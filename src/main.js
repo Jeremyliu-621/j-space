@@ -1186,10 +1186,10 @@ function initApp() {
         }
       });
 
-      // Re-enable tracking after a short delay
-      setTimeout(() => {
+      // Re-enable tracking on next frame (instantaneous response)
+      requestAnimationFrame(() => {
         windowHistory.isTracking = true;
-      }, 100);
+      });
     }
 
     // Function to undo last window resize/move
