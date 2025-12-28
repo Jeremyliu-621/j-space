@@ -551,17 +551,17 @@ a[href*="github"] {
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
 }
 
-/* Remove extra bottom margin from last elements in window bodies (except My Projects, Settings, Folder, and social buttons grid) */
+/* Remove extra bottom margin from last elements in window bodies (except My Projects, Settings, Folder, Image Viewer, Thank you, and social buttons grid) */
 win98-window:not([title="My Projects.exe"]):not([title="Settings.exe"]):not(
     [title="Folder.exe"]
-  )
+  ):not([title="Image Viewer.exe"]):not([title="Thank you!.exe"])
   .window-body
-  > *:last-child:not(.social-buttons-grid),
+  > *:last-child:not(.social-buttons-grid):not(.viewer-nav-controls),
 win98-window:not([title="My Projects.exe"]):not([title="Settings.exe"]):not(
     [title="Folder.exe"]
-  )
+  ):not([title="Image Viewer.exe"]):not([title="Thank you!.exe"])
   .window-body
-  > div:last-child:not(.social-buttons-grid)
+  > div:last-child:not(.social-buttons-grid):not(.viewer-nav-controls)
   > *:last-child {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
@@ -1210,6 +1210,39 @@ win98-window {
     height: 16px !important;
     margin-right: 4px !important;
   }
+}
+
+/* Image Viewer Styles - match theme */
+.window-body .viewer-image-container {
+  /* Inherit background from window-body (which is themed) */
+  background: inherit !important;
+}
+
+.window-body .viewer-image-inner {
+  /* Inherit background from window-body theme */
+  background: inherit !important;
+  border: 2px solid #808080 !important; /* Default border, will be overridden by theme */
+}
+
+/* Icons in project tabs (including image viewer buttons) */
+.project-tab img {
+  width: 16px !important;
+  height: 16px !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+}
+
+/* Center content in image viewer navigation buttons */
+win98-window[title="Image Viewer.exe"] .viewer-nav-controls .project-tab {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Image viewer navigation controls - exclude from last-child margin removal */
+win98-window[title="Image Viewer.exe"] .viewer-nav-controls {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* Color scheme is handled by 98.css */

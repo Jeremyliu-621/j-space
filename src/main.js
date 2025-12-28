@@ -270,6 +270,23 @@ export function applyColorPalette(paletteKey) {
         body.style.border = "2px solid #808080"; // Divider between gray frame and content
       });
 
+      // Apply default border to image viewer inner container
+      document
+        .querySelectorAll(
+          'win98-window[title="Image Viewer.exe"] .viewer-image-inner'
+        )
+        .forEach((inner) => {
+          inner.style.borderColor = "#808080";
+        });
+
+      // Apply default background to thank you items
+      document
+        .querySelectorAll('win98-window[title="Thank you!.exe"] .thanks-item')
+        .forEach((item) => {
+          item.style.backgroundColor = "#e0e0e0";
+          item.style.borderColor = "#808080";
+        });
+
       document
         .querySelectorAll("button, .social-btn, a[href*='github']")
         .forEach((btn) => {
@@ -306,6 +323,23 @@ export function applyColorPalette(paletteKey) {
         body.style.backgroundColor = colors[3] || "#e0e0e0";
         body.style.border = `2px solid ${colors[1] || "#808080"}`; // Divider using medium color
       });
+
+      // Apply theme border to image viewer inner container
+      document
+        .querySelectorAll(
+          'win98-window[title="Image Viewer.exe"] .viewer-image-inner'
+        )
+        .forEach((inner) => {
+          inner.style.borderColor = colors[1] || "#808080";
+        });
+
+      // Apply theme background to thank you items
+      document
+        .querySelectorAll('win98-window[title="Thank you!.exe"] .thanks-item')
+        .forEach((item) => {
+          item.style.backgroundColor = colors[3] || "#e0e0e0";
+          item.style.borderColor = colors[1] || "#808080";
+        });
 
       // Apply to buttons and interactive elements - use darker colors (index 0 or 1) with lighter text
       document
@@ -1370,18 +1404,22 @@ function initApp() {
           const viewerHTML = `
             <win98-window title="Image Viewer.exe" resizable style="top: 150px; left: 200px; width: 700px; height: 600px; z-index: 2000;">
               <div class="window-body" style="padding: 8px; height: calc(100% - 54px); box-sizing: border-box; display: flex; flex-direction: column;">
-                <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: #c0c0c0; margin-bottom: 8px; position: relative; overflow: hidden; padding: 8px;">
-                  <div style="background: #c0c0c0; border: 1px solid #808080; padding: 8px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; box-sizing: border-box;">
+                <div class="viewer-image-container" style="flex: 1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; position: relative; overflow: hidden; padding: 8px;">
+                  <div class="viewer-image-inner" style="padding: 8px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; box-sizing: border-box;">
                   <img id="viewer-main-image" src="${currentUrl}" alt="${currentName}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                   </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
-                  <button id="viewer-prev-btn" style="padding: 4px 12px; font-size: 0.9em;">◀ Previous</button>
+                <div class="viewer-nav-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                  <button id="viewer-prev-btn" class="project-tab"><img src="${
+                    getImageUrl("back-icon") || ""
+                  }" alt="Previous" style="width: 16px; height: 16px; margin-right: 4px; vertical-align: middle;"> Previous</button>
                   <span id="viewer-image-name" style="font-weight: bold; flex: 1; text-align: center; margin: 0 8px;">${currentName}</span>
                   <span id="viewer-image-counter" style="color: #666; margin: 0 8px;">${
                     currentIndex + 1
                   } / ${imageList.length}</span>
-                  <button id="viewer-next-btn" style="padding: 4px 12px; font-size: 0.9em;">Next ▶</button>
+                  <button id="viewer-next-btn" class="project-tab">Next <img src="${
+                    getImageUrl("forward-icon") || ""
+                  }" alt="Next" style="width: 16px; height: 16px; margin-left: 4px; vertical-align: middle;"></button>
                 </div>
               </div>
             </win98-window>
@@ -1394,6 +1432,11 @@ function initApp() {
             viewerWindow = document.querySelector(
               'win98-window[title="Image Viewer.exe"]'
             );
+
+            // Apply current theme to the image viewer window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
           }
         }
 
@@ -1716,21 +1759,21 @@ function initApp() {
           const thanksHTML = content.thanks
             .map((item) => {
               const nameHTML = item.link
-                ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" style="color: #000080; text-decoration: underline;">${item.name}</a>`
+                ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" style="color: #000080; text-decoration: underline; padding: 3px 6px;">${item.name}</a>`
                 : `<strong>${item.name}</strong>`;
               return `
-                <div style="margin-bottom: 20px; padding: 8px; background: #e0e0e0; border: 1px solid #808080;">
-                  <h3 style="margin-top: 0; margin-bottom: 6px; font-weight: bold; font-size: 1.2em;">${nameHTML}</h3>
-                  <p style="margin: 0; line-height: 1.4; color: #000;">${item.description}</p>
-                </div>
-              `;
+                 <div class="thanks-item" style="margin-bottom: 20px; padding: 8px; border: 1px solid #808080;">
+                   <h3 style="margin: 4px 0px 8px 2px; font-weight: bold; font-size: 1.2em;">${nameHTML}</h3>
+                   <p style="margin: 0px 0px 0px 2px; line-height: 1.4; color: #000;">${item.description}</p>
+                 </div>
+               `;
             })
             .join("");
 
           // Create thanks window HTML
           const windowHTML = `
             <win98-window title="Thank you!.exe" resizable style="top: 50px; left: 50px; width: 600px; height: 500px; z-index: 1000;">
-              <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; border: 2px solid #808080;">
+              <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box;">
                 <h2 style="margin-top: 0; margin-bottom: 20px; font-weight: bold; font-size: 1.8em; text-align: center;">Thank You!</h2>
                 <div style="max-width: 100%;">
                   ${thanksHTML}
@@ -1746,6 +1789,11 @@ function initApp() {
             thanksWindow = document.querySelector(
               'win98-window[title="Thank you!.exe"]'
             );
+
+            // Apply current theme to the thanks window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
           }
         }
 
@@ -1822,7 +1870,7 @@ function initApp() {
 
         const windowHTML = `
           <win98-window title="Settings.exe" resizable style="top: 100px; left: 100px; width: 500px; height: 530px; z-index: 1000;">
-            <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; padding-bottom: 20px; border: 2px solid #808080">
+            <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; padding-bottom: 20px;">
               <h2 style="margin-top: 0; margin-bottom: 20px; font-weight: bold; font-size: 1.5em;">Settings</h2>
               
               <div style="margin-bottom: 0;">
@@ -1839,6 +1887,11 @@ function initApp() {
           settingsWindow = document.querySelector(
             'win98-window[title="Settings.exe"]'
           );
+
+          // Apply current theme to the settings window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
         }
 
         // Load saved settings for display
