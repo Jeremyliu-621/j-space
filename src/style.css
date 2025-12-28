@@ -517,24 +517,24 @@ win98-window .window-body h4 {
   text-align: center !important;
 }
 
+.social-btn:hover {
+  background: #d4d4d4 !important;
+}
+
+.social-btn:active {
+  border: 2px inset #c0c0c0 !important;
+  background: #a0a0a0 !important;
+}
+
 .social-btn img {
   width: 20px;
   height: 20px;
   margin-right: 8px;
 }
 
-/* GitHub Button Styling */
+/* GitHub Button Styling - now inherits from .social-btn hover/active */
 a[href*="github"] {
   transition: all 0.1s;
-}
-
-a[href*="github"]:hover {
-  background: #d4d4d4 !important;
-}
-
-a[href*="github"]:active {
-  border: 2px inset #c0c0c0 !important;
-  background: #a0a0a0 !important;
 }
 
 /* Social buttons grid - responsive */
