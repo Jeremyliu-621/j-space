@@ -177,10 +177,19 @@ win98-window[resizable] {
 }
 
 /* Project list images in "All" tab - default sizes */
+/* Image is now inside content div, positioned right after title */
 .project-list-image {
-  width: 250px;
-  min-width: 200px;
-  height: 180px;
+  width: 220px;
+  min-width: 180px;
+  height: 160px;
+}
+
+/* For wide windows (side-by-side layout), make image float to the right of text */
+.window-projects .tab-pane[data-tab-content="all"] > div:not([style*="flex-direction: column"]) .project-list-image {
+  float: right;
+  margin-left: 8px;
+  margin-right: 0;
+  margin-top: 0;
 }
 
 win98-window .window-body {
@@ -194,6 +203,18 @@ win98-window .window-body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Projects window specific - ensure proper overflow */
+.window-projects .window-body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.window-projects .projects-tab-content {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  word-wrap: break-word !important;
 }
 
 /* Typography adjustments for better legibility */
@@ -383,6 +404,86 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   border-right: 1px solid #808080 !important;
 }
 
+/* Make projects window content responsive - prevent text/button cutoff */
+.window-projects {
+  min-width: 300px;
+  min-height: 400px;
+}
+
+/* When projects window is narrow, stack image below title for better layout */
+/* For narrow windows (under ~450px width), move image below title */
+@media screen and (max-width: 450px) {
+  .window-projects .tab-pane[data-tab-content="all"] > div {
+    flex-direction: column !important;
+  }
+
+  .window-projects .project-list-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* Ensure project items wrap properly */
+.window-projects .tab-pane[data-tab-content="all"] > div {
+  min-width: 0 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Make text wrap properly */
+.window-projects .tab-pane[data-tab-content="all"] > div > div:first-child {
+  min-width: 0 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.window-projects .tab-pane[data-tab-content="all"] h3,
+.window-projects .tab-pane[data-tab-content="all"] p,
+.window-projects .tab-pane[data-tab-content="all"] strong {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+}
+
+/* Make buttons flexible and allow wrapping */
+.window-projects
+  .tab-pane[data-tab-content="all"]
+  > div
+  > div:first-child
+  > div[style*="display: flex"] {
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+/* Override fixed button widths - make buttons flexible */
+.window-projects .tab-pane[data-tab-content="all"] .social-btn {
+  width: auto !important;
+  min-width: 100px !important;
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+  word-wrap: break-word !important;
+  white-space: normal !important;
+}
+
+/* Also handle buttons in individual project tabs */
+.window-projects .tab-pane:not([data-tab-content="all"]) .social-btn {
+  width: auto !important;
+  min-width: 100px !important;
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+}
+
+.window-projects
+  .tab-pane:not([data-tab-content="all"])
+  > div
+  > div[style*="display: flex"] {
+  flex-wrap: wrap !important;
+}
+
 /* ============================================
    RESPONSIVE TEXT SIZES ONLY
    Windows maintain fixed sizes, only text scales
@@ -394,6 +495,11 @@ win98-window {
   max-height: 100vh;
 }
 
+@media screen and (max-height: 700px) {
+  #desktop-thanks {
+    top: 380px;
+  }
+
 /* Mobile devices (phones) - up to 768px */
 @media screen and (max-width: 768px) {
   /* Adjust positioning only - no size changes */
@@ -401,37 +507,43 @@ win98-window {
 }
 
 /* Tablets and small laptops (under 1300px) */
-@media screen and (max-width: 1300px) {
+@media screen and (max-width: 1064px) {
   /* Resize and reposition windows to the left - override classes without !important */
   .window-about-me {
     left: 120px;
     width: 40vw;
-    max-width: 300px;
+    max-width: 250px;
     height: 370px;
+    top: 10px;
   }
 
   .window-about-me p {
-    display: none;
+    display: none !important;
   }
 
   .window-skills {
-    left: 795px;
+    left: 120px;
+    top: 390px;
     width: 250px;
   }
 
   .window-hobbies {
-    left: 800px;
+    left: 390px;
+    top: 450px;
     width: 250px;
+    height: 200px;
   }
 
   .window-projects {
-    left: 431px;
-    width: 350px;
+    left: 390px;
+    top: 10px;
+    width: 355px;
+    height: 420px;
   }
 
   .window-interactive {
-    bottom: 12vh;
-    left: 200px;
+    top: 445px;
+    left: 660px;
     width: 180px;
   }
 
@@ -440,12 +552,24 @@ win98-window {
     font-size: 3em;
   }
 
-  /* Make project images smaller in the "All" tab list view - you can adjust these values */
+  /* Make project images appear under the title instead of side by side */
+  /* Target the project item container divs - override inline flex-direction */
+  .window-projects .tab-pane[data-tab-content="all"] > div {
+    flex-direction: column !important;
+  }
+
+  /* Image is now inside content div, so it naturally appears after title in narrow windows */
+  /* Make image smaller when stacked */
   .window-projects .project-list-image {
-    width: 100px;
-    min-width: 0px;
-    max-width: auto;
-    height: 130px;
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 160px !important;
+    object-fit: cover !important;
   }
 
   /* Make project images smaller in individual project tabs */
@@ -463,6 +587,105 @@ win98-window {
   }
 }
 
+/* Tablets and small laptops (under 1300px) */
+@media screen and (min-width: 1065px) and (max-width: 1300px) {
+  /* Resize and reposition windows to the left - override classes without !important */
+  .window-about-me {
+    left: 120px;
+    width: 40vw;
+    max-width: 300px;
+    height: 370px;
+  }
+
+  .window-about-me p {
+    display: none;
+  }
+
+  .window-projects {
+    left: 431px;
+    width: 350px;
+  }
+
+  /* For narrow projects window in this range, stack image below title */
+  .window-projects .tab-pane[data-tab-content="all"] > div {
+    flex-direction: column !important;
+  }
+  
+  /* Image is now inside content div, so it naturally appears after title */
+  /* Make image smaller when stacked */
+  .window-projects .project-list-image {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 180px !important;
+    object-fit: cover !important;
+  }
+
+  .window-skills {
+    left: 794px;
+    width: 250px;
+  }
+
+  .window-hobbies {
+    left: 797px;
+    width: 250px;
+  }
+
+  .window-interactive {
+    bottom: 12vh;
+    left: 200px;
+    width: 180px;
+  }
+
+  /* Make "My Projects" text smaller */
+  .window-projects .window-body h1 {
+    font-size: 3em;
+  }
+
+  /* Project images in "All" tab - already handled by column layout rule above */
+  /* Image size is controlled by the column layout rule */
+
+  /* Make project images smaller in individual project tabs */
+  .window-projects .tab-pane:not([data-tab-content="all"]) img {
+    max-width: 400px;
+    height: 140px;
+  }
+
+  /* Hide icons in all buttons */
+  .social-btn img,
+  button img,
+  a[href*="github"] img,
+  a[href*="http"] img {
+    display: none;
+  }
+}
+
+/* For larger screens (1301px+), when projects window is narrow, stack image below title */
+/* Make it trigger earlier - at wider screen sizes */
+@media screen and (min-width: 1301px) and (max-width: 1800px) {
+  .window-projects .tab-pane[data-tab-content="all"] > div {
+    flex-direction: column !important;
+  }
+  
+  /* Image is now inside content div, so it naturally appears after title */
+  /* Make image smaller when stacked */
+  .window-projects .project-list-image {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+  }
+}
+
 /* Larger desktops (1920px to 2303px) */
 @media screen and (min-width: 1920px) and (max-width: 2303px) {
   /* Adjust positioning only - windows and text stay the same size */
@@ -473,6 +696,31 @@ win98-window {
 @media screen and (min-width: 2304px) {
   /* Adjust positioning only - windows and text stay the same size */
   /* Maximum spacing around windows on very large screens */
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .desktop-folder {
+    min-width: 80px !important;
+    min-height: 80px !important;
+    padding: 8px !important;
+  }
+
+  .project-tab {
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+  }
+
+  .social-btn {
+    min-height: 44px !important;
+    padding: 12px 10px !important;
+  }
+
+  /* Prevent text selection on touch */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* Touch device optimizations */

@@ -349,8 +349,14 @@ function createProjectHTML(project, index) {
   let html = `
     <div style="margin: 4px 0; padding: 5px; border: 1px solid #808080; background: #e0e0e0; display: flex; gap: 8px; align-items: flex-start;">
       <div style="flex: 1; min-width: 0;">
-        <h3 style="margin-top: 0; margin-bottom: 3px; font-weight: bold;">${project.title}</h4>
-        <p style="margin: 8px 0;">${project.description}</p>`;
+        <h3 style="margin-top: 0; margin-bottom: 3px; font-weight: bold;">${project.title}</h3>`;
+
+  // Add image right after title if it exists
+  if (imgUrl) {
+    html += `<img src="${imgUrl}" class="project-list-image" style="border: 1px solid #808080; object-fit: cover; object-position: center; flex-shrink: 0; width: 250px; min-width: 200px; height: 180px; margin-bottom: 8px; margin-top: 8px;" alt="${project.title}">`;
+  }
+
+  html += `<p style="margin: 8px 0;">${project.description}</p>`;
 
   if (project.front || project.back) {
     html += `
@@ -391,13 +397,7 @@ function createProjectHTML(project, index) {
       </div>`;
   }
 
-  html += `</div>`;
-
-  if (imgUrl) {
-    html += `<img src="${imgUrl}" class="project-list-image" style="border: 1px solid #808080; object-fit: cover; object-position: center; flex-shrink: 0;" alt="${project.title}">`;
-  }
-
-  html += `</div>`;
+  html += `</div></div>`;
   return html;
 }
 
