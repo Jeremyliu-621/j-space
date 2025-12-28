@@ -844,7 +844,7 @@ win98-window {
   max-height: 100vh;
 }
 
-@media screen and (max-height: 700px) {
+@media screen and (max-height: 695px) {
   #desktop-thanks {
     top: 380px !important;
   }
