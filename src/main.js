@@ -356,62 +356,6 @@ export function applyColorPalette(paletteKey) {
 
 // Note: Project HTML functions are now in ./components/projects.js
 
-// Function to show intro animation and then initialize the app
-function showIntroAnimation() {
-  const app = document.querySelector("#app");
-  if (!app) {
-    setTimeout(showIntroAnimation, 50);
-    return;
-  }
-
-  // Show intro screen with progress bar
-  app.innerHTML = `
-    <div id="intro-screen">
-      <div id="intro-content">
-        <h1 id="intro-title">Jeremy Liu's Space</h1>
-        <div id="progress-bar-container">
-          <div id="progress-bar"></div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Animate the progress bar
-  const progressBar = document.getElementById("progress-bar");
-  let progress = 0;
-  const targetProgress = 100;
-  const progressSpeed = 2; // Percentage points per frame
-
-  function animateProgress() {
-    if (progress < targetProgress) {
-      progress += progressSpeed;
-      if (progress > targetProgress) progress = targetProgress;
-
-      if (progressBar) {
-        progressBar.style.width = progress + "%";
-      }
-
-      requestAnimationFrame(animateProgress);
-    } else {
-      // Progress bar complete, quickly fade out and show main content
-      const introScreen = document.getElementById("intro-screen");
-      if (introScreen) {
-        introScreen.style.opacity = "0";
-        setTimeout(() => {
-          initApp();
-        }, 200); // Quick transition
-      } else {
-        initApp();
-      }
-    }
-  }
-
-  // Start animation after a brief delay
-  setTimeout(() => {
-    animateProgress();
-  }, 100);
-}
-
 // Function to initialize the app
 function initApp() {
   const app = document.querySelector("#app");
@@ -2524,10 +2468,10 @@ function initApp() {
 
 // Initialize when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", showIntroAnimation);
+  document.addEventListener("DOMContentLoaded", initApp);
 } else {
   // DOM is already ready
-  showIntroAnimation();
+  initApp();
 }
 
 // Set Windows 98 cursor globally after everything loads

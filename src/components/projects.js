@@ -173,7 +173,7 @@ export function generateProjectsWindowHTML(projectsHTML) {
           <div class="projects-tab-content">
             <!-- All Projects Tab (default) -->
             <div class="tab-pane active" data-tab-content="all">
-              <h1 id="my-projects-title" style="margin-top: 0; margin-bottom: 5px; min-height: 1.2em; visibility: hidden;"></h1>
+              <h1 id="my-projects-title" class="animate-title-slow" style="margin-top: 0; margin-bottom: 5px; min-height: 1.2em; visibility: hidden;">My Projects</h1>
               ${projectsHTML}
             </div>
             
@@ -193,43 +193,9 @@ export function generateProjectsWindowHTML(projectsHTML) {
     `;
 }
 
-// Function to typewriter animate the "My Projects" title
-function animateProjectsTitle() {
-  const titleElement = document.getElementById("my-projects-title");
-  if (!titleElement) return;
-
-  const text = "My Projects";
-  let index = 0;
-
-  // Clear the title and make it visible
-  titleElement.textContent = "";
-  titleElement.style.visibility = "visible";
-
-  function typeNextChar() {
-    if (index < text.length) {
-      titleElement.textContent += text[index];
-      index++;
-      // Choppy, slower typing effect with more variation
-      // Random delay between 100-250ms for a choppy, pixelated feel
-      const baseDelay = 120;
-      const randomVariation = Math.random() * 150; // 0-150ms variation
-      const delay = baseDelay + randomVariation;
-
-      // Occasionally add a longer pause for extra choppiness
-      const extraPause = Math.random() < 0.2 ? 50 + Math.random() * 50 : 0;
-
-      setTimeout(typeNextChar, delay + extraPause);
-    }
-  }
-
-  // Start typing after a short delay
-  setTimeout(typeNextChar, 200);
-}
-
 // Function to initialize project tabs (event listeners and tab switching)
 export function initProjectTabs() {
-  // Start the typewriter animation for the title
-  animateProjectsTitle();
+  // Title animation is now handled in main.js via the "animate-title-slow" class
 
   setTimeout(() => {
     const projectTabs = document.querySelectorAll(".project-tab");
