@@ -241,8 +241,15 @@ win98-window[resizable] {
 
 .project-card-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 6px;
+}
+
+/* Ensure buttons can shrink but maintain minimum usable size */
+.project-card-buttons .social-btn {
+  flex: 0 1 auto;
+  min-width: 100px;
 }
 
 /* Single project view styles */
@@ -292,8 +299,15 @@ win98-window[resizable] {
 
 .project-single-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 20px;
+}
+
+/* Ensure buttons can shrink but maintain minimum usable size */
+.project-single-buttons .social-btn {
+  flex: 0 1 auto;
+  min-width: 100px;
 }
 
 /* For wide windows (side-by-side layout), make image float to the right of text */
@@ -684,21 +698,22 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   white-space: normal !important;
 }
 
-/* Make buttons flexible and allow wrapping */
-.window-projects
-  .tab-pane[data-tab-content="all"]
-  > div
-  > div:first-child
-  > div[style*="display: flex"] {
+/* Make buttons flexible and allow wrapping - ensure buttons container wraps */
+.window-projects .tab-pane[data-tab-content="all"] .project-card-buttons {
   flex-wrap: wrap !important;
-  gap: 8px !important;
+}
+
+.window-projects
+  .tab-pane:not([data-tab-content="all"])
+  .project-single-buttons {
+  flex-wrap: wrap !important;
 }
 
 /* Override fixed button widths - make buttons flexible for smaller screens */
 .window-projects .tab-pane[data-tab-content="all"] .social-btn {
   width: auto !important;
   min-width: 100px !important;
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   max-width: 100% !important;
   word-wrap: break-word !important;
   white-space: normal !important;
@@ -708,7 +723,7 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 .window-projects .tab-pane:not([data-tab-content="all"]) .social-btn {
   width: auto !important;
   min-width: 100px !important;
-  flex: 1 1 auto !important;
+  flex: 0 1 auto !important;
   max-width: 100% !important;
 }
 
@@ -749,10 +764,9 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   }
 }
 
-.window-projects
-  .tab-pane:not([data-tab-content="all"])
-  > div
-  > div[style*="display: flex"] {
+/* Buttons in project cards and single views should wrap when needed */
+.window-projects .project-card-buttons,
+.window-projects .project-single-buttons {
   flex-wrap: wrap !important;
 }
 
