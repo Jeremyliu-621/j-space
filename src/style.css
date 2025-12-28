@@ -110,10 +110,24 @@ h1 {
 
 /* Start Menu Styles */
 #start-menu {
+  display: none;
+  position: fixed;
+  bottom: 40px;
+  left: 0;
+  width: 200px;
+  z-index: 10000;
   box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.3);
 }
 
+#start-menu .window-body ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 #start-menu .window-body ul li {
+  padding: 4px 8px;
+  cursor: pointer;
   user-select: none;
   transition: background-color 0.1s, color 0.1s;
 }
@@ -121,6 +135,10 @@ h1 {
 #start-menu .window-body ul li:hover {
   background-color: #000080 !important;
   color: #fff !important;
+}
+
+#start-menu .window-body hr {
+  margin: 4px 0;
 }
 
 /* Window body overflow fix - ensures scrollbars appear when content overflows */
@@ -150,16 +168,16 @@ win98-window[resizable] {
 
 .window-skills {
   bottom: 43vh;
-  left: 165vh;
-  width: 300px;
+  right: 12vh;
+  width: 42vh;
   height: calc(35vh);
 }
 
 .window-hobbies {
-  bottom: 18vh;
-  left: 167vh;
-  width: 300px;
-  height: 22vh;
+  bottom: 16vh;
+  right: 15vh;
+  width: 38vh;
+  height: 24vh;
 }
 
 .window-projects {
@@ -170,22 +188,119 @@ win98-window[resizable] {
 }
 
 .window-interactive {
-  bottom: 10vh;
+  bottom: 8vh;
   left: 48vh;
-  width: 200px;
-  height: 120px;
+  width: 32vh;
+  height: 18.5vh;
 }
 
 /* Project list images in "All" tab - default sizes */
 /* Image is now inside content div, positioned right after title */
 .project-list-image {
-  width: 220px;
-  min-width: 180px;
-  height: 160px;
+  width: 250px;
+  min-width: 200px;
+  height: 180px;
+  border: 1px solid #808080;
+  object-fit: cover;
+  object-position: center;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+/* Project card styles */
+.project-card {
+  margin: 4px 0;
+  padding: 5px;
+  border: 1px solid #808080;
+  background: #e0e0e0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.project-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-card-title {
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+.project-card-description {
+  margin: 8px 0;
+}
+
+.project-card-stack {
+  margin: 3px 0 0 0;
+  color: #666;
+}
+
+.project-card-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Single project view styles */
+.project-single {
+  margin: 4px 0;
+  padding: 5px;
+  border: 1px solid #808080;
+  background: #e0e0e0;
+}
+
+.project-single-title {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 2.4em;
+}
+
+.project-single-image {
+  width: 99.3%;
+  max-width: 500px;
+  height: 170px;
+  border: 2px solid #808080;
+  margin-bottom: 12px;
+  display: block;
+  object-fit: cover;
+}
+
+.project-section {
+  margin-bottom: 12px;
+}
+
+.project-section-title {
+  margin: 0 0 4px 0;
+  font-weight: bold;
+  font-size: 1.6em;
+}
+
+.project-section-content {
+  margin: 2px 0;
+  line-height: 1.4;
+}
+
+.project-section-stack {
+  margin: 2px 0;
+  color: #000;
+}
+
+.project-single-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
 }
 
 /* For wide windows (side-by-side layout), make image float to the right of text */
-.window-projects .tab-pane[data-tab-content="all"] > div:not([style*="flex-direction: column"]) .project-list-image {
+.window-projects
+  .tab-pane[data-tab-content="all"]
+  > div:not([style*="flex-direction: column"])
+  .project-list-image {
   float: right;
   margin-left: 8px;
   margin-right: 0;
@@ -198,11 +313,26 @@ win98-window .window-body {
   overflow-x: hidden;
   flex: 1;
   min-height: 0;
+  padding: 8px;
+  height: calc(100% - 54px);
   /* Ensure content outside viewport is completely hidden */
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Window body variations */
+.window-projects .window-body {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.window-skills .window-body,
+.window-hobbies .window-body {
+  min-height: 0;
 }
 
 /* Projects window specific - ensure proper overflow */
@@ -212,8 +342,10 @@ win98-window .window-body {
 }
 
 .window-projects .projects-tab-content {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  box-sizing: border-box;
   word-wrap: break-word !important;
 }
 
@@ -222,9 +354,16 @@ win98-window .window-body {
 
 win98-window .window-body p {
   font-size: 1.25em;
+  margin: 5px 0;
+  line-height: 1.3;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+.window-body p.bold-title {
+  font-weight: bold;
+  margin: 3px 0;
 }
 
 win98-window .window-body li {
@@ -234,9 +373,22 @@ win98-window .window-body li {
   text-rendering: optimizeLegibility;
 }
 
+win98-window .window-body h2 {
+  margin-top: 0;
+  font-size: 2.8em;
+  font-weight: bold;
+  margin-bottom: 3px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color: var(--palette-color-1, #000000);
+}
+
 win98-window .window-body h3 {
   font-size: 1.35em;
   font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 5px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -249,27 +401,16 @@ win98-window .window-body h4 {
   text-rendering: optimizeLegibility;
 }
 
-/* Social buttons styling */
-.social-btn {
-  transition: all 0.1s;
-  user-select: none;
-  text-align: center !important;
-}
-
-.social-btn:hover {
-  background: #d4d4d4 !important;
-}
-
-.social-btn:active {
-  border-top: 2px solid #808080 !important;
-  border-left: 2px solid #808080 !important;
-  border-bottom: 2px solid #ffffff !important;
-  border-right: 2px solid #ffffff !important;
-  background: #a0a0a0 !important;
-}
+/* Social buttons styling - base styles moved from inline */
 
 /* Desktop Folder Icon */
 .desktop-folder {
+  position: absolute;
+  width: 80px;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  user-select: none;
   transition: background-color 0.1s;
 }
 
@@ -283,7 +424,49 @@ win98-window .window-body h4 {
 }
 
 .desktop-folder img {
+  width: 48px;
+  height: 48px;
+  display: block;
+  margin: 0 auto 4px auto;
+  image-rendering: pixelated;
   filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.3));
+}
+
+.desktop-folder span {
+  display: block;
+  font-size: 1.2em;
+  color: #000;
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+  word-break: break-word;
+  line-height: 1.1;
+  font-family: "Jersey 10", sans-serif;
+}
+
+/* Desktop folder positioning - individual positioning stays inline for uniqueness */
+#desktop-folder {
+  top: 20px;
+  left: 20px;
+}
+
+#desktop-blog {
+  top: 110px;
+  left: 20px;
+}
+
+#desktop-chatbox {
+  top: 200px;
+  left: 20px;
+}
+
+#desktop-theme {
+  top: 290px;
+  left: 20px;
+}
+
+#desktop-thanks {
+  top: 560px;
+  left: 20px;
 }
 
 /* Folder Image Items */
@@ -294,6 +477,36 @@ win98-window .window-body h4 {
 
 .folder-image-item:hover {
   background-color: rgba(0, 0, 128, 0.3) !important;
+}
+
+/* Social Button Styling */
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+  text-decoration: none;
+  color: #000;
+  font-size: 1.15em;
+  cursor: pointer;
+  font-family: "Jersey 10", sans-serif;
+  box-sizing: border-box;
+  gap: 6px;
+  line-height: 1.2;
+  transition: all 0.1s;
+  user-select: none;
+  text-align: center !important;
+}
+
+.social-btn img {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
 }
 
 /* GitHub Button Styling */
@@ -308,6 +521,15 @@ a[href*="github"]:hover {
 a[href*="github"]:active {
   border: 2px inset #c0c0c0 !important;
   background: #a0a0a0 !important;
+}
+
+/* Social buttons grid */
+.social-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(44px, auto);
+  gap: 4px;
+  margin-top: 8px;
 }
 
 /* Remove extra bottom margin from last elements in window bodies (except My Projects, Settings, Folder, and social buttons grid) */
@@ -355,12 +577,16 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 
 /* Projects Window Tabs */
 .projects-tabs {
+  display: flex;
+  background: #c0c0c0;
+  border-bottom: 1px solid #808080;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
   user-select: none;
   /* Hide horizontal scrollbar but keep scrolling functionality */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
@@ -378,6 +604,15 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 }
 
 .project-tab {
+  padding: 6px 12px;
+  background: #c0c0c0;
+  border: none;
+  border-right: 1px solid #808080;
+  cursor: pointer;
+  font-family: "Jersey 10", sans-serif;
+  font-size: 1em;
+  white-space: nowrap;
+  min-width: 60px;
   transition: background-color 0.1s;
 }
 
@@ -486,7 +721,7 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
     min-width: 120px !important;
     max-width: 120px !important;
   }
-  
+
   /* When only one button exists (it's the only child), make it 248px (space of two buttons) */
   .window-projects .tab-pane[data-tab-content="all"] .social-btn:only-child {
     width: 248px !important;
@@ -494,7 +729,7 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
     min-width: 248px !important;
     max-width: 248px !important;
   }
-  
+
   /* Individual project tab buttons - constant width: 140px when both buttons exist */
   .window-projects .tab-pane:not([data-tab-content="all"]) .social-btn {
     width: 140px !important;
@@ -502,15 +737,16 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
     min-width: 140px !important;
     max-width: 140px !important;
   }
-  
+
   /* When only one button exists in expanded view, make it 288px (space of two buttons: 140px + 8px gap + 140px) */
-  .window-projects .tab-pane:not([data-tab-content="all"]) .social-btn:only-child {
+  .window-projects
+    .tab-pane:not([data-tab-content="all"])
+    .social-btn:only-child {
     width: 288px !important;
     flex: 0 0 288px !important;
     min-width: 288px !important;
     max-width: 288px !important;
   }
-  
 }
 
 .window-projects
@@ -533,8 +769,9 @@ win98-window {
 
 @media screen and (max-height: 700px) {
   #desktop-thanks {
-    top: 380px;
+    top: 380px !important;
   }
+}
 
 /* Mobile devices (phones) - up to 768px */
 @media screen and (max-width: 768px) {
@@ -647,7 +884,7 @@ win98-window {
   .window-projects .tab-pane[data-tab-content="all"] > div {
     flex-direction: column !important;
   }
-  
+
   /* Image is now inside content div, so it naturally appears after title */
   /* Make image smaller when stacked */
   .window-projects .project-list-image {
@@ -707,7 +944,7 @@ win98-window {
   .window-projects .tab-pane[data-tab-content="all"] > div {
     flex-direction: column !important;
   }
-  
+
   /* Image is now inside content div, so it naturally appears after title */
   /* Make image smaller when stacked */
   .window-projects .project-list-image {

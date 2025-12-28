@@ -347,20 +347,20 @@ function createProjectHTML(project, index) {
   const imgUrl = project.image ? getImageUrl(project.image) : null;
 
   let html = `
-    <div style="margin: 4px 0; padding: 5px; border: 1px solid #808080; background: #e0e0e0; display: flex; gap: 8px; align-items: flex-start;">
-      <div style="flex: 1; min-width: 0;">
-        <h3 style="margin-top: 0; margin-bottom: 3px; font-weight: bold;">${project.title}</h3>`;
+    <div class="project-card">
+      <div class="project-card-content">
+        <h3 class="project-card-title">${project.title}</h3>`;
 
   // Add image right after title if it exists
   if (imgUrl) {
-    html += `<img src="${imgUrl}" class="project-list-image" style="border: 1px solid #808080; object-fit: cover; object-position: center; flex-shrink: 0; width: 250px; min-width: 200px; height: 180px; margin-bottom: 8px; margin-top: 8px;" alt="${project.title}">`;
+    html += `<img src="${imgUrl}" class="project-list-image" alt="${project.title}">`;
   }
 
-  html += `<p style="margin: 8px 0;">${project.description}</p>`;
+  html += `<p class="project-card-description">${project.description}</p>`;
 
   if (project.front || project.back) {
     html += `
-      <p style="margin: 3px 0 0 0; color: #666;">
+      <p class="project-card-stack">
         ${project.front ? `<strong>Front:</strong> ${project.front}<br>` : ""}
         ${project.back ? `<strong>Back: </strong> ${project.back}` : ""}
       </p>`;
@@ -370,15 +370,15 @@ function createProjectHTML(project, index) {
   const buttonWidth = "120px";
 
   html += `
-      <div style="display: flex; gap: 8px; margin-top: 6px;">
+      <div class="project-card-buttons">
         ${
           project.website
             ? `
           <a href="${
             project.website
-          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="width: ${buttonWidth};"><img src="${
                 getImageUrl("website-icon") || ""
-              }" alt="Website" style="width: 20px; height: 20px; margin-right: 8px;"> Website</a>
+              }" alt="Website"> Website</a>
         `
             : ""
         }
@@ -387,15 +387,15 @@ function createProjectHTML(project, index) {
             ? `
           <a href="${
             project.github
-          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="width: ${buttonWidth};"><img src="${
                 getImageUrl("github-icon") || ""
-              }" alt="GitHub" style="width: 20px; height: 20px; margin-right: 8px;"> GitHub</a>
+              }" alt="GitHub"> GitHub</a>
         `
             : ""
         }
-          <a href="#" class="project-specifics-btn social-btn" data-project-index="${index}" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+          <a href="#" class="project-specifics-btn social-btn" data-project-index="${index}" style="width: ${buttonWidth};"><img src="${
     getImageUrl("specifics-icon") || ""
-  }" alt="Specifics" style="width: 20px; height: 20px; margin-right: 8px;"> Specifics</a>
+  }" alt="Specifics"> Specifics</a>
       </div>`;
 
   html += `</div></div>`;
@@ -407,22 +407,22 @@ function createSingleProjectHTML(project) {
   const imgUrl = project.image ? getImageUrl(project.image) : null;
 
   let html = `
-    <div style="margin: 4px 0; padding: 5px; border: 1px solid #808080; background: #e0e0e0;">
-      <h1 style="margin-top: 0; margin-bottom: 8px; font-weight: bold; font-size: 2.4em;">${project.title}</h1>`;
+    <div class="project-single">
+      <h1 class="project-single-title">${project.title}</h1>`;
 
   // Image
   if (imgUrl) {
     html += `
-      <img src="${imgUrl}" style="width: 99.3%; max-width: 500px; height: 170px; border: 2px solid #808080; margin-bottom: 12px; display: block; object-fit: cover;" alt="${project.title}">`;
+      <img src="${imgUrl}" class="project-single-image" alt="${project.title}">`;
   }
 
   // Stack (Front/Back)
   if (project.front || project.back) {
     html += `
-      <div style="margin-bottom: 12px;">
-        <h3 style="margin: 0 0 4px 0; font-weight: bold; font-size: 1.6em;">Stack</h3>
+      <div class="project-section">
+        <h3 class="project-section-title">Stack</h3>
         <br>
-        <p style="margin: 2px 0; color: #000;">
+        <p class="project-section-stack">
           ${
             project.front ? `<strong>Front: </strong> ${project.front}<br>` : ""
           }
@@ -433,17 +433,17 @@ function createSingleProjectHTML(project) {
 
   // Description
   html += `
-      <div style="margin-bottom: 12px;">
-        <h3 style="margin: 0 0 4px 0; font-weight: bold; font-size: 1.6em;">Description</h3>
-        <p style="margin: 2px 0; line-height: 1.4;">${project.description}</p>
+      <div class="project-section">
+        <h3 class="project-section-title">Description</h3>
+        <p class="project-section-content">${project.description}</p>
       </div>`;
 
   // Additional Information
   if (project.additionalInfo) {
     html += `
-      <div style="margin-bottom: 12px;">
-        <h3 style="margin: 0 0 4px 0; font-weight: bold; font-size: 1.6em;">Additional Information</h3>
-        <div style="margin: 2px 0; line-height: 1.4; font-size: 1.2em">${project.additionalInfo}</div>
+      <div class="project-section">
+        <h3 class="project-section-title">Additional Information</h3>
+        <div class="project-section-content" style="font-size: 1.2em">${project.additionalInfo}</div>
       </div>`;
   }
 
@@ -451,15 +451,15 @@ function createSingleProjectHTML(project) {
   const buttonWidth = "140px";
 
   html += `
-      <div style="display: flex; gap: 8px; margin-top: 20px;">
+      <div class="project-single-buttons">
         ${
           project.website
             ? `
           <a href="${
             project.website
-          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 20px; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="font-size: 20px; width: ${buttonWidth};"><img src="${
                 getImageUrl("website-icon") || ""
-              }" alt="Website" style="width: 20px; height: 20px; margin-right: 8px;"> Website</a>
+              }" alt="Website"> Website</a>
         `
             : ""
         }
@@ -468,15 +468,15 @@ function createSingleProjectHTML(project) {
             ? `
           <a href="${
             project.github
-          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 20px; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+          }" target="_blank" rel="noopener noreferrer" class="social-btn" style="font-size: 20px; width: ${buttonWidth};"><img src="${
                 getImageUrl("github-icon") || ""
-              }" alt="GitHub" style="width: 20px; height: 20px; margin-right: 8px;"> GitHub</a>
+              }" alt="GitHub"> GitHub</a>
         `
             : ""
         }
-        <a href="#" class="project-all-btn social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 20px; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+        <a href="#" class="project-all-btn social-btn" style="font-size: 20px; width: ${buttonWidth};"><img src="${
     getImageUrl("all-icon") || ""
-  }" alt="All" style="width: 20px; height: 20px; margin-right: 8px;"> All</a>
+  }" alt="All"> All</a>
       </div>`;
 
   html += `</div>`;
@@ -504,57 +504,43 @@ function initApp() {
     .join("");
 
   app.innerHTML = `
-    <win98-desktop style="cursor: default !important; position: relative;">
+    <win98-desktop>
       <!-- Desktop Folder Icon -->
-      <div class="desktop-folder" id="desktop-folder" style="position: absolute; top: 20px; left: 20px; width: 80px; cursor: pointer; text-align: center; padding: 4px; user-select: none;">
-        <img src="${
-          getImageUrl("directory_computer") || ""
-        }" alt="Folder" style="width: 48px; height: 48px; display: block; margin: 0 auto 4px auto; image-rendering: pixelated;">
-        <span style="display: block; font-size: 1em; color: #000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; word-break: break-word; line-height: 1.1; font-family: 'Jersey 10', sans-serif;">Click Me!</span>
+      <div class="desktop-folder" id="desktop-folder">
+        <img src="${getImageUrl("directory_computer") || ""}" alt="Folder">
+        <span>Double Click Me!</span>
       </div>
 
       <!-- Desktop Blog Icon -->
-      <div class="desktop-folder" id="desktop-blog" style="position: absolute; top: 110px; left: 20px; width: 80px; cursor: pointer; text-align: center; padding: 4px; user-select: none;">
-        <img src="${
-          getImageUrl("user-world") || ""
-        }" alt="Blog" style="width: 48px; height: 48px; display: block; margin: 0 auto 4px auto; image-rendering: pixelated;">
-        <span style="display: block; font-size: 1em; color: #000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; word-break: break-word; line-height: 1.1; font-family: 'Jersey 10', sans-serif;">Blog</span>
+      <div class="desktop-folder" id="desktop-blog">
+        <img src="${getImageUrl("user-world") || ""}" alt="Blog">
+        <span>Blog</span>
       </div>
 
       <!-- Desktop Chatbox Icon -->
-      <div class="desktop-folder" id="desktop-chatbox" style="position: absolute; top: 200px; left: 20px; width: 80px; cursor: pointer; text-align: center; padding: 4px; user-select: none;">
-        <img src="${
-          getImageUrl("user-chatbox") || ""
-        }" alt="Chatbox" style="width: 48px; height: 48px; display: block; margin: 0 auto 4px auto; image-rendering: pixelated;">
-        <span style="display: block; font-size: 1em; color: #000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; word-break: break-word; line-height: 1.1; font-family: 'Jersey 10', sans-serif;">Chatbox</span>
+      <div class="desktop-folder" id="desktop-chatbox">
+        <img src="${getImageUrl("user-chatbox") || ""}" alt="Chatbox">
+        <span>Chatbox</span>
       </div>
 
       <!-- Desktop Theme Editor Icon -->
-      <div class="desktop-folder" id="desktop-theme" style="position: absolute; top: 290px; left: 20px; width: 80px; cursor: pointer; text-align: center; padding: 4px; user-select: none;">
-        <img src="${
-          getImageUrl("paint_old") || ""
-        }" alt="Theme Editor" style="width: 48px; height: 48px; display: block; margin: 0 auto 4px auto; image-rendering: pixelated;">
-        <span style="display: block; font-size: 1em; color: #000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; word-break: break-word; line-height: 1.1; font-family: 'Jersey 10', sans-serif;">Theme Editor</span>
+      <div class="desktop-folder" id="desktop-theme">
+        <img src="${getImageUrl("paint_old") || ""}" alt="Theme Editor">
+        <span>Theme Editor</span>
       </div>
 
       <!-- Desktop Thanks Icon -->
-      <div class="desktop-folder" id="desktop-thanks" style="position: absolute; top: 560px; left: 20px; width: 80px; cursor: pointer; text-align: center; padding: 4px; user-select: none;">
-        <img src="${
-          getImageUrl("picture-painting") || ""
-        }" alt="Blog" style="width: 48px; height: 48px; font-family: 'Jersey 10', sans-serif; display: block; margin: 0 auto 4px auto; image-rendering: pixelated;">
-        <span style="display: block; font-size: 1em; color: #000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; word-break: break-word; line-height: 1.1; font-family: 'Jersey 10', sans-serif;">Thank you!</span>
+      <div class="desktop-folder" id="desktop-thanks">
+        <img src="${getImageUrl("picture-painting") || ""}" alt="Blog">
+        <span>Thank you!</span>
       </div>
 
       <!-- About Me Window - Left -->
       <win98-window title="About Me.exe" resizable class="window-about-me">
-        <div class="window-body" style="padding: 8px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box;">
-          <h2 style="margin-top: 0; font-size: 2.8em; font-weight: bold; margin-bottom: 3px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; color: var(--palette-color-1, #000000);">${
-            content.aboutMe.name
-          }</h2>
-          <p style="font-weight: bold; margin: 3px 0;">${
-            content.aboutMe.title
-          }</p>
-          <p style="margin: 5px 0; line-height: 1.3;">${content.aboutMe.bio}</p>
+        <div class="window-body">
+          <h2>${content.aboutMe.name}</h2>
+          <p class="bold-title">${content.aboutMe.title}</p>
+          <p>${content.aboutMe.bio}</p>
           <div style="display: flex; justify-content: center; margin-bottom: 8px;">
           <img src="${
             getImageUrl("cruisesunset") || ""
@@ -563,48 +549,48 @@ function initApp() {
             getImageUrl("armbar") || ""
           }" alt="Cruise Sunset" style="width: 60%; height: 100px; margin: 8px 2px; border: 2px solid #808080; box-sizing: border-box; display: block; object-fit: cover; object-position: center;">
           </div>
-          <div class="social-buttons-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(44px, auto); gap: 4px; margin-top: 8px;">
-            <a href="https://www.linkedin.com/in/jmyl" target="_blank" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+          <div class="social-buttons-grid">
+            <a href="https://www.linkedin.com/in/jmyl" target="_blank" class="social-btn"><img src="${
               getImageUrl("linkedin-icon") || ""
-            }" alt="LinkedIn" style="width: 20px; height: 20px; margin-right: 8px;"> LinkedIn</a>
-            <a href="mailto:jeremyliu621@gmail.com" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+            }" alt="LinkedIn"> LinkedIn</a>
+            <a href="mailto:jeremyliu621@gmail.com" class="social-btn"><img src="${
               getImageUrl("email-icon") || ""
-            }" alt="Email" style="width: 20px; height: 20px; margin-right: 8px;"> Email</a>
-            <a href="https://github.com/Jeremyliu-621" target="_blank" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+            }" alt="Email"> Email</a>
+            <a href="https://github.com/Jeremyliu-621" target="_blank" class="social-btn"><img src="${
               getImageUrl("github-icon") || ""
-            }" alt="GitHub" style="width: 20px; height: 20px; margin-right: 8px;"> Github</a>
-            <a href="https://github.com/Jeremyliu-621/Jeremy-Liu-Resume" target="_blank" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+            }" alt="GitHub"> Github</a>
+            <a href="https://github.com/Jeremyliu-621/Jeremy-Liu-Resume" target="_blank" class="social-btn"><img src="${
               getImageUrl("resume-icon") || ""
-            }" alt="Resume" style="width: 20px; height: 20px; margin-right: 8px;"> Resume</a>
-            <a href="https://instagram.com/jeremyliu.621" target="_blank" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+            }" alt="Resume"> Resume</a>
+            <a href="https://instagram.com/jeremyliu.621" target="_blank" class="social-btn"><img src="${
               getImageUrl("instagram-icon") || ""
-            }" alt="Instagram" style="width: 20px; height: 20px; margin-right: 8px;"> Instagram</a>
-            <a href="https://devpost.com/jeremyliu621" target="_blank" class="social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; line-height: 1.2;"><img src="${
+            }" alt="Instagram"> Instagram</a>
+            <a href="https://devpost.com/jeremyliu621" target="_blank" class="social-btn"><img src="${
               getImageUrl("devpost-icon") || ""
-            }" alt="Devpost" style="width: 20px; height: 20px; margin-right: 8px;"> Devpost</a>
+            }" alt="Devpost"> Devpost</a>
           </div>
         </div>
       </win98-window>
 
       <!-- Skills Window - Middle Top -->
       <win98-window title="Skills.exe" resizable class="window-skills">
-        <div class="window-body" style="padding: 8px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; min-height: 0;">
-          <h3 style="margin-top: 0; margin-bottom: 5px; font-weight: bold; font-size: 1.4em;; color: var(--palette-color-1, #000000">Languages</h3>
+        <div class="window-body">
+          <h3 style="color: var(--palette-color-1, #000000);">Languages</h3>
           <p style="margin: 3px 0;">${content.skills.languages}</p>
           
           <hr style="margin: 8px 0;">
           
-          <h3 style="margin-top: 8px; margin-bottom: 5px; font-weight: bold; font-size: 1.4em;">Frameworks</h3>
+          <h3>Frameworks</h3>
           <p style="margin: 3px 0;">${content.skills.frameworks}</p>
           
           <hr style="margin: 8px 0;">
           
-          <h3 style="margin-top: 8px; margin-bottom: 5px; font-weight: bold; font-size: 1.4em;">Tools</h3>
+          <h3>Tools</h3>
           <p style="margin: 3px 0;">${content.skills.tools}</p>
           
           <hr style="margin: 8px 0;">
           
-          <h3 style="margin-top: 8px; margin-bottom: 5px; font-weight: bold; font-size: 1.4em;">Currently improving by:</h3>
+          <h3>Currently improving by:</h3>
           <ul style="text-align: left; margin: 3px 0 0 0; padding-left: 20px; line-height: 1.4;">
             ${improvingHTML}
           </ul>
@@ -613,9 +599,9 @@ function initApp() {
 
       <!-- Hobbies Window - Middle Bottom -->
       <win98-window title="Hobbies.exe" resizable class="window-hobbies">
-        <div class="window-body" style="padding: 8px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; min-height: 0;">
-          <h3 style="margin-top: 0; margin-bottom: 5px;">Outside of Academics</h3>
-          <p style="margin: 5px 0; line-height: 1.3;">${content.hobbies}</p>
+        <div class="window-body">
+          <h3>Outside of Academics</h3>
+          <p>${content.hobbies}</p>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
            <img src="${
              getImageUrl("conormcgregor") || ""
@@ -643,16 +629,16 @@ function initApp() {
 
       <!-- Projects Window - Right -->
       <win98-window title="My Projects.exe" resizable class="window-projects">
-        <div class="window-body" style="padding: 0; overflow: hidden; height: calc(100% - 54px); box-sizing: border-box; min-height: 0; display: flex; flex-direction: column;">
+        <div class="window-body">
           <!-- Tabs -->
-          <div class="projects-tabs" style="display: flex; background: #c0c0c0; border-bottom: 1px solid #808080; overflow-x: auto; overflow-y: hidden; flex-shrink: 0;">
-            <button class="project-tab active" data-tab="all" style="padding: 6px 12px; background: #c0c0c0; border: none; border-right: 1px solid #808080; cursor: pointer; font-family: 'Jersey 10', sans-serif; font-size: 1em; white-space: nowrap; min-width: 60px;">
+          <div class="projects-tabs">
+            <button class="project-tab active" data-tab="all">
               All
             </button>
             ${content.projects
               .map(
                 (project, index) => `
-              <button class="project-tab" data-tab="${index}" style="padding: 6px 12px; background: #c0c0c0; border: none; border-right: 1px solid #808080; cursor: pointer; font-family: 'Jersey 10', sans-serif; font-size: 1em; white-space: nowrap; min-width: 80px;">
+              <button class="project-tab" data-tab="${index}" style="min-width: 80px;">
                 ${
                   project.title.length > 12
                     ? project.title.substring(0, 12) + "..."
@@ -665,7 +651,7 @@ function initApp() {
           </div>
           
           <!-- Tab Content -->
-          <div class="projects-tab-content" style="flex: 1; overflow-y: auto; padding: 8px; box-sizing: border-box;">
+          <div class="projects-tab-content">
             <!-- All Projects Tab (default) -->
             <div class="tab-pane active" data-tab-content="all">
               <h1 style="margin-top: 0; margin-bottom: 5px;">My Projects</h1>
@@ -688,7 +674,7 @@ function initApp() {
 
       <!-- Interactive Window -->
       <win98-window title="Interactive.exe" resizable class="window-interactive">
-        <div class="window-body" style="padding: 8px; overflow: hidden; height: calc(100% - 54px); box-sizing: border-box; display: flex; align-items: center; gap: 10px;">
+        <div class="window-body" style="overflow: hidden; display: flex; align-items: center; gap: 10px;">
           <p style="margin: 0; font-size: 1.15em; flex: 1;">you can interact with windows!</p>
           <img src="${
             getImageUrl("ascii-gif") || ""
@@ -701,15 +687,15 @@ function initApp() {
     </win98-desktop>
 
     <!-- Start Menu -->
-    <div id="start-menu" class="window" style="display: none; position: fixed; bottom: 40px; left: 0; width: 200px; z-index: 10000;">
+    <div id="start-menu" class="window">
       <div class="title-bar">
         <div class="title-bar-text">Start Menu</div>
       </div>
       <div class="window-body">
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          <li style="padding: 4px 8px; cursor: pointer;" id="menu-settings">⚙️ Settings</li>
-          <hr style="margin: 4px 0;">
-          <li style="padding: 4px 8px; cursor: pointer;" id="menu-shutdown">⏻ Shut Down...</li>
+        <ul>
+          <li id="menu-settings">⚙️ Settings</li>
+          <hr>
+          <li id="menu-shutdown">⏻ Shut Down...</li>
         </ul>
       </div>
     </div>
