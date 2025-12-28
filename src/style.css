@@ -495,20 +495,20 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
     max-width: 248px !important;
   }
   
-  /* Individual project tab buttons - constant width: 240px when both buttons exist */
+  /* Individual project tab buttons - constant width: 140px when both buttons exist */
   .window-projects .tab-pane:not([data-tab-content="all"]) .social-btn {
-    width: 240px !important;
-    flex: 0 0 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
+    width: 140px !important;
+    flex: 0 0 140px !important;
+    min-width: 140px !important;
+    max-width: 140px !important;
   }
   
-  /* When only one button exists in expanded view, make it 488px (space of two buttons) */
+  /* When only one button exists in expanded view, make it 288px (space of two buttons: 140px + 8px gap + 140px) */
   .window-projects .tab-pane:not([data-tab-content="all"]) .social-btn:only-child {
-    width: 488px !important;
-    flex: 0 0 488px !important;
-    min-width: 488px !important;
-    max-width: 488px !important;
+    width: 288px !important;
+    flex: 0 0 288px !important;
+    min-width: 288px !important;
+    max-width: 288px !important;
   }
   
 }
@@ -703,7 +703,7 @@ win98-window {
 
 /* For larger screens (1301px+), when projects window is narrow, stack image below title */
 /* Make it trigger earlier - at wider screen sizes */
-@media screen and (min-width: 1301px) and (max-width: 1800px) {
+@media screen and (min-width: 1301px) and (max-width: 1919px) {
   .window-projects .tab-pane[data-tab-content="all"] > div {
     flex-direction: column !important;
   }
@@ -721,15 +721,6 @@ win98-window {
     max-height: 200px !important;
     object-fit: cover !important;
   }
-}
-
-/* Larger desktops (1920px to 2303px) */
-@media screen and (min-width: 1920px) {
-  /* Adjust positioning only - windows and text stay the same size */
-  /* More spacing around windows on very large screens */
-    .window-body p {
-      font-size: 2.8em;
-    }
 }
 
 /* Touch device optimizations */

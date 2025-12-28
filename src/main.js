@@ -366,11 +366,10 @@ function createProjectHTML(project, index) {
       </p>`;
   }
 
-  // Add website and GitHub buttons if URLs are provided
-  if (project.website || project.github) {
-    const hasBothButtons = project.website && project.github;
-    const buttonWidth = hasBothButtons ? "120px" : "248px"; // 120px + 8px gap + 120px = 248px
-    html += `
+  // Add website, GitHub, and Specifics buttons - all buttons same size (120px)
+  const buttonWidth = "120px";
+
+  html += `
       <div style="display: flex; gap: 8px; margin-top: 6px;">
         ${
           project.website
@@ -394,8 +393,10 @@ function createProjectHTML(project, index) {
         `
             : ""
         }
+          <a href="#" class="project-specifics-btn social-btn" data-project-index="${index}" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 1.15em; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+    getImageUrl("specifics-icon") || ""
+  }" alt="Specifics" style="width: 20px; height: 20px; margin-right: 8px;"> Specifics</a>
       </div>`;
-  }
 
   html += `</div></div>`;
   return html;
@@ -446,11 +447,10 @@ function createSingleProjectHTML(project) {
       </div>`;
   }
 
-  // Website and GitHub buttons
-  if (project.website || project.github) {
-    const hasBothButtons = project.website && project.github;
-    const buttonWidth = hasBothButtons ? "240px" : "480px"; // 120px + 8px gap + 120px = 248px
-    html += `
+  // Website, GitHub, and All buttons - all same size (140px)
+  const buttonWidth = "140px";
+
+  html += `
       <div style="display: flex; gap: 8px; margin-top: 20px;">
         ${
           project.website
@@ -474,8 +474,10 @@ function createSingleProjectHTML(project) {
         `
             : ""
         }
+        <a href="#" class="project-all-btn social-btn" style="display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: #c0c0c0; border-top: 2px solid #ffffff; border-left: 2px solid #ffffff; border-bottom: 2px solid #808080; border-right: 2px solid #808080; text-decoration: none; color: #000; font-size: 20px; cursor: pointer; font-family: 'Jersey 10', sans-serif; box-sizing: border-box; gap: 6px; width: ${buttonWidth};"><img src="${
+    getImageUrl("all-icon") || ""
+  }" alt="All" style="width: 20px; height: 20px; margin-right: 8px;"> All</a>
       </div>`;
-  }
 
   html += `</div>`;
   return html;
@@ -1405,63 +1407,92 @@ function initApp() {
         }
       });
 
+      // Function to switch tabs
+      const switchTab = (tabId) => {
+        // Remove active class from all tabs and panes
+        projectTabs.forEach((t) => {
+          t.classList.remove("active");
+          t.style.background = "#c0c0c0";
+          t.style.border = "none";
+          t.style.borderRight = "1px solid #808080";
+        });
+        tabPanes.forEach((p) => {
+          p.classList.remove("active");
+          p.style.display = "none";
+        });
+
+        // Find and activate the target tab
+        const targetTab = document.querySelector(
+          `.project-tab[data-tab="${tabId}"]`
+        );
+        if (targetTab) {
+          targetTab.classList.add("active");
+          targetTab.style.background = "#c0c0c0";
+          targetTab.style.border = "none";
+        }
+
+        const activePane = document.querySelector(
+          `.tab-pane[data-tab-content="${tabId}"]`
+        );
+        if (activePane) {
+          activePane.classList.add("active");
+          activePane.style.display = "block";
+        }
+
+        // Reapply theme colors to buttons after tab switch
+        setTimeout(() => {
+          const savedPalette = localStorage.getItem("colorPalette");
+          if (savedPalette && savedPalette !== "default") {
+            const savedPaletteColors = localStorage.getItem("paletteColors");
+            if (savedPaletteColors) {
+              try {
+                const colors = JSON.parse(savedPaletteColors);
+                document
+                  .querySelectorAll(
+                    "button, .social-btn, a[href*='github'], a[href*='http']"
+                  )
+                  .forEach((btn) => {
+                    btn.style.backgroundColor = colors[0] || "#c0c0c0";
+                    btn.style.color = colors[3] || "#ffffff";
+                  });
+              } catch (e) {
+                console.warn("Failed to reapply theme:", e);
+              }
+            }
+          } else {
+            document
+              .querySelectorAll(
+                "button, .social-btn, a[href*='github'], a[href*='http']"
+              )
+              .forEach((btn) => {
+                btn.style.backgroundColor = "#c0c0c0";
+                btn.style.color = "#000000";
+              });
+          }
+        }, 10);
+      };
+
       projectTabs.forEach((tab) => {
         tab.addEventListener("click", () => {
           const tabId = tab.getAttribute("data-tab");
+          switchTab(tabId);
+        });
+      });
 
-          // Remove active class from all tabs and panes
-          projectTabs.forEach((t) => {
-            t.classList.remove("active");
-            t.style.background = "#c0c0c0";
-            t.style.border = "none";
-            t.style.borderRight = "1px solid #808080";
-          });
-          tabPanes.forEach((p) => {
-            p.classList.remove("active");
-            p.style.display = "none";
-          });
+      // Handle "Specifics" button clicks in All tab
+      document.querySelectorAll(".project-specifics-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const projectIndex = btn.getAttribute("data-project-index");
+          switchTab(projectIndex);
+        });
+      });
 
-          // Add active class to clicked tab and corresponding pane
-          tab.classList.add("active");
-          tab.style.background = "#c0c0c0";
-          // Remove inline border styles - let CSS handle the pressed appearance
-          tab.style.border = "none";
-
-          const activePane = document.querySelector(
-            `.tab-pane[data-tab-content="${tabId}"]`
-          );
-          if (activePane) {
-            activePane.classList.add("active");
-            activePane.style.display = "block";
-          }
-
-          // Reapply theme colors to buttons after tab switch
-          setTimeout(() => {
-            const savedPalette = localStorage.getItem("colorPalette");
-            if (savedPalette && savedPalette !== "default") {
-              const savedPaletteColors = localStorage.getItem("paletteColors");
-              if (savedPaletteColors) {
-                try {
-                  const colors = JSON.parse(savedPaletteColors);
-                  document
-                    .querySelectorAll("button, .social-btn, a[href*='github']")
-                    .forEach((btn) => {
-                      btn.style.backgroundColor = colors[0] || "#c0c0c0";
-                      btn.style.color = colors[3] || "#ffffff";
-                    });
-                } catch (e) {
-                  console.warn("Failed to reapply theme:", e);
-                }
-              }
-            } else {
-              document
-                .querySelectorAll("button, .social-btn, a[href*='github']")
-                .forEach((btn) => {
-                  btn.style.backgroundColor = "#c0c0c0";
-                  btn.style.color = "#000000";
-                });
-            }
-          }, 10);
+      // Handle "All" button clicks in individual project tabs
+      document.querySelectorAll(".project-all-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          switchTab("all");
         });
       });
     }, 100);
