@@ -99,7 +99,7 @@ const content = {
       title: "j-space", // this project
       description: "A space that focuses on my creativity and ideas.",
       front: "HTML, CSS, JavaScript, Vite",
-      image: "j-space-gif",
+      image: "j-gif-space",
       website: "https://j-space.vercel.app/",
       github: "https://github.com/Jeremyliu-621/j-space",
       additionalInfo:
