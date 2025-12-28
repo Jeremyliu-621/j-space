@@ -356,6 +356,62 @@ export function applyColorPalette(paletteKey) {
 
 // Note: Project HTML functions are now in ./components/projects.js
 
+// Function to show intro animation and then initialize the app
+function showIntroAnimation() {
+  const app = document.querySelector("#app");
+  if (!app) {
+    setTimeout(showIntroAnimation, 50);
+    return;
+  }
+
+  // Show intro screen with progress bar
+  app.innerHTML = `
+    <div id="intro-screen">
+      <div id="intro-content">
+        <h1 id="intro-title">Jeremy Liu's Space</h1>
+        <div id="progress-bar-container">
+          <div id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Animate the progress bar
+  const progressBar = document.getElementById("progress-bar");
+  let progress = 0;
+  const targetProgress = 100;
+  const progressSpeed = 2; // Percentage points per frame
+
+  function animateProgress() {
+    if (progress < targetProgress) {
+      progress += progressSpeed;
+      if (progress > targetProgress) progress = targetProgress;
+
+      if (progressBar) {
+        progressBar.style.width = progress + "%";
+      }
+
+      requestAnimationFrame(animateProgress);
+    } else {
+      // Progress bar complete, quickly fade out and show main content
+      const introScreen = document.getElementById("intro-screen");
+      if (introScreen) {
+        introScreen.style.opacity = "0";
+        setTimeout(() => {
+          initApp();
+        }, 200); // Quick transition
+      } else {
+        initApp();
+      }
+    }
+  }
+
+  // Start animation after a brief delay
+  setTimeout(() => {
+    animateProgress();
+  }, 100);
+}
+
 // Function to initialize the app
 function initApp() {
   const app = document.querySelector("#app");
@@ -411,7 +467,7 @@ function initApp() {
       <!-- About Me Window - Left -->
       <win98-window title="About Me.exe" resizable class="window-about-me">
         <div class="window-body">
-          <h2>${content.aboutMe.name}</h2>
+          <h2 id="about-me-name" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">J</em>eremy <em style="font-size: 1.2em;">L</em>iu</h2>
           <p class="bold-title">${content.aboutMe.title}</p>
           <p>${content.aboutMe.bio}</p>
           <div style="display: flex; justify-content: center; margin-bottom: 8px;">
@@ -448,17 +504,17 @@ function initApp() {
       <!-- Skills Window - Middle Top -->
       <win98-window title="Skills.exe" resizable class="window-skills">
         <div class="window-body">
-          <h3 style="color: var(--palette-color-1, #000000);">Languages</h3>
+          <h3 id="skills-languages" class="animate-title-fast" style="color: var(--palette-color-1, #000000); visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Languages</em></h3>
           <p style="margin: 3px 0;">${content.skills.languages}</p>
           
           <hr style="margin: 8px 0;">
           
-          <h3>Frameworks</h3>
+          <h3 id="skills-frameworks" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Frameworks</em></h3>
           <p style="margin: 3px 0;">${content.skills.frameworks}</p>
           
           <hr style="margin: 8px 0;">
           
-          <h3>Tools</h3>
+          <h3 id="skills-tools" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Tools</em></h3>
           <p style="margin: 3px 0;">${content.skills.tools}</p>
           
           <hr style="margin: 8px 0;">
@@ -473,18 +529,18 @@ function initApp() {
       <!-- Hobbies Window - Middle Bottom -->
       <win98-window title="Hobbies.exe" resizable class="window-hobbies">
         <div class="window-body">
-          <h3>Outside of Academics</h3>
+          <h3 id="hobbies-title" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><span style="font-size: 1.2em;">Outside</span> of Academics</h3>
           <p>${content.hobbies}</p>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
            <img src="${
              getImageUrl("conormcgregor") || ""
-           }" alt="Conor McGregor" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+           }" alt="Conor McGregor" style="max-width: 50px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
           <img src="${
             getImageUrl("animation") || ""
-          }" alt="Pretty Animation" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+          }" alt="Pretty Animation" style="max-width: 50px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
           <img src="${
             getImageUrl("bjj-grappling") || ""
-          }" alt="BJJ Grappling" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+          }" alt="BJJ Grappling" style="max-width: 50px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
           <img src="${
             getImageUrl("Happy") || ""
           }" alt="Charles Oliviera" style="max-width: 200px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
@@ -505,7 +561,7 @@ function initApp() {
       <!-- Interactive Window -->
       <win98-window title="Interactive.exe" resizable class="window-interactive">
         <div class="window-body" style="overflow: hidden; display: flex; align-items: center; gap: 10px;">
-          <p style="margin: 0; font-size: 1.15em; flex: 1;">you can interact with windows!</p>
+          <p id="interactive-text" class="animate-title-fast" style="margin: 0; font-size: 1.15em; flex: 1; visibility: hidden;">you can interact with windows!</p>
           <img src="${
             getImageUrl("ascii-gif") || ""
           }" alt="Bear" style="max-width: 100px; height: auto; flex-shrink: 0; border: 2px solid #808080;">
@@ -523,7 +579,18 @@ function initApp() {
       </div>
       <div class="window-body">
         <ul>
-          <li id="menu-settings">⚙️ Settings</li>
+          <li id="menu-about-me">👤 About Me</li>
+          <li id="menu-skills">💼 Skills</li>
+          <li id="menu-hobbies">🎨 Hobbies</li>
+          <li id="menu-projects">📁 My Projects</li>
+          <li id="menu-interactive">✨ Interactive</li>
+          <hr>
+          <li id="menu-folder">📂 Folder</li>
+          <li id="menu-blog">📝 Blog</li>
+          <li id="menu-chatbox">💬 Chatbox</li>
+          <li id="menu-thanks">🙏 Thank you!</li>
+          <hr>
+          <li id="menu-theme-editor">🎨 Theme Editor</li>
           <hr>
           <li id="menu-shutdown">⏻ Shut Down...</li>
         </ul>
@@ -1127,6 +1194,14 @@ function initApp() {
     const startMenu = document.querySelector("#start-menu");
     const taskbar = document.querySelector("win98-taskbar");
 
+    // Ensure start menu is properly initialized
+    if (startMenu) {
+      startMenu.style.display = "none";
+    }
+
+    // Track if listener is attached to avoid duplicates
+    let startButtonListenerAttached = false;
+
     // Find the start button in the taskbar (handles shadow DOM)
     const findStartButton = () => {
       if (!taskbar) return null;
@@ -1156,42 +1231,221 @@ function initApp() {
       return null;
     };
 
+    // Reset button visual state
+    const resetButtonState = (button) => {
+      if (!button) return;
+      // Force button to lose active/pressed state
+      button.blur();
+      // Remove any active/pressed classes that might be stuck
+      button.classList.remove("active", "pressed", "down");
+      // Remove inline styles that might be stuck
+      button.style.removeProperty("outline");
+      // Use mouseleave event to reset hover state
+      button.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+      // Trigger a reflow to reset visual state
+      requestAnimationFrame(() => {
+        void button.offsetWidth;
+      });
+    };
+
     // Toggle start menu function
     const toggleStartMenu = (e) => {
-      if (e) e.stopPropagation();
-      if (startMenu) {
-        const isVisible = startMenu.style.display !== "none";
-        startMenu.style.display = isVisible ? "none" : "block";
+      if (e) {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        // Don't preventDefault - let the button handle its own visual state naturally
+      }
+
+      if (!startMenu) return;
+
+      const isVisible = startMenu.style.display !== "none";
+      startMenu.style.display = isVisible ? "none" : "block";
+
+      // Reset button state after menu toggles - use a small delay to let button's native handler finish
+      const startButton = findStartButton();
+      if (startButton) {
+        // Use requestAnimationFrame to reset after the browser processes the click
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            resetButtonState(startButton);
+          }, 50);
+        });
       }
     };
 
-    // Try to find start button after a delay to ensure taskbar is rendered
-    setTimeout(() => {
+    // Setup start button handler with retry logic
+    const setupStartButton = (maxRetries = 10, currentRetry = 0) => {
       const startButton = findStartButton();
-      if (startButton) {
-        startButton.addEventListener("click", toggleStartMenu);
-      } else {
+
+      if (startButton && !startButtonListenerAttached) {
+        // Add our handler with capture phase to ensure it runs first and stops other handlers
+        startButton.addEventListener("click", toggleStartMenu, {
+          capture: true,
+        });
+        startButtonListenerAttached = true;
+      } else if (!startButton && currentRetry < maxRetries) {
+        // Retry if button not found yet
+        setTimeout(() => {
+          setupStartButton(maxRetries, currentRetry + 1);
+        }, 100);
+      } else if (!startButton && taskbar && !startButtonListenerAttached) {
         // Fallback: listen for clicks on the taskbar itself
-        if (taskbar) {
-          taskbar.addEventListener("click", (e) => {
+        taskbar.addEventListener(
+          "click",
+          (e) => {
             // Check if click is on the left side (where start button would be)
             const rect = taskbar.getBoundingClientRect();
             if (e.clientX < rect.left + 100) {
               toggleStartMenu(e);
             }
-          });
-        }
+          },
+          { capture: true }
+        );
+        startButtonListenerAttached = true;
       }
-    }, 500);
+    };
+
+    // Start trying to setup the button - use requestAnimationFrame for better timing
+    requestAnimationFrame(() => {
+      setupStartButton();
+    });
 
     // Close start menu when clicking outside
     document.addEventListener("click", (e) => {
-      if (startMenu && !startMenu.contains(e.target)) {
-        const startButton = findStartButton();
-        if (startButton && !startButton.contains(e.target)) {
-          startMenu.style.display = "none";
+      if (!startMenu) return;
+
+      // Don't close if clicking on start menu itself
+      if (startMenu.contains(e.target)) return;
+
+      const startButton = findStartButton();
+      // Don't close if clicking the start button (it will toggle)
+      if (startButton && startButton.contains(e.target)) return;
+
+      // Close the menu
+      if (startMenu.style.display !== "none") {
+        startMenu.style.display = "none";
+        // Reset button state when menu closes
+        if (startButton) {
+          resetButtonState(startButton);
         }
       }
+    });
+
+    // Typewriter animation function - animates elements by reading their innerHTML
+    // Supports both plain text and HTML strings
+    function animateElement(
+      element,
+      baseDelay,
+      randomVariation,
+      extraPauseChance,
+      extraPauseAmount
+    ) {
+      const textOrHtml = element.innerHTML;
+      element.innerHTML = "";
+      element.style.visibility = "visible";
+
+      // Check if input contains HTML tags
+      const hasHtml = /<[^>]+>/.test(textOrHtml);
+
+      if (!hasHtml) {
+        // Plain text - simple case
+        let index = 0;
+        function typeNextChar() {
+          if (index < textOrHtml.length) {
+            element.textContent = textOrHtml.substring(0, index + 1);
+            index++;
+
+            const charDelay = baseDelay + Math.random() * randomVariation;
+            const extraPause =
+              Math.random() < extraPauseChance ? extraPauseAmount() : 0;
+
+            setTimeout(typeNextChar, charDelay + extraPause);
+          }
+        }
+        typeNextChar();
+      } else {
+        // HTML - parse structure and type while preserving tags
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = textOrHtml;
+
+        // Extract plain text content
+        const plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+        // Function to build HTML up to a specific character position
+        const buildHtmlUpTo = (
+          node,
+          targetLength,
+          currentPos = { value: 0 }
+        ) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent || "";
+            const textStart = currentPos.value;
+            const textEnd = Math.min(textStart + text.length, targetLength);
+
+            if (textEnd > textStart) {
+              const visibleText = text.substring(0, textEnd - textStart);
+              currentPos.value = textEnd;
+              return visibleText;
+            }
+            return "";
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const tagName = node.tagName.toLowerCase();
+            const attrs = Array.from(node.attributes)
+              .map((attr) => `${attr.name}="${attr.value}"`)
+              .join(" ");
+            const openTag = attrs ? `<${tagName} ${attrs}>` : `<${tagName}>`;
+            const closeTag = `</${tagName}>`;
+
+            let content = "";
+            const pos = { value: currentPos.value };
+
+            node.childNodes.forEach((child) => {
+              content += buildHtmlUpTo(child, targetLength, pos);
+            });
+
+            currentPos.value = pos.value;
+
+            // Only include tags if there's content
+            if (content.length > 0 || currentPos.value >= targetLength) {
+              return openTag + content + closeTag;
+            }
+            return "";
+          }
+          return "";
+        };
+
+        let charIndex = 0;
+        function typeNextChar() {
+          if (charIndex < plainText.length) {
+            const htmlSoFar = buildHtmlUpTo(tempDiv, charIndex + 1, {
+              value: 0,
+            });
+            element.innerHTML = htmlSoFar;
+
+            charIndex++;
+
+            const charDelay = baseDelay + Math.random() * randomVariation;
+            const extraPause =
+              Math.random() < extraPauseChance ? extraPauseAmount() : 0;
+
+            setTimeout(typeNextChar, charDelay + extraPause);
+          } else {
+            // Animation complete - set final HTML
+            element.innerHTML = textOrHtml;
+          }
+        }
+        typeNextChar();
+      }
+    }
+
+    // Animate all elements with class "animate-title-fast" (faster speed: 40-80ms per char)
+    document.querySelectorAll(".animate-title-fast").forEach((element) => {
+      animateElement(element, 40, 40, 0.1, () => 30 + Math.random() * 30);
+    });
+
+    // Animate all elements with class "animate-title-slow" (slower speed: 120-270ms per char, choppier)
+    document.querySelectorAll(".animate-title-slow").forEach((element) => {
+      animateElement(element, 120, 150, 0.2, () => 50 + Math.random() * 50);
     });
 
     // Projects window tab switching - now in ./components/projects.js
@@ -1374,16 +1628,7 @@ function initApp() {
 
         // Show and bring to front
         if (folderWindow) {
-          folderWindow.style.display = "block";
-          folderWindow.style.zIndex = "1000";
-          // Bring to front by increasing z-index
-          const allWindows = document.querySelectorAll("win98-window");
-          let maxZ = 0;
-          allWindows.forEach((w) => {
-            const z = parseInt(w.style.zIndex) || 0;
-            if (z > maxZ) maxZ = z;
-          });
-          folderWindow.style.zIndex = (maxZ + 1).toString();
+          bringWindowToFront(folderWindow);
         }
       }
 
@@ -1633,29 +1878,11 @@ function initApp() {
 
           // Show and bring to front
           if (chatboxWindow) {
-            chatboxWindow.style.display = "block";
-            chatboxWindow.style.zIndex = "1000";
-            // Bring to front by increasing z-index
-            const allWindows = document.querySelectorAll("win98-window");
-            let maxZ = 0;
-            allWindows.forEach((w) => {
-              const z = parseInt(w.style.zIndex) || 0;
-              if (z > maxZ) maxZ = z;
-            });
-            chatboxWindow.style.zIndex = (maxZ + 1).toString();
+            bringWindowToFront(chatboxWindow);
           }
         } else {
           // Window exists, just show and bring to front
-          chatboxWindow.style.display = "block";
-          chatboxWindow.style.zIndex = "1000";
-          // Bring to front by increasing z-index
-          const allWindows = document.querySelectorAll("win98-window");
-          let maxZ = 0;
-          allWindows.forEach((w) => {
-            const z = parseInt(w.style.zIndex) || 0;
-            if (z > maxZ) maxZ = z;
-          });
-          chatboxWindow.style.zIndex = (maxZ + 1).toString();
+          bringWindowToFront(chatboxWindow);
         }
       }
 
@@ -1765,8 +1992,8 @@ function initApp() {
                  <div class="thanks-item" style="margin-bottom: 20px; padding: 8px; border: 1px solid #808080;">
                    <h3 style="margin: 4px 0px 8px 2px; font-weight: bold; font-size: 1.2em;">${nameHTML}</h3>
                    <p style="margin: 0px 0px 0px 2px; line-height: 1.4; color: #000;">${item.description}</p>
-                 </div>
-               `;
+                </div>
+              `;
             })
             .join("");
 
@@ -1799,16 +2026,7 @@ function initApp() {
 
         // Show and bring to front
         if (thanksWindow) {
-          thanksWindow.style.display = "block";
-          thanksWindow.style.zIndex = "1000";
-          // Bring to front by increasing z-index
-          const allWindows = document.querySelectorAll("win98-window");
-          let maxZ = 0;
-          allWindows.forEach((w) => {
-            const z = parseInt(w.style.zIndex) || 0;
-            if (z > maxZ) maxZ = z;
-          });
-          thanksWindow.style.zIndex = (maxZ + 1).toString();
+          bringWindowToFront(thanksWindow);
         }
       }
 
@@ -1824,7 +2042,11 @@ function initApp() {
     // Helper function to bring window to front
     const bringWindowToFront = (window) => {
       if (window) {
+        // Ensure window is visible (in case it was hidden/closed)
         window.style.display = "block";
+        window.style.visibility = "visible";
+
+        // Bring to front by setting highest z-index
         const allWindows = document.querySelectorAll("win98-window");
         let maxZ = 0;
         allWindows.forEach((w) => {
@@ -1957,67 +2179,50 @@ function initApp() {
       bringWindowToFront(settingsWindow);
     };
 
-    // Function to open Help window
-    const openHelpWindow = () => {
-      let helpWindow = document.querySelector('win98-window[title="Help.exe"]');
+    // Functions to open/recreate static windows (similar to openBlogWindow)
+    const openAboutMeWindow = () => {
+      let aboutMeWindow = document.querySelector(
+        'win98-window[title="About Me.exe"]'
+      );
 
-      if (!helpWindow) {
-        const socialLinks = [
-          {
-            name: "LinkedIn",
-            url: "https://www.linkedin.com/in/jmyl",
-            icon: "🟦",
-          },
-          { name: "Email", url: "mailto:jeremyliu621@gmail.com", icon: "✉️" },
-          {
-            name: "GitHub",
-            url: "https://github.com/Jeremyliu-621",
-            icon: "💻",
-          },
-          {
-            name: "Resume",
-            url: "https://github.com/Jeremyliu-621/Jeremy-Liu-Resume",
-            icon: "📄",
-          },
-          {
-            name: "Instagram",
-            url: "https://instagram.com/jeremyliu.621",
-            icon: "📷",
-          },
-          {
-            name: "Devpost",
-            url: "https://devpost.com/jeremyliu621",
-            icon: "💬",
-          },
-        ];
-
-        const linksHTML = socialLinks
-          .map(
-            (link) => `
-            <div style="margin-bottom: 12px; padding: 8px; border: 1px solid #808080; background: #e0e0e0;">
-              <a href="${link.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #000; font-size: 1.1em;">
-                <span style="font-size: 1.3em;">${link.icon}</span>
-                <strong>${link.name}</strong>
-              </a>
-            </div>
-          `
-          )
+      if (!aboutMeWindow) {
+        const activitiesHTML = content.aboutMe.currentActivities
+          .map((activity) => `<li>${activity}</li>`)
           .join("");
 
         const windowHTML = `
-          <win98-window title="Help.exe" resizable style="top: 100px; left: 100px; width: 400px; height: 450px; z-index: 1000;">
-            <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box;">
-              <h2 style="margin-top: 0; margin-bottom: 20px; font-weight: bold; font-size: 1.5em;">Help & Contact</h2>
-              <p style="margin-bottom: 16px; line-height: 1.4;">Welcome to Jeremy Liu's Portfolio!</p>
-              <p style="margin-bottom: 20px; line-height: 1.4;">Connect with me through any of these platforms:</p>
-              ${linksHTML}
-              <div style="margin-top: 20px; padding: 8px; background: #e8e8e8; border: 1px solid #808080;">
-                <p style="margin: 0; font-size: 0.9em; line-height: 1.4;">
-                  <strong>Tips:</strong><br>
-                  • All windows are resizable and draggable<br>
-                  • Use the Start menu to navigate<br>
-                  • Double-click desktop icons to open windows
-                </p>
+          <win98-window title="About Me.exe" resizable class="window-about-me">
+            <div class="window-body">
+              <h2 id="about-me-name-recreated">${content.aboutMe.name}</h2>
+              <p class="bold-title">${content.aboutMe.title}</p>
+              <p>${content.aboutMe.bio}</p>
+              <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+              <img src="${
+                getImageUrl("cruisesunset") || ""
+              }" alt="Cruise Sunset" style="width: 60%; height: 100px; margin: 8px 2px; border: 2px solid #808080; box-sizing: border-box; display: block; object-fit: cover; object-position: center;">
+              <img src="${
+                getImageUrl("armbar") || ""
+              }" alt="Cruise Sunset" style="width: 60%; height: 100px; margin: 8px 2px; border: 2px solid #808080; box-sizing: border-box; display: block; object-fit: cover; object-position: center;">
+            </div>
+              <div class="social-buttons-grid">
+                <a href="https://www.linkedin.com/in/jmyl" target="_blank" class="social-btn"><img src="${
+                  getImageUrl("linkedin-icon") || ""
+                }" alt="LinkedIn"> LinkedIn</a>
+                <a href="mailto:jeremyliu621@gmail.com" class="social-btn"><img src="${
+                  getImageUrl("email-icon") || ""
+                }" alt="Email"> Email</a>
+                <a href="https://github.com/Jeremyliu-621" target="_blank" class="social-btn"><img src="${
+                  getImageUrl("github-icon") || ""
+                }" alt="GitHub"> Github</a>
+                <a href="https://github.com/Jeremyliu-621/Jeremy-Liu-Resume" target="_blank" class="social-btn"><img src="${
+                  getImageUrl("resume-icon") || ""
+                }" alt="Resume"> Resume</a>
+                <a href="https://instagram.com/jeremyliu.621" target="_blank" class="social-btn"><img src="${
+                  getImageUrl("instagram-icon") || ""
+                }" alt="Instagram"> Instagram</a>
+                <a href="https://devpost.com/jeremyliu621" target="_blank" class="social-btn"><img src="${
+                  getImageUrl("devpost-icon") || ""
+                }" alt="Devpost"> Devpost</a>
               </div>
             </div>
           </win98-window>
@@ -2026,16 +2231,264 @@ function initApp() {
         const desktop = document.querySelector("win98-desktop");
         if (desktop) {
           desktop.insertAdjacentHTML("beforeend", windowHTML);
-          helpWindow = document.querySelector('win98-window[title="Help.exe"]');
+          aboutMeWindow = document.querySelector(
+            'win98-window[title="About Me.exe"]'
+          );
+
+          // Apply current theme to the window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
         }
       }
 
-      bringWindowToFront(helpWindow);
+      if (aboutMeWindow) {
+        bringWindowToFront(aboutMeWindow);
+      }
+    };
+
+    const openSkillsWindow = () => {
+      let skillsWindow = document.querySelector(
+        'win98-window[title="Skills.exe"]'
+      );
+
+      if (!skillsWindow) {
+        const improvingHTML = content.skills.improvingBy
+          .map((item) => `<li>${item}</li>`)
+          .join("");
+
+        const windowHTML = `
+          <win98-window title="Skills.exe" resizable class="window-skills">
+            <div class="window-body">
+              <h3 id="skills-languages-recreated" style="color: var(--palette-color-1, #000000);">Languages</h3>
+              <p style="margin: 3px 0;">${content.skills.languages}</p>
+              
+              <hr style="margin: 8px 0;">
+              
+              <h3 id="skills-frameworks-recreated">Frameworks</h3>
+              <p style="margin: 3px 0;">${content.skills.frameworks}</p>
+              
+              <hr style="margin: 8px 0;">
+              
+              <h3 id="skills-tools-recreated">Tools</h3>
+              <p style="margin: 3px 0;">${content.skills.tools}</p>
+              
+              <hr style="margin: 8px 0;">
+              
+              <h3>Currently improving by:</h3>
+              <ul style="text-align: left; margin: 3px 0 0 0; padding-left: 20px; line-height: 1.4;">
+                ${improvingHTML}
+              </ul>
+              </div>
+          </win98-window>
+        `;
+
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          skillsWindow = document.querySelector(
+            'win98-window[title="Skills.exe"]'
+          );
+
+          // Apply current theme to the window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+        }
+      }
+
+      if (skillsWindow) {
+        bringWindowToFront(skillsWindow);
+      }
+    };
+
+    const openHobbiesWindow = () => {
+      let hobbiesWindow = document.querySelector(
+        'win98-window[title="Hobbies.exe"]'
+      );
+
+      if (!hobbiesWindow) {
+        const windowHTML = `
+          <win98-window title="Hobbies.exe" resizable class="window-hobbies">
+            <div class="window-body">
+              <h3 id="hobbies-title-recreated">Outside of Academics</h3>
+              <p>${content.hobbies}</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+               <img src="${
+                 getImageUrl("conormcgregor") || ""
+               }" alt="Conor McGregor" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              <img src="${
+                getImageUrl("animation") || ""
+              }" alt="Pretty Animation" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              <img src="${
+                getImageUrl("bjj-grappling") || ""
+              }" alt="BJJ Grappling" style="max-width: 100px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              <img src="${
+                getImageUrl("Happy") || ""
+              }" alt="Charles Oliviera" style="max-width: 200px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              <img src="${
+                getImageUrl("Rodney") || ""
+              }" alt="Skating" style="max-width: 100px; width: 40px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              <img src="${
+                getImageUrl("stop") || ""
+              }" alt="graffiti" style="max-width: 100px; width: 40px; height: auto; display: block; margin: 8px 0 0 0; border: 2px solid #808080;">
+              
+              </div>
+          
+            </div>
+          </win98-window>
+        `;
+
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          hobbiesWindow = document.querySelector(
+            'win98-window[title="Hobbies.exe"]'
+          );
+
+          // Apply current theme to the window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+        }
+      }
+
+      if (hobbiesWindow) {
+        bringWindowToFront(hobbiesWindow);
+      }
+    };
+
+    const openProjectsWindow = () => {
+      let projectsWindow = document.querySelector(
+        'win98-window[title="My Projects.exe"]'
+      );
+
+      if (!projectsWindow) {
+        const projectsHTML = content.projects
+          .map((project, index) => createProjectHTML(project, index))
+          .join("");
+        const windowHTML = generateProjectsWindowHTML(projectsHTML);
+
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          projectsWindow = document.querySelector(
+            'win98-window[title="My Projects.exe"]'
+          );
+
+          // Apply current theme to the window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+
+          // Initialize project tabs after window is created
+          setTimeout(() => {
+            initProjectTabs();
+          }, 100);
+        }
+      }
+
+      if (projectsWindow) {
+        bringWindowToFront(projectsWindow);
+      }
+    };
+
+    const openInteractiveWindow = () => {
+      let interactiveWindow = document.querySelector(
+        'win98-window[title="Interactive.exe"]'
+      );
+
+      if (!interactiveWindow) {
+        const windowHTML = `
+          <win98-window title="Interactive.exe" resizable class="window-interactive">
+            <div class="window-body" style="overflow: hidden; display: flex; align-items: center; gap: 10px;">
+              <p id="interactive-text-recreated" style="margin: 0; font-size: 1.15em; flex: 1;">you can interact with windows!</p>
+              <img src="${
+                getImageUrl("ascii-gif") || ""
+              }" alt="Bear" style="max-width: 100px; height: auto; flex-shrink: 0; border: 2px solid #808080;">
+            </div>
+          </win98-window>
+        `;
+
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          interactiveWindow = document.querySelector(
+            'win98-window[title="Interactive.exe"]'
+          );
+
+          // Apply current theme to the window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+        }
+      }
+
+      if (interactiveWindow) {
+        bringWindowToFront(interactiveWindow);
+      }
+    };
+
+    // Helper function to trigger desktop icon double-click (for windows that need to be created)
+    const triggerDesktopIconDoubleClick = (iconId) => {
+      const icon = document.querySelector(iconId);
+      if (icon) {
+        // First check if window already exists
+        let windowTitle = "";
+        if (iconId === "#desktop-folder") windowTitle = "Folder.exe";
+        else if (iconId === "#desktop-chatbox") windowTitle = "Chatbox.exe";
+        else if (iconId === "#desktop-thanks") windowTitle = "Thank you!.exe";
+
+        if (windowTitle) {
+          const existingWindow = document.querySelector(
+            `win98-window[title="${windowTitle}"]`
+          );
+          if (existingWindow) {
+            bringWindowToFront(existingWindow);
+            return;
+          }
+        }
+
+        // If window doesn't exist, simulate double-click and then bring to front
+        const click1 = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+        });
+        icon.dispatchEvent(click1);
+        setTimeout(() => {
+          const click2 = new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+          });
+          icon.dispatchEvent(click2);
+
+          // After window is created, bring it to front
+          setTimeout(() => {
+            if (windowTitle) {
+              const newWindow = document.querySelector(
+                `win98-window[title="${windowTitle}"]`
+              );
+              if (newWindow) {
+                bringWindowToFront(newWindow);
+              }
+            }
+          }, 150);
+        }, 100);
+      }
     };
 
     // Start menu item click handlers
     const menuItems = {
-      "menu-settings": () => openSettingsWindow(),
+      "menu-about-me": () => openAboutMeWindow(),
+      "menu-skills": () => openSkillsWindow(),
+      "menu-hobbies": () => openHobbiesWindow(),
+      "menu-projects": () => openProjectsWindow(),
+      "menu-interactive": () => openInteractiveWindow(),
+      "menu-folder": () => triggerDesktopIconDoubleClick("#desktop-folder"),
+      "menu-blog": () => openBlogWindow(),
+      "menu-chatbox": () => triggerDesktopIconDoubleClick("#desktop-chatbox"),
+      "menu-thanks": () => triggerDesktopIconDoubleClick("#desktop-thanks"),
+      "menu-theme-editor": () => openSettingsWindow(),
       "menu-shutdown": () => {
         if (confirm("Are you sure you want to shut down?")) {
           // Close the website
@@ -2071,10 +2524,10 @@ function initApp() {
 
 // Initialize when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initApp);
+  document.addEventListener("DOMContentLoaded", showIntroAnimation);
 } else {
   // DOM is already ready
-  initApp();
+  showIntroAnimation();
 }
 
 // Set Windows 98 cursor globally after everything loads

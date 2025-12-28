@@ -113,10 +113,19 @@ h1 {
   display: none;
   position: fixed;
   bottom: 40px;
-  left: 0;
+  left: 10px;
   width: 200px;
   z-index: 10000;
   box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.3);
+  border: 2px solid #808080 !important;
+}
+
+#start-menu .window-body {
+  border: 2px solid #808080 !important;
+}
+
+#start-menu .window-body {
+  padding-bottom: 8px !important;
 }
 
 #start-menu .window-body ul {
@@ -161,9 +170,9 @@ win98-window[resizable] {
 /* Window initial positions - using classes instead of inline styles */
 .window-about-me {
   top: 12vh;
-  left: 28vh;
+  left: 26.5vh;
   width: 55vh;
-  height: 435px;
+  height: 440px;
 }
 
 .window-skills {
@@ -189,7 +198,7 @@ win98-window[resizable] {
 
 .window-interactive {
   bottom: 8vh;
-  left: 48vh;
+  left: 44vh;
   width: 32vh;
   height: 18.5vh;
 }
@@ -1246,3 +1255,48 @@ win98-window[title="Image Viewer.exe"] .viewer-nav-controls {
 }
 
 /* Color scheme is handled by 98.css */
+
+/* Intro Animation Styles */
+#intro-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #008080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  opacity: 1;
+  transition: opacity 0.2s ease-out;
+}
+
+#intro-content {
+  text-align: center;
+  color: #ffffff;
+  font-family: var(--custom-font, "Jersey 10", sans-serif);
+}
+
+#intro-title {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  color: #ffffff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#progress-bar-container {
+  width: 400px;
+  height: 30px;
+  background-color: #000080;
+  border: 2px solid #ffffff;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+#progress-bar {
+  width: 0%;
+  height: 100%;
+  background-color: #ffffff;
+  transition: width 0.1s linear;
+}
