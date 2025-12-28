@@ -817,22 +817,43 @@ function initApp() {
     // ============================================
     // MOBILE TOUCH SUPPORT FOR WINDOW DRAGGING AND RESIZING
     // ============================================
+    // Global state to track active window interaction
+    const touchState = {
+      activeWindow: null,
+      activeTouch: null,
+    };
+
+    const cancelAllWindowInteractions = () => {
+      const windows = document.querySelectorAll("win98-window[resizable]");
+      windows.forEach((window) => {
+        if (window.touchData) {
+          window.touchData.isDragging = false;
+          window.touchData.isResizing = false;
+          window.touchData.resizeEdge = null;
+        }
+      });
+      touchState.activeWindow = null;
+      touchState.activeTouch = null;
+    };
+
     const setupTouchSupport = () => {
       const windows = document.querySelectorAll("win98-window[resizable]");
       windows.forEach((window) => {
         if (window.dataset.touchSetup === "true") return;
         window.dataset.touchSetup = "true";
 
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let initialLeft = 0;
-        let initialTop = 0;
-        let initialWidth = 0;
-        let initialHeight = 0;
-        let isDragging = false;
-        let isResizing = false;
-        let resizeEdge = null;
-        let activeTouch = null;
+        // Store touch state on window element
+        window.touchData = {
+          touchStartX: 0,
+          touchStartY: 0,
+          initialLeft: 0,
+          initialTop: 0,
+          initialWidth: 0,
+          initialHeight: 0,
+          isDragging: false,
+          isResizing: false,
+          resizeEdge: null,
+        };
 
         const getWindowRect = () => {
           const rect = window.getBoundingClientRect();
@@ -846,12 +867,12 @@ function initApp() {
         };
 
         const getTouch = (e) => {
-          if (activeTouch === null && e.touches.length > 0) {
-            activeTouch = e.touches[0].identifier;
+          if (touchState.activeTouch === null && e.touches.length > 0) {
+            touchState.activeTouch = e.touches[0].identifier;
             return e.touches[0];
           }
           for (let touch of e.touches) {
-            if (touch.identifier === activeTouch) {
+            if (touch.identifier === touchState.activeTouch) {
               return touch;
             }
           }
@@ -883,20 +904,20 @@ function initApp() {
         };
 
         const handleTouchStart = (e) => {
+          // If another window is active, cancel its interaction first
+          if (touchState.activeWindow && touchState.activeWindow !== window) {
+            cancelAllWindowInteractions();
+          }
+
           const touch = getTouch(e);
           if (!touch) return;
 
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
+          // Set this window as active
+          touchState.activeWindow = window;
 
-          // Try to find title bar in shadow DOM or use window element
-          const target = e.target;
-          let titleBar = null;
-
-          // Check if click is on title bar or window element
-          if (window.shadowRoot) {
-            titleBar = window.shadowRoot.querySelector(".title-bar");
-          }
+          const data = window.touchData;
+          data.touchStartX = touch.clientX;
+          data.touchStartY = touch.clientY;
 
           // Check if we clicked on the title bar area (top portion of window)
           const rect = getWindowRect();
@@ -904,82 +925,93 @@ function initApp() {
           const windowTop = window.getBoundingClientRect().top;
           const titleBarHeight = 30; // Approximate title bar height
 
-          if (touchY - windowTop < titleBarHeight && !isResizing) {
+          if (touchY - windowTop < titleBarHeight && !data.isResizing) {
             // Starting drag
-            isDragging = true;
-            initialLeft = rect.left;
-            initialTop = rect.top;
+            data.isDragging = true;
+            data.initialLeft = rect.left;
+            data.initialTop = rect.top;
             e.preventDefault();
           } else {
             // Check if we're on a resize edge
             const resizeRect = window.getBoundingClientRect();
-            resizeEdge = getResizeEdge(
+            data.resizeEdge = getResizeEdge(
               touch.clientX,
               touch.clientY,
               resizeRect
             );
-            if (resizeEdge) {
-              isResizing = true;
-              initialLeft = rect.left;
-              initialTop = rect.top;
-              initialWidth = rect.width;
-              initialHeight = rect.height;
+            if (data.resizeEdge) {
+              data.isResizing = true;
+              data.initialLeft = rect.left;
+              data.initialTop = rect.top;
+              data.initialWidth = rect.width;
+              data.initialHeight = rect.height;
               e.preventDefault();
             }
           }
         };
 
         const handleTouchMove = (e) => {
+          // Only process if this window is the active one
+          if (touchState.activeWindow !== window) return;
+
           const touch = getTouch(e);
-          if (!touch || (!isDragging && !isResizing)) return;
+          if (!touch) return;
+
+          const data = window.touchData;
+          if (!data.isDragging && !data.isResizing) return;
 
           e.preventDefault();
 
-          const deltaX = touch.clientX - touchStartX;
-          const deltaY = touch.clientY - touchStartY;
+          const deltaX = touch.clientX - data.touchStartX;
+          const deltaY = touch.clientY - data.touchStartY;
 
-          if (isDragging) {
+          if (data.isDragging) {
             // Move window
-            const newLeft = initialLeft + deltaX;
-            const newTop = Math.max(0, initialTop + deltaY); // Prevent going above viewport
+            const newLeft = data.initialLeft + deltaX;
+            const newTop = Math.max(0, data.initialTop + deltaY); // Prevent going above viewport
             window.style.left = `${newLeft}px`;
             window.style.top = `${newTop}px`;
-          } else if (isResizing && resizeEdge) {
+          } else if (data.isResizing && data.resizeEdge) {
             // Resize window
             const style = window.style;
-            let newWidth = initialWidth;
-            let newHeight = initialHeight;
-            let newLeft = initialLeft;
-            let newTop = initialTop;
+            let newWidth = data.initialWidth;
+            let newHeight = data.initialHeight;
+            let newLeft = data.initialLeft;
+            let newTop = data.initialTop;
 
-            if (resizeEdge.includes("e")) {
-              newWidth = Math.max(200, initialWidth + deltaX);
+            if (data.resizeEdge.includes("e")) {
+              newWidth = Math.max(200, data.initialWidth + deltaX);
             }
-            if (resizeEdge.includes("w")) {
-              newWidth = Math.max(200, initialWidth - deltaX);
-              newLeft = initialLeft + deltaX;
+            if (data.resizeEdge.includes("w")) {
+              newWidth = Math.max(200, data.initialWidth - deltaX);
+              newLeft = data.initialLeft + deltaX;
             }
-            if (resizeEdge.includes("s")) {
-              newHeight = Math.max(200, initialHeight + deltaY);
+            if (data.resizeEdge.includes("s")) {
+              newHeight = Math.max(200, data.initialHeight + deltaY);
             }
-            if (resizeEdge.includes("n")) {
-              newHeight = Math.max(200, initialHeight - deltaY);
-              newTop = Math.max(0, initialTop + deltaY);
+            if (data.resizeEdge.includes("n")) {
+              newHeight = Math.max(200, data.initialHeight - deltaY);
+              newTop = Math.max(0, data.initialTop + deltaY);
             }
 
             style.width = `${newWidth}px`;
             style.height = `${newHeight}px`;
-            if (resizeEdge.includes("w")) style.left = `${newLeft}px`;
-            if (resizeEdge.includes("n")) style.top = `${newTop}px`;
+            if (data.resizeEdge.includes("w")) style.left = `${newLeft}px`;
+            if (data.resizeEdge.includes("n")) style.top = `${newTop}px`;
           }
         };
 
         const handleTouchEnd = (e) => {
-          if (isDragging || isResizing) {
-            isDragging = false;
-            isResizing = false;
-            resizeEdge = null;
-            activeTouch = null;
+          // Only process if this window is the active one
+          if (touchState.activeWindow !== window) return;
+
+          const data = window.touchData;
+          if (data.isDragging || data.isResizing) {
+            data.isDragging = false;
+            data.isResizing = false;
+            data.resizeEdge = null;
+            touchState.activeWindow = null;
+            touchState.activeTouch = null;
             constrainWindowPositions();
           }
         };
