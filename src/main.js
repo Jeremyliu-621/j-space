@@ -215,6 +215,10 @@ const colorPalettes = {
     name: "Default",
     colors: ["#000000", "#808080", "#c0c0c0", "#e0e0e0"], // Darkest to lightest
   },
+  dark: {
+    name: "Dark",
+    colors: ["#1a1a1a", "#2d2d2d", "#404040", "#525252"], // Darkest to lightest
+  },
   retroGreen: {
     name: "Retro Green",
     colors: ["#5C6F2B", "#DE802B", "#D8C9A7", "#EEEEEE"], // Darkest to lightest
@@ -244,6 +248,29 @@ const colorPalettes = {
 // Helper function to apply color palette (can be used from anywhere)
 export function applyColorPalette(paletteKey) {
   if (colorPalettes[paletteKey]) {
+    const desktop = document.querySelector("win98-desktop");
+
+    // Handle background image based on theme
+    if (paletteKey === "dark") {
+      // Use dark background for dark theme
+      const darkBackgroundUrl = getImageUrl("dark-Backgroundpixels");
+      if (darkBackgroundUrl && desktop) {
+        desktop.style.backgroundImage = `url(${darkBackgroundUrl})`;
+        desktop.style.backgroundRepeat = "repeat";
+        desktop.style.backgroundPosition = "0 0";
+        desktop.style.backgroundSize = "auto";
+      }
+    } else {
+      // Use default background for all other themes
+      const backgroundImageUrl = getImageUrl("backgroundpixels");
+      if (backgroundImageUrl && desktop) {
+        desktop.style.backgroundImage = `url(${backgroundImageUrl})`;
+        desktop.style.backgroundRepeat = "repeat";
+        desktop.style.backgroundPosition = "0 0";
+        desktop.style.backgroundSize = "auto";
+      }
+    }
+
     // For default palette, always use Windows 98 default colors
     if (paletteKey === "default") {
       // Reset to Windows 98 defaults
