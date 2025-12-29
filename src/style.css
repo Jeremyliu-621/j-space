@@ -52,7 +52,7 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.83;
+  opacity: 0.74.5;
   background-image: repeating-linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.05) 0px,
@@ -199,12 +199,21 @@ win98-window[resizable] {
   --resize-border-width: 12px;
 }
 
-/* Initially hide windows - they will be made visible */
+/* Constant opacity for all windows */
 .window-about-me,
 .window-skills,
 .window-hobbies,
 .window-projects,
 .window-interactive {
+  opacity: 1;
+}
+
+/* Initially hide windows - they will be made visible */
+.window-about-me:not(.window-pop-open),
+.window-skills:not(.window-pop-open),
+.window-hobbies:not(.window-pop-open),
+.window-projects:not(.window-pop-open),
+.window-interactive:not(.window-pop-open) {
   opacity: 0;
 }
 
@@ -225,6 +234,7 @@ win98-window[resizable] {
 .window-projects.window-pop-open,
 .window-interactive.window-pop-open {
   animation: subtleFadeIn 0.3s ease-in forwards;
+  opacity: 1;
   display: block !important;
   visibility: visible !important;
 }

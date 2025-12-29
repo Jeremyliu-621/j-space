@@ -2018,6 +2018,7 @@ function initApp() {
         // Ensure window is visible (in case it was hidden/closed)
         window.style.display = "block";
         window.style.visibility = "visible";
+        window.classList.add("window-pop-open");
 
         // Bring to front by setting highest z-index
         const allWindows = document.querySelectorAll("win98-window");
@@ -2208,10 +2209,13 @@ function initApp() {
             'win98-window[title="About Me.exe"]'
           );
 
-          // Apply current theme to the window
-          const savedPalette =
-            localStorage.getItem("colorPalette") || "default";
-          applyColorPalette(savedPalette);
+          if (aboutMeWindow) {
+            aboutMeWindow.classList.add("window-pop-open");
+            // Apply current theme to the window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
+          }
         }
       }
 
@@ -2263,10 +2267,13 @@ function initApp() {
             'win98-window[title="Skills.exe"]'
           );
 
-          // Apply current theme to the window
-          const savedPalette =
-            localStorage.getItem("colorPalette") || "default";
-          applyColorPalette(savedPalette);
+          if (skillsWindow) {
+            skillsWindow.classList.add("window-pop-open");
+            // Apply current theme to the window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
+          }
         }
       }
 
@@ -2319,10 +2326,13 @@ function initApp() {
             'win98-window[title="Hobbies.exe"]'
           );
 
-          // Apply current theme to the window
-          const savedPalette =
-            localStorage.getItem("colorPalette") || "default";
-          applyColorPalette(savedPalette);
+          if (hobbiesWindow) {
+            hobbiesWindow.classList.add("window-pop-open");
+            // Apply current theme to the window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
+          }
         }
       }
 
@@ -2349,15 +2359,18 @@ function initApp() {
             'win98-window[title="My Projects.exe"]'
           );
 
-          // Apply current theme to the window
-          const savedPalette =
-            localStorage.getItem("colorPalette") || "default";
-          applyColorPalette(savedPalette);
+          if (projectsWindow) {
+            projectsWindow.classList.add("window-pop-open");
+            // Apply current theme to the window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
 
-          // Initialize project tabs after window is created
-          setTimeout(() => {
-            initProjectTabs();
-          }, 100);
+            // Initialize project tabs after window is created
+            setTimeout(() => {
+              initProjectTabs();
+            }, 100);
+          }
         }
       }
 
@@ -2390,10 +2403,13 @@ function initApp() {
             'win98-window[title="Interactive.exe"]'
           );
 
-          // Apply current theme to the window
-          const savedPalette =
-            localStorage.getItem("colorPalette") || "default";
-          applyColorPalette(savedPalette);
+          if (interactiveWindow) {
+            interactiveWindow.classList.add("window-pop-open");
+            // Apply current theme to the window
+            const savedPalette =
+              localStorage.getItem("colorPalette") || "default";
+            applyColorPalette(savedPalette);
+          }
         }
       }
 
