@@ -18,6 +18,20 @@ import {
 // Import all images from src/assets
 const images = import.meta.glob("./assets/*.*", { eager: true });
 
+// Asset images list (used in folder window and image viewer)
+const ASSET_IMAGES = [
+  "bear.gif",
+  "binder_action.jpg",
+  "cruisesunset.JPG",
+  "do you even lift like a boss GIF.gif",
+  "directory_computer.png",
+  "portfolio-website-cover.png",
+  "rref_calculator.PNG",
+  "slot-machine.PNG",
+  "stop_dont_go_on_grey.jpg",
+  "ufc_elo.png",
+];
+
 // Helper to get image URL by filename (partial match, case-insensitive)
 export function getImageUrl(filename) {
   const lowerFilename = filename.toLowerCase();
@@ -245,6 +259,26 @@ const colorPalettes = {
   },
 };
 
+// Theme-specific background filters (subtle manipulation)
+const THEME_FILTERS = {
+  retroGreen: "hue-rotate(15deg) saturate(1.1) brightness(0.95)",
+  Lilac: "hue-rotate(20deg) saturate(1.15) brightness(1.02)",
+  Snow: "hue-rotate(180deg) saturate(0.9) brightness(1.05)",
+  Chocolate: "hue-rotate(25deg) saturate(1.2) brightness(0.92)",
+  Cream: "hue-rotate(30deg) saturate(1.1) brightness(1.03)",
+  calmGreen: "hue-rotate(4deg) saturate(1.15) brightness(0.98)",
+};
+
+// Theme-specific background overlays (subtle color tints)
+const THEME_OVERLAYS = {
+  retroGreen: "rgba(92, 111, 43, 0.08)",
+  Lilac: "rgba(137, 138, 196, 0.06)",
+  Snow: "rgba(137, 168, 178, 0.05)",
+  Chocolate: "rgba(137, 108, 108, 0.07)",
+  Cream: "rgba(201, 181, 156, 0.06)",
+  calmGreen: "rgba(119, 136, 115, 0.07)",
+};
+
 // Helper function to apply color palette (can be used from anywhere)
 export function applyColorPalette(paletteKey) {
   if (colorPalettes[paletteKey]) {
@@ -259,15 +293,45 @@ export function applyColorPalette(paletteKey) {
         desktop.style.backgroundRepeat = "repeat";
         desktop.style.backgroundPosition = "0 0";
         desktop.style.backgroundSize = "auto";
+        desktop.style.filter = "none";
+        desktop.style.setProperty("--bg-image", "none");
+        desktop.style.setProperty("--bg-filter", "none");
+        desktop.style.setProperty("--bg-overlay", "transparent");
       }
-    } else {
-      // Use default background for all other themes
+    } else if (paletteKey === "default") {
+      // Default theme - no special effects
       const backgroundImageUrl = getImageUrl("backgroundpixels");
       if (backgroundImageUrl && desktop) {
         desktop.style.backgroundImage = `url(${backgroundImageUrl})`;
         desktop.style.backgroundRepeat = "repeat";
         desktop.style.backgroundPosition = "0 0";
         desktop.style.backgroundSize = "auto";
+        desktop.style.filter = "none";
+        desktop.style.setProperty("--bg-image", "none");
+        desktop.style.setProperty("--bg-filter", "none");
+        desktop.style.setProperty("--bg-overlay", "transparent");
+      }
+    } else {
+      // Apply subtle theme-specific background effects
+      const backgroundImageUrl = getImageUrl("backgroundpixels");
+      if (backgroundImageUrl && desktop) {
+        // Store background properties in CSS variables for pseudo-element (isolated from window content)
+        desktop.style.setProperty("--bg-image", `url(${backgroundImageUrl})`);
+        desktop.style.setProperty("--bg-repeat", "repeat");
+        desktop.style.setProperty("--bg-position", "0 0");
+        desktop.style.setProperty("--bg-size", "auto");
+        desktop.style.setProperty(
+          "--bg-filter",
+          THEME_FILTERS[paletteKey] || "none"
+        );
+        desktop.style.setProperty(
+          "--bg-overlay",
+          THEME_OVERLAYS[paletteKey] || "transparent"
+        );
+
+        // Remove direct background from desktop to use pseudo-element instead
+        desktop.style.backgroundImage = "none";
+        desktop.style.filter = "none";
       }
     }
 
@@ -553,6 +617,69 @@ function initApp() {
     </div>
   `;
 
+  // Helper function to bring window to front (needed by window opening functions)
+  function bringWindowToFront(window) {
+    if (window) {
+      window.style.display = "block";
+      window.style.visibility = "visible";
+      window.classList.add("window-pop-open");
+      const allWindows = document.querySelectorAll("win98-window");
+      let maxZ = 0;
+      allWindows.forEach((w) => {
+        const z = parseInt(w.style.zIndex) || 0;
+        if (z > maxZ) maxZ = z;
+      });
+      window.style.zIndex = (maxZ + 1).toString();
+    }
+  }
+
+  // Helper function to setup desktop icon click handlers
+  function setupDesktopIcon(iconId, onDoubleClick) {
+    const icon = document.querySelector(iconId);
+    if (!icon) {
+      console.warn(`Desktop icon not found: ${iconId}`);
+      return;
+    }
+
+    let clickTimer = null;
+    let isSelected = false;
+
+    icon.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        icon.classList.add("selected");
+        onDoubleClick();
+      } else {
+        clickTimer = setTimeout(() => {
+          if (isSelected) {
+            icon.classList.remove("selected");
+            isSelected = false;
+          } else {
+            document.querySelectorAll(".desktop-folder").forEach((f) => {
+              f.classList.remove("selected");
+            });
+            icon.classList.add("selected");
+            isSelected = true;
+          }
+          clickTimer = null;
+        }, 250);
+      }
+    });
+
+    // Deselect when clicking elsewhere
+    document.addEventListener("click", (e) => {
+      if (!icon.contains(e.target)) {
+        icon.classList.remove("selected");
+        isSelected = false;
+      }
+    });
+  }
+
+  // Desktop icons will be set up after all functions are defined (see end of initApp)
+
   // Wait for custom elements to be defined
   setTimeout(() => {
     // Always pick a random theme on every page load (excluding "default")
@@ -592,22 +719,34 @@ function initApp() {
       });
     };
 
-    // Monitor window positions - check frequently during drag
+    // Monitor window positions - only check during drag for efficiency
     let isDragging = false;
-    const checkInterval = setInterval(() => {
-      constrainWindowPositions();
-    }, 16); // Check every ~16ms (60fps) for smooth constraint
+    let checkInterval = null;
 
-    // Also listen for mouse events to detect dragging
     document.addEventListener("mousedown", (e) => {
       if (e.target.closest("win98-window")) {
         isDragging = true;
+        // Start checking only when dragging
+        if (!checkInterval) {
+          checkInterval = setInterval(() => {
+            if (isDragging) {
+              constrainWindowPositions();
+            } else {
+              clearInterval(checkInterval);
+              checkInterval = null;
+            }
+          }, 16); // Check every ~16ms (60fps) for smooth constraint
+        }
       }
     });
 
     document.addEventListener("mouseup", () => {
       isDragging = false;
       constrainWindowPositions(); // Final check on release
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
     });
 
     // Expand resize handle area for resizable windows
@@ -926,19 +1065,8 @@ function initApp() {
         subtree: true,
       });
 
-      // Set repeating background wallpaper
-      const backgroundImageUrl = getImageUrl("backgroundpixels");
-      if (backgroundImageUrl) {
-        desktop.style.backgroundImage = `url(${backgroundImageUrl})`;
-        desktop.style.backgroundRepeat = "repeat";
-        desktop.style.backgroundPosition = "0 0";
-        desktop.style.backgroundSize = "auto";
-        console.log("Background wallpaper applied:", backgroundImageUrl);
-      } else {
-        console.warn(
-          "Backgroundpixels image not found. Make sure Backgroundpixels.png is in src/assets/"
-        );
-      }
+      // Background wallpaper is now handled by applyColorPalette based on selected theme
+      // This ensures dark theme gets dark background, others get default background
     }
 
     // ============================================
@@ -1452,34 +1580,32 @@ function initApp() {
     // Projects window tab switching - now in ./components/projects.js
     initProjectTabs();
 
-    // Desktop folder icon click handling
-    const desktopFolder = document.querySelector("#desktop-folder");
-    if (desktopFolder) {
+    // Helper function to setup desktop icon click handlers (reduces code duplication)
+    function setupDesktopIcon(iconId, onDoubleClick) {
+      const icon = document.querySelector(iconId);
+      if (!icon) return;
+
       let clickTimer = null;
       let isSelected = false;
 
-      // Single click - select/deselect
-      desktopFolder.addEventListener("click", (e) => {
+      icon.addEventListener("click", (e) => {
         e.stopPropagation();
 
         if (clickTimer) {
           clearTimeout(clickTimer);
           clickTimer = null;
-          // Double click detected - open folder window
-          desktopFolder.classList.add("selected");
-          openFolderWindow();
+          icon.classList.add("selected");
+          onDoubleClick();
         } else {
           clickTimer = setTimeout(() => {
-            // Single click - toggle selection
             if (isSelected) {
-              desktopFolder.classList.remove("selected");
+              icon.classList.remove("selected");
               isSelected = false;
             } else {
-              // Deselect other folders first
               document.querySelectorAll(".desktop-folder").forEach((f) => {
                 f.classList.remove("selected");
               });
-              desktopFolder.classList.add("selected");
+              icon.classList.add("selected");
               isSelected = true;
             }
             clickTimer = null;
@@ -1487,70 +1613,65 @@ function initApp() {
         }
       });
 
-      // Function to open folder window
-      function openFolderWindow() {
-        // Get all asset images (defined once for use in both window creation and handlers)
-        const assetImages = [
-          "bear.gif",
-          "binder_action.jpg",
-          "cruisesunset.JPG",
-          "do you even lift like a boss GIF.gif",
-          "directory_computer.png",
-          "portfolio-website-cover.png",
-          "rref_calculator.PNG",
-          "slot-machine.PNG",
-          "stop_dont_go_on_grey.jpg",
-          "ufc_elo.png",
+      // Deselect when clicking elsewhere
+      document.addEventListener("click", (e) => {
+        if (!icon.contains(e.target)) {
+          icon.classList.remove("selected");
+          isSelected = false;
+        }
+      });
+    }
+
+    // Desktop folder icon click handling
+
+    // Function to open folder window
+    function openFolderWindow() {
+      // Check if window already exists
+      let folderWindow = document.querySelector(
+        'win98-window[title="Folder.exe"]'
+      );
+
+      if (!folderWindow) {
+        // Source code files
+        const sourceFiles = [
+          {
+            name: "main.js",
+            description: "Main application logic and content",
+          },
+          { name: "style.css", description: "Custom styles and overrides" },
+          { name: "index.html", description: "Main HTML file" },
+          { name: "package.json", description: "Project dependencies" },
         ];
 
-        // Check if window already exists
-        let folderWindow = document.querySelector(
-          'win98-window[title="Folder.exe"]'
-        );
-
-        if (!folderWindow) {
-          // Source code files
-          const sourceFiles = [
-            {
-              name: "main.js",
-              description: "Main application logic and content",
-            },
-            { name: "style.css", description: "Custom styles and overrides" },
-            { name: "index.html", description: "Main HTML file" },
-            { name: "package.json", description: "Project dependencies" },
-          ];
-
-          // Build images HTML with data attributes for navigation
-          const imagesHTML = assetImages
-            .map((img, index) => {
-              const imgUrl = getImageUrl(img.split(".")[0]);
-              return `
+        // Build images HTML with data attributes for navigation
+        const imagesHTML = ASSET_IMAGES.map((img, index) => {
+          const imgUrl = getImageUrl(img.split(".")[0]);
+          return `
               <div class="folder-image-item" style="display: inline-block; margin: 8px; text-align: center; vertical-align: top; width: 100px; cursor: pointer;">
                 <img src="${
                   imgUrl || ""
                 }" alt="${img}" data-image-index="${index}" data-image-name="${img}" data-image-url="${
-                imgUrl || ""
-              }" style="width: 64px; height: 64px; object-fit: contain; border: 1px solid #808080; background: #fff; padding: 2px; display: block; margin: 0 auto 4px auto;">
+            imgUrl || ""
+          }" style="width: 64px; height: 64px; object-fit: contain; border: 1px solid #808080; background: #fff; padding: 2px; display: block; margin: 0 auto 4px auto;">
                 <span style="font-size: 0.85em; color: #000; display: block; word-break: break-word;">${img}</span>
               </div>
             `;
-            })
-            .join("");
+        }).join("");
 
-          // Build source files HTML
-          const filesHTML = sourceFiles
-            .map(
-              (file) => `
+        // Build source files HTML
+        const filesHTML = sourceFiles
+          .map(
+            (file) => `
             <div style="padding: 4px 8px; border-bottom: 1px solid #c0c0c0; display: flex; align-items: center; gap: 8px;">
               <span style="font-weight: bold; min-width: 120px;">${file.name}</span>
               <span style="color: #666; font-size: 0.9em;">${file.description}</span>
             </div>
           `
-            )
-            .join("");
+          )
+          .join("");
 
-          // Create window HTML
-          const windowHTML = `
+        // Create window HTML
+        const windowHTML = `
             <win98-window title="Folder.exe" resizable style="top: 100px; left: 100px; width: 600px; height: 500px; z-index: 1000;">
               <div class="window-body" style="padding: 8px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box; border: 2px solid #808080;">
                 <h3 style="margin-top: 0; margin-bottom: 8px; font-weight: bold;">Images</h3>
@@ -1565,89 +1686,66 @@ function initApp() {
             </win98-window>
           `;
 
-          // Insert window into desktop
-          const desktop = document.querySelector("win98-desktop");
-          if (desktop) {
-            desktop.insertAdjacentHTML("beforeend", windowHTML);
-            folderWindow = document.querySelector(
-              'win98-window[title="Folder.exe"]'
-            );
-          }
-        }
-
-        // Add double-click handlers to images (whether new or existing window)
-        if (folderWindow) {
-          // Remove old handlers if any
-          const imageItems = folderWindow.querySelectorAll(
-            ".folder-image-item img"
+        // Insert window into desktop
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          folderWindow = document.querySelector(
+            'win98-window[title="Folder.exe"]'
           );
-          imageItems.forEach((img) => {
-            // Clone to remove all event listeners
-            const newImg = img.cloneNode(true);
-            img.parentNode.replaceChild(newImg, img);
-
-            // Add new double-click handler
-            let clickTimer = null;
-            newImg.addEventListener("click", (e) => {
-              e.stopPropagation();
-              if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-                // Double click - open image viewer
-                const imageIndex = parseInt(
-                  newImg.getAttribute("data-image-index")
-                );
-                const imageName = newImg.getAttribute("data-image-name");
-                const imageUrl = newImg.getAttribute("data-image-url");
-                // Get asset images list (same as in openFolderWindow)
-                const assetImagesList = [
-                  "bear.gif",
-                  "binder_action.jpg",
-                  "cruisesunset.JPG",
-                  "do you even lift like a boss GIF.gif",
-                  "directory_computer.png",
-                  "portfolio-website-cover.png",
-                  "rref_calculator.PNG",
-                  "slot-machine.PNG",
-                  "stop_dont_go_on_grey.jpg",
-                  "ufc_elo.png",
-                ];
-                openImageViewer(
-                  assetImagesList,
-                  imageIndex,
-                  imageName,
-                  imageUrl
-                );
-              } else {
-                clickTimer = setTimeout(() => {
-                  clickTimer = null;
-                }, 300);
-              }
-            });
-          });
-        }
-
-        // Show and bring to front
-        if (folderWindow) {
-          bringWindowToFront(folderWindow);
         }
       }
 
-      // Function to open image viewer window
-      function openImageViewer(
-        imageList,
-        currentIndex,
-        currentName,
-        currentUrl
-      ) {
-        // Check if viewer already exists
-        let viewerWindow = document.querySelector(
-          'win98-window[title="Image Viewer.exe"]'
+      // Add double-click handlers to images (whether new or existing window)
+      if (folderWindow) {
+        // Remove old handlers if any
+        const imageItems = folderWindow.querySelectorAll(
+          ".folder-image-item img"
         );
+        imageItems.forEach((img) => {
+          // Clone to remove all event listeners
+          const newImg = img.cloneNode(true);
+          img.parentNode.replaceChild(newImg, img);
 
-        if (!viewerWindow) {
-          // Create viewer window HTML
-          const viewerHTML = `
+          // Add new double-click handler
+          let clickTimer = null;
+          newImg.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (clickTimer) {
+              clearTimeout(clickTimer);
+              clickTimer = null;
+              // Double click - open image viewer
+              const imageIndex = parseInt(
+                newImg.getAttribute("data-image-index")
+              );
+              const imageName = newImg.getAttribute("data-image-name");
+              const imageUrl = newImg.getAttribute("data-image-url");
+              openImageViewer(ASSET_IMAGES, imageIndex, imageName, imageUrl);
+            } else {
+              clickTimer = setTimeout(() => {
+                clickTimer = null;
+              }, 300);
+            }
+          });
+        });
+      }
+
+      // Show and bring to front
+      if (folderWindow) {
+        bringWindowToFront(folderWindow);
+      }
+    }
+
+    // Function to open image viewer window
+    function openImageViewer(imageList, currentIndex, currentName, currentUrl) {
+      // Check if viewer already exists
+      let viewerWindow = document.querySelector(
+        'win98-window[title="Image Viewer.exe"]'
+      );
+
+      if (!viewerWindow) {
+        // Create viewer window HTML
+        const viewerHTML = `
             <win98-window title="Image Viewer.exe" resizable style="top: 150px; left: 200px; width: 700px; height: 600px; z-index: 2000;">
               <div class="window-body" style="padding: 8px; height: calc(100% - 54px); box-sizing: border-box; display: flex; flex-direction: column;">
                 <div class="viewer-image-container" style="flex: 1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; position: relative; overflow: hidden; padding: 8px;">
@@ -1671,371 +1769,124 @@ function initApp() {
             </win98-window>
           `;
 
-          // Insert viewer window
-          const desktop = document.querySelector("win98-desktop");
-          if (desktop) {
-            desktop.insertAdjacentHTML("beforeend", viewerHTML);
-            viewerWindow = document.querySelector(
-              'win98-window[title="Image Viewer.exe"]'
-            );
+        // Insert viewer window
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", viewerHTML);
+          viewerWindow = document.querySelector(
+            'win98-window[title="Image Viewer.exe"]'
+          );
 
-            // Apply current theme to the image viewer window
-            const savedPalette =
-              localStorage.getItem("colorPalette") || "default";
-            applyColorPalette(savedPalette);
-          }
+          // Apply current theme to the image viewer window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+        }
+      }
+
+      // Update viewer content
+      if (viewerWindow) {
+        const mainImage = viewerWindow.querySelector("#viewer-main-image");
+        const imageName = viewerWindow.querySelector("#viewer-image-name");
+        const imageCounter = viewerWindow.querySelector(
+          "#viewer-image-counter"
+        );
+        const prevBtn = viewerWindow.querySelector("#viewer-prev-btn");
+        const nextBtn = viewerWindow.querySelector("#viewer-next-btn");
+
+        // Store current index in the window element
+        let viewerCurrentIndex = currentIndex;
+
+        // Update current image
+        function updateImage(index) {
+          const imgName = imageList[index];
+          const imgUrl = getImageUrl(imgName.split(".")[0]);
+          if (mainImage) mainImage.src = imgUrl || "";
+          if (imageName) imageName.textContent = imgName;
+          if (imageCounter)
+            imageCounter.textContent = `${index + 1} / ${imageList.length}`;
+
+          // Update button states
+          if (prevBtn) prevBtn.disabled = index === 0;
+          if (nextBtn) nextBtn.disabled = index === imageList.length - 1;
+
+          viewerCurrentIndex = index;
         }
 
-        // Update viewer content
-        if (viewerWindow) {
-          const mainImage = viewerWindow.querySelector("#viewer-main-image");
-          const imageName = viewerWindow.querySelector("#viewer-image-name");
-          const imageCounter = viewerWindow.querySelector(
-            "#viewer-image-counter"
-          );
-          const prevBtn = viewerWindow.querySelector("#viewer-prev-btn");
-          const nextBtn = viewerWindow.querySelector("#viewer-next-btn");
+        // Set initial image
+        updateImage(currentIndex);
 
-          // Store current index in the window element
-          let viewerCurrentIndex = currentIndex;
-
-          // Update current image
-          function updateImage(index) {
-            const imgName = imageList[index];
-            const imgUrl = getImageUrl(imgName.split(".")[0]);
-            if (mainImage) mainImage.src = imgUrl || "";
-            if (imageName) imageName.textContent = imgName;
-            if (imageCounter)
-              imageCounter.textContent = `${index + 1} / ${imageList.length}`;
-
-            // Update button states
-            if (prevBtn) prevBtn.disabled = index === 0;
-            if (nextBtn) nextBtn.disabled = index === imageList.length - 1;
-
-            viewerCurrentIndex = index;
-          }
-
-          // Set initial image
-          updateImage(currentIndex);
-
-          // Navigation handlers
-          if (prevBtn) {
-            prevBtn.onclick = () => {
-              if (viewerCurrentIndex > 0) {
-                updateImage(viewerCurrentIndex - 1);
-              }
-            };
-          }
-
-          if (nextBtn) {
-            nextBtn.onclick = () => {
-              if (viewerCurrentIndex < imageList.length - 1) {
-                updateImage(viewerCurrentIndex + 1);
-              }
-            };
-          }
-
-          // Keyboard navigation
-          const handleKeyPress = (e) => {
-            if (viewerWindow && viewerWindow.style.display !== "none") {
-              if (e.key === "ArrowLeft" && viewerCurrentIndex > 0) {
-                updateImage(viewerCurrentIndex - 1);
-              } else if (
-                e.key === "ArrowRight" &&
-                viewerCurrentIndex < imageList.length - 1
-              ) {
-                updateImage(viewerCurrentIndex + 1);
-              }
+        // Navigation handlers
+        if (prevBtn) {
+          prevBtn.onclick = () => {
+            if (viewerCurrentIndex > 0) {
+              updateImage(viewerCurrentIndex - 1);
             }
           };
-          document.addEventListener("keydown", handleKeyPress);
-
-          // Show and bring to front
-          viewerWindow.style.display = "block";
-          const allWindows = document.querySelectorAll("win98-window");
-          let maxZ = 0;
-          allWindows.forEach((w) => {
-            const z = parseInt(w.style.zIndex) || 0;
-            if (z > maxZ) maxZ = z;
-          });
-          viewerWindow.style.zIndex = (maxZ + 1).toString();
         }
-      }
 
-      // Deselect when clicking elsewhere
-      document.addEventListener("click", (e) => {
-        if (!desktopFolder.contains(e.target)) {
-          desktopFolder.classList.remove("selected");
-          isSelected = false;
-        }
-      });
-    }
-
-    // Desktop blog icon click handling
-    const desktopBlog = document.querySelector("#desktop-blog");
-    if (desktopBlog) {
-      let clickTimer = null;
-      let isSelected = false;
-
-      // Single click - select/deselect
-      desktopBlog.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // Double click detected - open blog window
-          desktopBlog.classList.add("selected");
-          openBlogWindow();
-        } else {
-          clickTimer = setTimeout(() => {
-            // Single click - toggle selection
-            if (isSelected) {
-              desktopBlog.classList.remove("selected");
-              isSelected = false;
-            } else {
-              // Deselect other icons first
-              document.querySelectorAll(".desktop-folder").forEach((f) => {
-                f.classList.remove("selected");
-              });
-              desktopBlog.classList.add("selected");
-              isSelected = true;
+        if (nextBtn) {
+          nextBtn.onclick = () => {
+            if (viewerCurrentIndex < imageList.length - 1) {
+              updateImage(viewerCurrentIndex + 1);
             }
-            clickTimer = null;
-          }, 250);
+          };
         }
-      });
 
-      // Deselect when clicking elsewhere
-      document.addEventListener("click", (e) => {
-        if (!desktopBlog.contains(e.target)) {
-          desktopBlog.classList.remove("selected");
-          isSelected = false;
-        }
-      });
-    }
-
-    // Desktop chatbox icon click handling
-    const desktopChatbox = document.querySelector("#desktop-chatbox");
-    if (desktopChatbox) {
-      let clickTimer = null;
-      let isSelected = false;
-
-      // Single click - select/deselect
-      desktopChatbox.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // Double click detected - open chatbox window
-          desktopChatbox.classList.add("selected");
-          openChatboxWindow();
-        } else {
-          clickTimer = setTimeout(() => {
-            // Single click - toggle selection
-            if (isSelected) {
-              desktopChatbox.classList.remove("selected");
-              isSelected = false;
-            } else {
-              // Deselect other icons first
-              document.querySelectorAll(".desktop-folder").forEach((f) => {
-                f.classList.remove("selected");
-              });
-              desktopChatbox.classList.add("selected");
-              isSelected = true;
+        // Keyboard navigation
+        const handleKeyPress = (e) => {
+          if (viewerWindow && viewerWindow.style.display !== "none") {
+            if (e.key === "ArrowLeft" && viewerCurrentIndex > 0) {
+              updateImage(viewerCurrentIndex - 1);
+            } else if (
+              e.key === "ArrowRight" &&
+              viewerCurrentIndex < imageList.length - 1
+            ) {
+              updateImage(viewerCurrentIndex + 1);
             }
-            clickTimer = null;
-          }, 250);
-        }
-      });
-
-      function openChatboxWindow() {
-        // Check if window already exists
-        let chatboxWindow = document.querySelector(
-          'win98-window[title="Chatbox.exe"]'
-        );
-
-        if (!chatboxWindow) {
-          // Create chatbox window HTML
-          const windowHTML = `
-            <win98-window title="Chatbox.exe" resizable style="top: 100px; left: 100px; width: 600px; height: 550px; z-index: 1000;">
-              <div class="window-body" style="padding: 8px; overflow: hidden; height: calc(100% - 54px); box-sizing: border-box;">
-                <iframe src="https://www3.cbox.ws/box/?boxid=3551058&boxtag=a6HwaA" width="100%" height="100%" allowtransparency="yes" allow="autoplay" frameborder="0" marginheight="0" marginwidth="0" scrolling="auto" style="border: 1px solid #808080; background: #fff;"></iframe>
-              </div>
-            </win98-window>
-          `;
-
-          // Insert window into desktop
-          const desktop = document.querySelector("win98-desktop");
-          if (desktop) {
-            desktop.insertAdjacentHTML("beforeend", windowHTML);
-            chatboxWindow = document.querySelector(
-              'win98-window[title="Chatbox.exe"]'
-            );
           }
-
-          // Show and bring to front
-          if (chatboxWindow) {
-            bringWindowToFront(chatboxWindow);
-          }
-        } else {
-          // Window exists, just show and bring to front
-          bringWindowToFront(chatboxWindow);
-        }
-      }
-
-      // Deselect when clicking elsewhere
-      document.addEventListener("click", (e) => {
-        if (!desktopChatbox.contains(e.target)) {
-          desktopChatbox.classList.remove("selected");
-          isSelected = false;
-        }
-      });
-    }
-
-    // Desktop theme editor icon click handling
-    const desktopTheme = document.querySelector("#desktop-theme");
-    if (desktopTheme) {
-      let clickTimer = null;
-      let isSelected = false;
-
-      // Single click - select/deselect
-      desktopTheme.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // Double click detected - open settings window
-          desktopTheme.classList.add("selected");
-          openSettingsWindow();
-        } else {
-          clickTimer = setTimeout(() => {
-            // Single click - toggle selection
-            if (isSelected) {
-              desktopTheme.classList.remove("selected");
-              isSelected = false;
-            } else {
-              // Deselect other icons first
-              document.querySelectorAll(".desktop-folder").forEach((f) => {
-                f.classList.remove("selected");
-              });
-              desktopTheme.classList.add("selected");
-              isSelected = true;
-            }
-            clickTimer = null;
-          }, 250);
-        }
-      });
-
-      // Deselect when clicking elsewhere
-      document.addEventListener("click", (e) => {
-        if (!desktopTheme.contains(e.target)) {
-          desktopTheme.classList.remove("selected");
-          isSelected = false;
-        }
-      });
-    }
-
-    // Desktop thanks icon click handling
-    const desktopThanks = document.querySelector("#desktop-thanks");
-    if (desktopThanks) {
-      let clickTimer = null;
-      let isSelected = false;
-
-      // Single click - select/deselect
-      desktopThanks.addEventListener("click", (e) => {
-        e.stopPropagation();
-
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // Double click detected - open thanks window
-          desktopThanks.classList.add("selected");
-          openThanksWindow();
-        } else {
-          clickTimer = setTimeout(() => {
-            // Single click - toggle selection
-            if (isSelected) {
-              desktopThanks.classList.remove("selected");
-              isSelected = false;
-            } else {
-              // Deselect other icons first
-              document.querySelectorAll(".desktop-folder").forEach((f) => {
-                f.classList.remove("selected");
-              });
-              desktopThanks.classList.add("selected");
-              isSelected = true;
-            }
-            clickTimer = null;
-          }, 250);
-        }
-      });
-
-      // Function to open thanks window
-      function openThanksWindow() {
-        // Check if window already exists
-        let thanksWindow = document.querySelector(
-          'win98-window[title="Thank you!.exe"]'
-        );
-
-        if (!thanksWindow) {
-          // Build thanks HTML
-          const thanksHTML = content.thanks
-            .map((item) => {
-              const nameHTML = item.link
-                ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" style="color: #000080; text-decoration: underline; padding: 3px 6px;">${item.name}</a>`
-                : `<strong>${item.name}</strong>`;
-              return `
-                 <div class="thanks-item" style="margin-bottom: 20px; padding: 8px; border: 1px solid #808080;">
-                   <h3 style="margin: 4px 0px 8px 2px; font-weight: bold; font-size: 1.2em;">${nameHTML}</h3>
-                   <p style="margin: 0px 0px 0px 2px; line-height: 1.4; color: #000;">${item.description}</p>
-                </div>
-              `;
-            })
-            .join("");
-
-          // Create thanks window HTML
-          const windowHTML = `
-            <win98-window title="Thank you!.exe" resizable style="top: 50px; left: 50px; width: 600px; height: 500px; z-index: 1000;">
-              <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box;">
-                <h2 style="margin-top: 0; margin-bottom: 20px; font-weight: bold; font-size: 1.8em; text-align: center;">Thank You!</h2>
-                <div style="max-width: 100%;">
-                  ${thanksHTML}
-                </div>
-              </div>
-            </win98-window>
-          `;
-
-          // Insert window into desktop
-          const desktop = document.querySelector("win98-desktop");
-          if (desktop) {
-            desktop.insertAdjacentHTML("beforeend", windowHTML);
-            thanksWindow = document.querySelector(
-              'win98-window[title="Thank you!.exe"]'
-            );
-
-            // Apply current theme to the thanks window
-            const savedPalette =
-              localStorage.getItem("colorPalette") || "default";
-            applyColorPalette(savedPalette);
-          }
-        }
+        };
+        document.addEventListener("keydown", handleKeyPress);
 
         // Show and bring to front
-        if (thanksWindow) {
-          bringWindowToFront(thanksWindow);
+        viewerWindow.style.display = "block";
+        const allWindows = document.querySelectorAll("win98-window");
+        let maxZ = 0;
+        allWindows.forEach((w) => {
+          const z = parseInt(w.style.zIndex) || 0;
+          if (z > maxZ) maxZ = z;
+        });
+        viewerWindow.style.zIndex = (maxZ + 1).toString();
+      }
+    }
+
+    // Function to open chatbox window
+    function openChatboxWindow() {
+      let chatboxWindow = document.querySelector(
+        'win98-window[title="Chatbox.exe"]'
+      );
+
+      if (!chatboxWindow) {
+        const windowHTML = `
+          <win98-window title="Chatbox.exe" resizable style="top: 100px; left: 100px; width: 600px; height: 550px; z-index: 1000;">
+            <div class="window-body" style="padding: 8px; overflow: hidden; height: calc(100% - 54px); box-sizing: border-box;">
+              <iframe src="https://www3.cbox.ws/box/?boxid=3551058&boxtag=a6HwaA" width="100%" height="100%" allowtransparency="yes" allow="autoplay" frameborder="0" marginheight="0" marginwidth="0" scrolling="auto" style="border: 1px solid #808080; background: #fff;"></iframe>
+            </div>
+          </win98-window>
+        `;
+
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          chatboxWindow = document.querySelector(
+            'win98-window[title="Chatbox.exe"]'
+          );
         }
       }
 
-      // Deselect when clicking elsewhere
-      document.addEventListener("click", (e) => {
-        if (!desktopThanks.contains(e.target)) {
-          desktopThanks.classList.remove("selected");
-          isSelected = false;
-        }
-      });
+      if (chatboxWindow) {
+        bringWindowToFront(chatboxWindow);
+      }
     }
 
     // Helper function to bring window to front
@@ -2058,7 +1909,7 @@ function initApp() {
     };
 
     // Function to open Settings window
-    const openSettingsWindow = () => {
+    function openSettingsWindow() {
       let settingsWindow = document.querySelector(
         'win98-window[title="Settings.exe"]'
       );
@@ -2177,7 +2028,69 @@ function initApp() {
       }
 
       bringWindowToFront(settingsWindow);
-    };
+    }
+
+    // Function to open thanks window
+    function openThanksWindow() {
+      // Check if window already exists
+      let thanksWindow = document.querySelector(
+        'win98-window[title="Thank you!.exe"]'
+      );
+
+      if (!thanksWindow) {
+        // Build thanks HTML
+        const thanksHTML = content.thanks
+          .map((item) => {
+            const nameHTML = item.link
+              ? `<a href="${item.link}" target="_blank" rel="noopener noreferrer" style="color: #000080; text-decoration: underline; padding: 3px 6px;">${item.name}</a>`
+              : `<strong>${item.name}</strong>`;
+            return `
+               <div class="thanks-item" style="margin-bottom: 20px; padding: 8px; border: 1px solid #808080;">
+                 <h3 style="margin: 4px 0px 8px 2px; font-weight: bold; font-size: 1.2em;">${nameHTML}</h3>
+                 <p style="margin: 0px 0px 0px 2px; line-height: 1.4; color: #000;">${item.description}</p>
+              </div>
+            `;
+          })
+          .join("");
+
+        // Create thanks window HTML
+        const windowHTML = `
+          <win98-window title="Thank you!.exe" resizable style="top: 50px; left: 50px; width: 600px; height: 500px; z-index: 1000;">
+            <div class="window-body" style="padding: 12px; overflow-y: auto; height: calc(100% - 54px); box-sizing: border-box;">
+              <h2 style="margin-top: 0; margin-bottom: 20px; font-weight: bold; font-size: 1.8em; text-align: center;">Thank You!</h2>
+              <div style="max-width: 100%;">
+                ${thanksHTML}
+              </div>
+            </div>
+          </win98-window>
+        `;
+
+        // Insert window into desktop
+        const desktop = document.querySelector("win98-desktop");
+        if (desktop) {
+          desktop.insertAdjacentHTML("beforeend", windowHTML);
+          thanksWindow = document.querySelector(
+            'win98-window[title="Thank you!.exe"]'
+          );
+
+          // Apply current theme to the thanks window
+          const savedPalette =
+            localStorage.getItem("colorPalette") || "default";
+          applyColorPalette(savedPalette);
+        }
+      }
+
+      if (thanksWindow) {
+        bringWindowToFront(thanksWindow);
+      }
+    }
+
+    // Setup desktop icons (all functions are now defined)
+    setupDesktopIcon("#desktop-folder", openFolderWindow);
+    setupDesktopIcon("#desktop-blog", openBlogWindow);
+    setupDesktopIcon("#desktop-chatbox", openChatboxWindow);
+    setupDesktopIcon("#desktop-theme", openSettingsWindow);
+    setupDesktopIcon("#desktop-thanks", openThanksWindow);
 
     // Functions to open/recreate static windows (similar to openBlogWindow)
     const openAboutMeWindow = () => {
@@ -2491,52 +2404,6 @@ function initApp() {
     };
 
     // Helper function to trigger desktop icon double-click (for windows that need to be created)
-    const triggerDesktopIconDoubleClick = (iconId) => {
-      const icon = document.querySelector(iconId);
-      if (icon) {
-        // First check if window already exists
-        let windowTitle = "";
-        if (iconId === "#desktop-folder") windowTitle = "Folder.exe";
-        else if (iconId === "#desktop-chatbox") windowTitle = "Chatbox.exe";
-        else if (iconId === "#desktop-thanks") windowTitle = "Thank you!.exe";
-
-        if (windowTitle) {
-          const existingWindow = document.querySelector(
-            `win98-window[title="${windowTitle}"]`
-          );
-          if (existingWindow) {
-            bringWindowToFront(existingWindow);
-            return;
-          }
-        }
-
-        // If window doesn't exist, simulate double-click and then bring to front
-        const click1 = new MouseEvent("click", {
-          bubbles: true,
-          cancelable: true,
-        });
-        icon.dispatchEvent(click1);
-        setTimeout(() => {
-          const click2 = new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-          });
-          icon.dispatchEvent(click2);
-
-          // After window is created, bring it to front
-          setTimeout(() => {
-            if (windowTitle) {
-              const newWindow = document.querySelector(
-                `win98-window[title="${windowTitle}"]`
-              );
-              if (newWindow) {
-                bringWindowToFront(newWindow);
-              }
-            }
-          }, 150);
-        }, 100);
-      }
-    };
 
     // Start menu item click handlers
     const menuItems = {
@@ -2545,10 +2412,10 @@ function initApp() {
       "menu-hobbies": () => openHobbiesWindow(),
       "menu-projects": () => openProjectsWindow(),
       "menu-interactive": () => openInteractiveWindow(),
-      "menu-folder": () => triggerDesktopIconDoubleClick("#desktop-folder"),
+      "menu-folder": () => openFolderWindow(),
       "menu-blog": () => openBlogWindow(),
-      "menu-chatbox": () => triggerDesktopIconDoubleClick("#desktop-chatbox"),
-      "menu-thanks": () => triggerDesktopIconDoubleClick("#desktop-thanks"),
+      "menu-chatbox": () => openChatboxWindow(),
+      "menu-thanks": () => openThanksWindow(),
       "menu-theme-editor": () => openSettingsWindow(),
       "menu-shutdown": () => {
         if (confirm("Are you sure you want to shut down?")) {
@@ -2639,8 +2506,6 @@ function setGlobalCursor() {
   // Use detected cursor or fallback to default
   const cursorToUse = detectedCursor || "default";
 
-  console.log("Detected cursor:", cursorToUse); // Debug log
-
   // Create a style element to inject global cursor CSS
   let styleEl = document.getElementById("global-cursor-style");
   if (!styleEl) {
@@ -2676,8 +2541,9 @@ function setGlobalCursor() {
   }
 }
 
-// Run after a short delay to ensure 98.css has loaded
-setTimeout(setGlobalCursor, 100);
-setTimeout(setGlobalCursor, 500);
-// Also run when window loads
-window.addEventListener("load", setGlobalCursor);
+// Run after a short delay to ensure 98.css has loaded, and on window load
+const setupCursor = () => {
+  setGlobalCursor();
+  window.addEventListener("load", setGlobalCursor, { once: true });
+};
+setTimeout(setupCursor, 100);
