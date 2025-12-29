@@ -62,7 +62,7 @@ export const content = {
       front: "Next.js, React, Typescript, Tailwind",
       back: "Python, Pandas, BeautifulSoup",
       image: "ufc-search",
-      github: "https://github.com/Jeremyliu-621/UFC-Elo-Calculator", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/UFC-Elo-Calculator",
       website: "https://ufc-elo-calculator.vercel.app/",
       additionalInfo:
         "A website that calculates and ranks statistics for UFC Fighters." +
@@ -75,7 +75,7 @@ export const content = {
       front: "Next.js, Typescript, Tailwind, Vite",
       back: "Python, Beautifulsoup, Selenium",
       image: "binder_action",
-      github: "https://github.com/Jeremyliu-621/binder", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/binder",
       additionalInfo:
         "Created a swipe-based website that browses second-hand marketplaces in a more intuitive and engaging way." +
         " Used Beautiful Soup to scrape for data collection in real-time and leveraged the Gemini AI API for price evaluation." +
@@ -86,7 +86,7 @@ export const content = {
       description: "A page that displays everything about me.",
       image: "portfolio-works-gif",
       website: "https://jeremy-liu.vercel.app/",
-      github: "https://github.com/Jeremyliu-621/portfolio-works", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/portfolio-works",
       additionalInfo:
         "Built purely using HTML and CSS, using Bootstrap components for some styling." +
         " My first ever website, and I'm proud of it." +
@@ -98,7 +98,7 @@ export const content = {
       front: "React, Vite, TypeScript",
       back: "Python + Flask, OpenCV, PySerial, Pygame",
       image: "stop_dont_go_on_grey",
-      github: "https://github.com/Jeremyliu-621/stop-dont-go-on", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/stop-dont-go-on",
       additionalInfo:
         "Used Arduino to spray water and email.js to email friends and family to incentivize users away from continuing bad habits." +
         " Integrated OpenCV with a python backend to the arduino so users could be tracked with precision." +
@@ -120,13 +120,13 @@ export const content = {
       title: "Cookie Clicker Bot",
       description: "Bot that clicks cookies and buys upgrades!",
       image: "cookie-clicker-bot",
-      github: "https://github.com/Jeremyliu-621/cookie-clicker", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/cookie-clicker",
     },
     {
       title: "RREF Calculator",
       description: "A helping hand to linear algebra.",
       image: "rref_calculator",
-      github: "https://github.com/Jeremyliu-621/RREF-calculator", // Add your GitHub URL here, or leave as null for no button
+      github: "https://github.com/Jeremyliu-621/RREF-calculator",
     },
   ],
   hobbies:
@@ -157,15 +157,6 @@ export const content = {
       ], // Set to image filename (without extension) or null for no imageimage.png
       text: "Just made this website using 98-components and Windows 98 elements. Aided with Cursor.ai and Gemini.\nAlso just finished first semester at UofT. It was quite rough, but I'm glad I made it through and want to make the most of my time there. Coding more nowadays to make up for my bad grades.",
     },
-
-    // Add more posts below by copying the structure above
-    // Example:
-    // {
-    //   title: "My Second Post",
-    //   date: "February 2025",
-    //   image: "bear", // This would use bear.gif from assets
-    //   text: "Here's another post with an image!",
-    // },
   ],
   // ============================================
   // THANKS & CREDITS - Easy to add more!
@@ -218,13 +209,6 @@ export const content = {
       description: "For their cookie clicker gif online!.",
       link: "https://github.com/Kibuns/Cookie_Clicker_Bot",
     },
-    // Add more thanks below by copying the structure above
-    // Example:
-    // {
-    //   name: "Friend's Name",
-    //   description: "For their support and encouragement.",
-    //   link: "https://example.com", // or null for no link
-    // },
   ],
 };
 
@@ -272,7 +256,7 @@ export function applyColorPalette(paletteKey) {
       // Apply Windows 98 default colors
       document.querySelectorAll("win98-window .window-body").forEach((body) => {
         body.style.backgroundColor = "#e0e0e0";
-        body.style.border = "2px solid #808080"; // Divider between gray frame and content
+        body.style.border = "2px solid #808080";
       });
 
       // Apply default border to image viewer inner container
@@ -326,7 +310,7 @@ export function applyColorPalette(paletteKey) {
       // Add colored divider border between gray frame and colored content
       document.querySelectorAll("win98-window .window-body").forEach((body) => {
         body.style.backgroundColor = colors[3] || "#e0e0e0";
-        body.style.border = `2px solid ${colors[1] || "#808080"}`; // Divider using medium color
+        body.style.border = `2px solid ${colors[1] || "#808080"}`;
       });
 
       // Apply theme border to image viewer inner container
@@ -352,14 +336,12 @@ export function applyColorPalette(paletteKey) {
           "button, .social-btn, a[href*='github'], a[href*='http']"
         )
         .forEach((btn) => {
-          btn.style.backgroundColor = colors[0] || "#c0c0c0"; // Darkest color
-          btn.style.color = colors[3] || "#ffffff"; // Lightest color for text
+          btn.style.backgroundColor = colors[0] || "#c0c0c0";
+          btn.style.color = colors[3] || "#ffffff";
         });
     }
   }
 }
-
-// Note: Project HTML functions are now in ./components/projects.js
 
 // Function to initialize the app
 function initApp() {
@@ -557,9 +539,6 @@ function initApp() {
       paletteKeys[Math.floor(Math.random() * paletteKeys.length)];
     // Apply the random theme
     applyColorPalette(randomKey);
-
-    // Note: Removed window body update code that was interfering with dragging
-    // The inline styles in the HTML should handle overflow correctly
 
     // Constrain windows from being dragged above the top of the viewport
     const constrainWindowPositions = () => {
@@ -1800,8 +1779,6 @@ function initApp() {
           }, 250);
         }
       });
-
-      // Note: openBlogWindow is now in ./components/blog.js
 
       // Deselect when clicking elsewhere
       document.addEventListener("click", (e) => {
