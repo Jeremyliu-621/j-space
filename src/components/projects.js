@@ -81,12 +81,9 @@ export function createSingleProjectHTML(project) {
     html += `
       <div class="project-section">
         <h3 class="project-section-title">Stack</h3>
-        <br>
         <p class="project-section-stack">
-          ${
-            project.front ? `<strong>Front: </strong> ${project.front}<br>` : ""
-          }
-          ${project.back ? `<strong>Back: </strong> ${project.back}` : ""}
+          ${project.front ? `Front: ${project.front}<br>` : ""}
+          ${project.back ? `Back: ${project.back}` : ""}
         </p>
       </div>`;
   }

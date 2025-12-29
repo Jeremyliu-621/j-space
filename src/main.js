@@ -102,7 +102,7 @@ export const content = {
       additionalInfo:
         "Used Arduino to spray water and email.js to email friends and family to incentivize users away from continuing bad habits." +
         " Integrated OpenCV with a python backend to the arduino so users could be tracked with precision." +
-        " Created a dynamic UI that allowed user input and real-time computer feedback using React, Vite, and Typescript",
+        " Created a dynamic UI that allowed user input and real-time computer feedback using React, Vite, and Typescript.",
     },
     {
       title: "j-space", // this project
@@ -112,8 +112,8 @@ export const content = {
       website: "https://j-space.vercel.app/",
       github: "https://github.com/Jeremyliu-621/j-space",
       additionalInfo:
-        "Used HTML, CSS, JavaScript, and Vite to build an interactive space that gets my creativity into the computer" +
-        " Experimented with the lengths that different AIs can go to to help with coding projects" +
+        "Used HTML, CSS, JavaScript, and Vite to build an interactive space that gets my creativity into the computer." +
+        " Experimented with the lengths that different AIs can go to to help with coding projects." +
         " Used the open-source98-components library and cursor.ai to try and replicate that nostalgic feel to old websites.",
     },
     {
@@ -121,12 +121,9 @@ export const content = {
       description: "Bot that clicks cookies and buys upgrades!",
       image: "cookie-clicker-bot",
       github: "https://github.com/Jeremyliu-621/cookie-clicker",
-    },
-    {
-      title: "RREF Calculator",
-      description: "A helping hand to linear algebra.",
-      image: "rref_calculator",
-      github: "https://github.com/Jeremyliu-621/RREF-calculator",
+      additionalInfo:
+        "Used Python and Selenium to build a bot that opens a browser, clicks cookies and buys upgrades." +
+        " Small project to practice using open-source libraries.",
     },
   ],
   hobbies:
