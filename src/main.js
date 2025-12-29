@@ -7,7 +7,12 @@ import "98.css";
 import "98-components";
 
 // Import components
-import { openBlogWindow } from "./components/blog.js";
+import {
+  openBlogWindow,
+  generateBlogWindowHTML,
+  createCategoryHTML,
+  initBlogTabs,
+} from "./components/blog.js";
 import {
   createProjectHTML,
   createSingleProjectHTML,
@@ -143,9 +148,9 @@ export const content = {
   hobbies:
     "I create origami, train Brazilian Jiu-Jitsu, write (legal) graffiti, and longboard.",
   // ============================================
-  // BLOG POSTS - Easy to add more posts!
+  // BLOG CATEGORIES - Easy to add more categories and posts!
   // ============================================
-  // To add a new blog post, copy the structure below and paste it into the array
+  // Structure: Each category has a name, description, image, and posts array
   // Each post can have:
   //   - title: The post title
   //   - date: Publication date (any format you want)
@@ -157,18 +162,66 @@ export const content = {
   //            You can also specify: {filename: "img", width: 300, height: 200} for exact dimensions
   //            Images should be in assets folder (without extension), or null for no images
   //   - text: The blog post content (can use HTML for formatting)
-  blogPosts: [
-    {
-      title: "Welcome to My Blog",
-      date: "January 2025",
-      image: [
-        { filename: "j-gif-space", size: "small" },
-        { filename: "ascii-gif", size: "small" },
-        { filename: "website-icon", size: "small" },
-      ], // Set to image filename (without extension) or null for no imageimage.png
-      text: "Just made this website using 98-components and Windows 98 elements. Aided with Cursor.ai and Gemini.\nAlso just finished first semester at UofT. It was quite rough, but I'm glad I made it through and want to make the most of my time there. Coding more nowadays to make up for my bad grades.",
+  // To add a new category, copy one of the existing categories and modify it
+  // To add a new post to a category, add an object to that category's posts array
+  blogCategories: {
+    misc: {
+      name: "Misc",
+      description: "Random thoughts, ideas, and miscellaneous content.",
+      image: "directory_computer",
+      posts: [
+        {
+          title: "Welcome to Misc",
+          date: "January 2025",
+          image: "j-gif-space",
+          text: "This is where I'll share random thoughts and ideas that don't fit into other categories.",
+        },
+      ],
     },
-  ],
+    graffiti: {
+      name: "Graffiti",
+      description: "My graffiti art and street art projects.",
+      image: "stop",
+      posts: [
+        {
+          title: "Graffiti Collection",
+          date: "January 2025",
+          image: "stop",
+          text: "Check out my graffiti work! More posts coming soon.",
+        },
+      ],
+    },
+    bjj: {
+      name: "BJJ",
+      description: "Brazilian Jiu-Jitsu training, techniques, and experiences.",
+      image: "bjj-grappling",
+      posts: [
+        {
+          title: "BJJ Journey",
+          date: "January 2025",
+          image: "bjj-grappling",
+          text: "Documenting my Brazilian Jiu-Jitsu journey. Training updates, techniques, and experiences.",
+        },
+      ],
+    },
+    updates: {
+      name: "Updates",
+      description: "Life updates, achievements, and what I'm working on.",
+      image: "animation",
+      posts: [
+        {
+          title: "Website Launch",
+          date: "January 2025",
+          image: [
+            { filename: "j-gif-space", size: "small" },
+            { filename: "ascii-gif", size: "small" },
+            { filename: "website-icon", size: "small" },
+          ],
+          text: "Just launched this Windows 98 themed website! Built with 98-components and lots of help from AI assistants.\n\nAlso just finished first semester at UofT. It was quite rough, but I'm glad I made it through and want to make the most of my time there. Coding more nowadays because i'm locked in.",
+        },
+      ],
+    },
+  },
   // ============================================
   // THANKS & CREDITS - Easy to add more!
   // ============================================
@@ -1355,6 +1408,8 @@ function initApp() {
 
     // Convert windows positioned with 'right' to 'left' for proper resizing
     // Uses CSS calc() with original vh values to maintain zoom-independent positioning
+    // Note: This only applies on initial load. Responsive media queries in CSS will override
+    // for smaller screens to prevent overlapping.
     function convertRightPositionedWindows() {
       document
         .querySelectorAll(".window-skills, .window-hobbies")
@@ -1362,6 +1417,15 @@ function initApp() {
           // Only convert once
           if (winElement.dataset.convertedToLeft) return;
           winElement.dataset.convertedToLeft = "true";
+
+          // Check if we're in a responsive breakpoint where CSS handles positioning
+          const viewportWidth = window.innerWidth;
+          if (viewportWidth <= 1100) {
+            // For smaller screens, let CSS media queries handle it
+            // Just remove right positioning to allow CSS to take over
+            winElement.style.right = "auto";
+            return;
+          }
 
           // Get the original CSS values from the stylesheet
           // Skills: right: 12vh, width: 42vh
@@ -1377,6 +1441,21 @@ function initApp() {
           // Width stays as set in CSS (42vh or 38vh)
         });
     }
+
+    // Re-convert on window resize to handle responsive breakpoints
+    let resizeTimeoutPosition;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeoutPosition);
+      resizeTimeoutPosition = setTimeout(() => {
+        // Reset conversion flag for responsive recalculation
+        document
+          .querySelectorAll(".window-skills, .window-hobbies")
+          .forEach((winElement) => {
+            winElement.dataset.convertedToLeft = "false";
+          });
+        convertRightPositionedWindows();
+      }, 100);
+    });
 
     // Setup minimize buttons and registration for existing windows
     setTimeout(() => {

@@ -273,8 +273,17 @@ win98-window[resizable] {
 .window-skills,
 .window-hobbies,
 .window-projects,
-.window-interactive {
+.window-interactive,
+.window-blog {
   opacity: 1;
+}
+
+/* Blog window - fixed size like projects window */
+.window-blog {
+  width: 35vw; /* Same width as projects window */
+  height: 440px; /* Same height as About Me window - allows scrolling if content overflows */
+  min-width: 300px; /* Prevent it from getting too narrow */
+  max-width: 600px; /* Prevent it from getting too wide */
 }
 
 /* Initially hide windows - they will be made visible */
@@ -282,7 +291,8 @@ win98-window[resizable] {
 .window-skills:not(.window-pop-open),
 .window-hobbies:not(.window-pop-open),
 .window-projects:not(.window-pop-open),
-.window-interactive:not(.window-pop-open) {
+.window-interactive:not(.window-pop-open),
+.window-blog:not(.window-pop-open) {
   opacity: 0;
 }
 
@@ -301,7 +311,8 @@ win98-window[resizable] {
 .window-skills.window-pop-open,
 .window-hobbies.window-pop-open,
 .window-projects.window-pop-open,
-.window-interactive.window-pop-open {
+.window-interactive.window-pop-open,
+.window-blog.window-pop-open {
   animation: subtleFadeIn 0.3s ease-in forwards;
   opacity: 1;
   display: block !important;
@@ -342,6 +353,136 @@ win98-window[resizable] {
   left: 44vh;
   width: 32vh;
   height: 18.5vh;
+}
+
+/* ============================================
+   RESPONSIVE LAYOUT - Easily editable breakpoints
+   ============================================ */
+
+/* Medium screens (tablets and smaller desktops) */
+@media (max-width: 1400px) {
+  .window-about-me {
+    top: 12vh;
+    left: 2vh;
+    width: 45vh;
+  }
+
+  .window-skills {
+    bottom: 43vh;
+    right: 2vh;
+    width: 38vh;
+  }
+
+  .window-hobbies {
+    bottom: 16vh;
+    right: 2vh;
+    width: 35vh;
+  }
+
+  .window-projects {
+    top: 20px;
+    left: 50vh;
+    width: calc(100vw - 52vh);
+    max-width: 40vw;
+  }
+
+  .window-interactive {
+    bottom: 8vh;
+    left: 2vh;
+    width: 28vh;
+  }
+}
+
+/* Small screens (narrow tablets) */
+@media (max-width: 1100px) {
+  .window-about-me {
+    top: 2vh;
+    left: 2vh;
+    width: calc(50% - 3vh);
+    max-width: 45vh;
+  }
+
+  .window-skills {
+    top: 2vh;
+    right: 2vh;
+    left: auto;
+    bottom: auto;
+    width: calc(50% - 3vh);
+    max-width: 38vh;
+    height: 30vh;
+  }
+
+  .window-hobbies {
+    top: 35vh;
+    right: 2vh;
+    left: auto;
+    bottom: auto;
+    width: calc(50% - 3vh);
+    max-width: 35vh;
+    height: 20vh;
+  }
+
+  .window-projects {
+    top: 2vh;
+    left: calc(50% + 1vh);
+    width: calc(50% - 3vh);
+    max-width: 45vh;
+    height: 60vh;
+  }
+
+  .window-interactive {
+    top: 58vh;
+    left: calc(50% + 1vh);
+    bottom: auto;
+    width: calc(50% - 3vh);
+    max-width: 28vh;
+    height: 15vh;
+  }
+}
+
+/* Very small screens (mobile landscape / small tablets) */
+@media (max-width: 800px) {
+  .window-about-me {
+    top: 1vh;
+    left: 1vh;
+    width: calc(100% - 2vh);
+    max-width: none;
+    height: 25vh;
+  }
+
+  .window-skills {
+    top: 27vh;
+    left: 1vh;
+    right: auto;
+    width: calc(50% - 1.5vh);
+    max-width: none;
+    height: 25vh;
+  }
+
+  .window-hobbies {
+    top: 27vh;
+    left: calc(50% + 0.5vh);
+    right: auto;
+    width: calc(50% - 1.5vh);
+    max-width: none;
+    height: 25vh;
+  }
+
+  .window-projects {
+    top: 53vh;
+    left: 1vh;
+    width: calc(100% - 2vh);
+    max-width: none;
+    height: 35vh;
+  }
+
+  .window-interactive {
+    top: 89vh;
+    left: 1vh;
+    width: calc(100% - 2vh);
+    max-width: none;
+    height: 10vh;
+  }
 }
 
 /* Project list images in "All" tab - default sizes */
@@ -487,7 +628,8 @@ win98-window .window-body {
 }
 
 /* Window body variations */
-.window-projects .window-body {
+.window-projects .window-body,
+.window-blog .window-body {
   padding: 0;
   overflow: hidden;
   display: flex;
@@ -500,12 +642,14 @@ win98-window .window-body {
 }
 
 /* Projects window specific - ensure proper overflow */
-.window-projects .window-body {
+.window-projects .window-body,
+.window-blog .window-body {
   overflow-y: auto !important;
   overflow-x: hidden !important;
 }
 
-.window-projects .projects-tab-content {
+.window-projects .projects-tab-content,
+.window-blog .blog-tab-content {
   flex: 1;
   overflow-y: auto;
   padding: 8px;
@@ -803,7 +947,8 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 }
 
 /* Projects Window Tabs */
-.projects-tabs {
+.projects-tabs,
+.blog-tabs {
   display: flex;
   background: #c0c0c0;
   border-bottom: 1px solid #808080;
@@ -818,19 +963,22 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 }
 
 /* Hide horizontal scrollbar in WebKit browsers (Chrome, Safari, Opera) */
-.projects-tabs::-webkit-scrollbar:horizontal {
+.projects-tabs::-webkit-scrollbar:horizontal,
+.blog-tabs::-webkit-scrollbar:horizontal {
   display: none !important;
   height: 0 !important;
   background: transparent !important;
 }
 
-.projects-tabs::-webkit-scrollbar {
+.projects-tabs::-webkit-scrollbar,
+.blog-tabs::-webkit-scrollbar {
   display: none !important;
   height: 0 !important;
   width: 0 !important;
 }
 
-.project-tab {
+.project-tab,
+.blog-tab {
   padding: 6px 12px;
   background: #c0c0c0;
   border: none;
@@ -841,13 +989,16 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   white-space: nowrap;
   min-width: 60px;
   transition: background-color 0.1s;
+  flex-shrink: 0; /* Prevent tabs from shrinking too much */
 }
 
-.project-tab:hover {
+.project-tab:hover,
+.blog-tab:hover {
   background: #d4d4d4 !important;
 }
 
-.project-tab.active {
+.project-tab.active,
+.blog-tab.active {
   background: #c0c0c0 !important;
   /* Pressed/depressed appearance - inset borders */
   border-top: 1px solid #808080 !important;
@@ -858,7 +1009,8 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   font-weight: normal !important;
 }
 
-.project-tab:active {
+.project-tab:active,
+.blog-tab:active {
   background: #a0a0a0 !important;
   border-top: 1px solid #808080 !important;
   border-left: 1px solid #808080 !important;
@@ -868,6 +1020,12 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
 
 /* Make projects window content responsive - prevent text/button cutoff */
 .window-projects {
+  min-width: 300px;
+  min-height: 400px;
+}
+
+/* Make blog window content responsive - prevent text/button cutoff */
+.window-blog {
   min-width: 300px;
   min-height: 400px;
 }
@@ -886,6 +1044,23 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
     margin-top: 8px !important;
     margin-bottom: 8px !important;
   }
+
+  /* Blog window responsive - narrow windows */
+  .window-blog .blog-category-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 200px !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .window-blog .blog-post-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 200px !important;
+  }
 }
 
 /* Ensure project items wrap properly */
@@ -893,6 +1068,33 @@ win98-window[title="Hobbies.exe"] .window-body img:last-child {
   min-width: 0 !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
+}
+
+/* Ensure blog items wrap properly */
+.window-blog .tab-pane[data-tab-content="main"] > div {
+  min-width: 0 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Ensure blog post content in individual tabs doesn't expand window */
+.window-blog .tab-pane:not([data-tab-content="main"]) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  overflow: visible; /* Allow content to scroll within parent */
+  box-sizing: border-box;
+}
+
+.window-blog .tab-pane:not([data-tab-content="main"]) > div {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  box-sizing: border-box;
 }
 
 /* Make text wrap properly */
@@ -1007,7 +1209,7 @@ win98-window {
 }
 
 /* Tablets and small laptops (under 1300px) */
-@media screen and (max-width: 1064px) {
+@media screen and (max-width: 1170px) {
   /* Resize and reposition windows to the left - override classes without !important */
   .window-about-me {
     left: 120px;
@@ -1072,6 +1274,27 @@ win98-window {
     object-fit: cover !important;
   }
 
+  /* Blog images responsive - mobile */
+  .window-blog .blog-category-image {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 160px !important;
+    object-fit: cover !important;
+  }
+
+  .window-blog .blog-post-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 160px !important;
+    object-fit: cover !important;
+  }
+
   /* Make project images smaller in individual project tabs */
   .window-projects .tab-pane:not([data-tab-content="all"]) img {
     max-width: 400px;
@@ -1126,6 +1349,27 @@ win98-window {
     object-fit: cover !important;
   }
 
+  /* Blog images responsive - tablets */
+  .window-blog .blog-category-image {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 180px !important;
+    object-fit: cover !important;
+  }
+
+  .window-blog .blog-post-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 180px !important;
+    object-fit: cover !important;
+  }
+
   .window-skills {
     left: 794px;
     width: 250px;
@@ -1167,7 +1411,7 @@ win98-window {
 
 /* For larger screens (1301px+), when projects window is narrow, stack image below title */
 /* Make it trigger earlier - at wider screen sizes */
-@media screen and (min-width: 1301px) and (max-width: 1535px) {
+@media screen and (min-width: 1504px) and (max-width: 1535px) {
   .window-projects .tab-pane[data-tab-content="all"] > div {
     flex-direction: column !important;
   }
@@ -1182,6 +1426,27 @@ win98-window {
     margin-top: 8px !important;
     margin-bottom: 8px !important;
     margin-left: 0 !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+  }
+
+  /* Blog images responsive - small screens */
+  .window-blog .blog-category-image {
+    float: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 150px !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    margin-left: 0 !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+  }
+
+  .window-blog .blog-post-image {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
     max-height: 200px !important;
     object-fit: cover !important;
   }
@@ -1387,6 +1652,149 @@ win98-window[title="Image Viewer.exe"] .viewer-nav-controls .project-tab {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* ============================================
+   BLOG WINDOW STYLES - Similar to Projects
+   ============================================ */
+
+/* Blog category card styles (for main tab) */
+.blog-category-card {
+  margin: 4px 0;
+  padding: 5px;
+  border: 1px solid #808080;
+  background: #e0e0e0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.blog-category-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.blog-category-card-title {
+  margin-top: 0;
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+.blog-category-image {
+  width: 250px;
+  min-width: 200px;
+  height: 180px;
+  border: 1px solid #808080;
+  object-fit: cover;
+  object-position: center;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.blog-category-card-description {
+  margin: 8px 0;
+}
+
+/* Blog post styles (for category tabs) */
+.blog-post-single {
+  margin: 4px 0;
+  padding: 5px;
+  border: 1px solid #808080;
+  background: #e0e0e0;
+  min-width: 0 !important; /* Allow shrinking */
+  max-width: 100% !important; /* Prevent expansion beyond container */
+  width: 100% !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  box-sizing: border-box;
+}
+
+.blog-post-single-title {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 2.4em;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.blog-post-single-date {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 1.2em;
+}
+
+.blog-post-single-text {
+  margin: 12px 0;
+  font-size: 1.2em;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+/* Blog post images */
+.blog-post-images {
+  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.blog-post-image {
+  border: 2px solid #808080;
+  object-fit: cover;
+  object-position: center;
+  max-width: 100% !important;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.blog-post-image-small {
+  width: 150px;
+  height: 150px;
+}
+
+.blog-post-image-medium {
+  width: 250px;
+  height: 180px;
+}
+
+.blog-post-image-large {
+  width: 400px;
+  height: 300px;
+}
+
+.blog-post-image-full {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+/* Blog navigation buttons */
+.blog-post-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  justify-content: flex-start; /* Left align buttons */
+  max-width: 100%;
+  min-width: 0;
+}
+
+.blog-nav-btn {
+  font-size: 20px;
 }
 
 /* Image viewer navigation controls - exclude from last-child margin removal */
