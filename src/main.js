@@ -1366,6 +1366,30 @@ function initApp() {
       }
     }
 
+    // Function to trigger typing animation on elements
+    function triggerTypingAnimation(selectors) {
+      selectors.forEach((selector) => {
+        const element = document.querySelector(selector);
+        if (element) {
+          // Reset visibility for animation
+          element.style.visibility = "hidden";
+
+          // Check if it's a fast or slow animation
+          if (element.classList.contains("animate-title-fast")) {
+            animateElement(element, 40, 40, 0.1, () => 30 + Math.random() * 30);
+          } else if (element.classList.contains("animate-title-slow")) {
+            animateElement(
+              element,
+              120,
+              150,
+              0.2,
+              () => 50 + Math.random() * 50
+            );
+          }
+        }
+      });
+    }
+
     // Function to pop open a window and start its typing animation
     function popOpenWindow(windowSelector, typingSelectors, delay) {
       setTimeout(() => {
@@ -1375,29 +1399,7 @@ function initApp() {
 
           // Start typing animations after window pops open (wait for animation to complete)
           setTimeout(() => {
-            typingSelectors.forEach((selector) => {
-              const element = document.querySelector(selector);
-              if (element) {
-                // Check if it's a fast or slow animation
-                if (element.classList.contains("animate-title-fast")) {
-                  animateElement(
-                    element,
-                    40,
-                    40,
-                    0.1,
-                    () => 30 + Math.random() * 30
-                  );
-                } else if (element.classList.contains("animate-title-slow")) {
-                  animateElement(
-                    element,
-                    120,
-                    150,
-                    0.2,
-                    () => 50 + Math.random() * 50
-                  );
-                }
-              }
-            });
+            triggerTypingAnimation(typingSelectors);
           }, 50); // Start typing shortly after window appears
         }
       }, delay);
@@ -2167,7 +2169,7 @@ function initApp() {
         const windowHTML = `
           <win98-window title="About Me.exe" resizable class="window-about-me">
             <div class="window-body">
-              <h2 id="about-me-name-recreated">${content.aboutMe.name}</h2>
+              <h2 id="about-me-name" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">J</em>eremy <em style="font-size: 1.2em;">L</em>iu</h2>
               <p class="bold-title">${content.aboutMe.title}</p>
               <p>${content.aboutMe.bio}</p>
               <div style="display: flex; justify-content: center; margin-bottom: 8px;">
@@ -2215,12 +2217,20 @@ function initApp() {
             const savedPalette =
               localStorage.getItem("colorPalette") || "default";
             applyColorPalette(savedPalette);
+            // Trigger typing animation
+            setTimeout(() => {
+              triggerTypingAnimation(["#about-me-name"]);
+            }, 50);
           }
         }
       }
 
       if (aboutMeWindow) {
         bringWindowToFront(aboutMeWindow);
+        // Trigger typing animation if window already exists
+        setTimeout(() => {
+          triggerTypingAnimation(["#about-me-name"]);
+        }, 50);
       }
     };
 
@@ -2237,17 +2247,17 @@ function initApp() {
         const windowHTML = `
           <win98-window title="Skills.exe" resizable class="window-skills">
             <div class="window-body">
-              <h3 id="skills-languages-recreated" style="color: var(--palette-color-1, #000000);">Languages</h3>
+              <h3 id="skills-languages" class="animate-title-fast" style="color: var(--palette-color-1, #000000); visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Languages</em></h3>
               <p style="margin: 3px 0;">${content.skills.languages}</p>
               
               <hr style="margin: 8px 0;">
               
-              <h3 id="skills-frameworks-recreated">Frameworks</h3>
+              <h3 id="skills-frameworks" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Frameworks</em></h3>
               <p style="margin: 3px 0;">${content.skills.frameworks}</p>
               
               <hr style="margin: 8px 0;">
               
-              <h3 id="skills-tools-recreated">Tools</h3>
+              <h3 id="skills-tools" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><em style="font-size: 1.2em;">Tools</em></h3>
               <p style="margin: 3px 0;">${content.skills.tools}</p>
               
               <hr style="margin: 8px 0;">
@@ -2273,12 +2283,28 @@ function initApp() {
             const savedPalette =
               localStorage.getItem("colorPalette") || "default";
             applyColorPalette(savedPalette);
+            // Trigger typing animation
+            setTimeout(() => {
+              triggerTypingAnimation([
+                "#skills-languages",
+                "#skills-frameworks",
+                "#skills-tools",
+              ]);
+            }, 50);
           }
         }
       }
 
       if (skillsWindow) {
         bringWindowToFront(skillsWindow);
+        // Trigger typing animation if window already exists
+        setTimeout(() => {
+          triggerTypingAnimation([
+            "#skills-languages",
+            "#skills-frameworks",
+            "#skills-tools",
+          ]);
+        }, 50);
       }
     };
 
@@ -2291,7 +2317,7 @@ function initApp() {
         const windowHTML = `
           <win98-window title="Hobbies.exe" resizable class="window-hobbies">
             <div class="window-body">
-              <h3 id="hobbies-title-recreated">Outside of Academics</h3>
+              <h3 id="hobbies-title" class="animate-title-fast" style="visibility: hidden; min-height: 1.2em;"><span style="font-size: 1.2em;">Outside</span> of Academics</h3>
               <p>${content.hobbies}</p>
               <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                <img src="${
@@ -2332,12 +2358,20 @@ function initApp() {
             const savedPalette =
               localStorage.getItem("colorPalette") || "default";
             applyColorPalette(savedPalette);
+            // Trigger typing animation
+            setTimeout(() => {
+              triggerTypingAnimation(["#hobbies-title"]);
+            }, 50);
           }
         }
       }
 
       if (hobbiesWindow) {
         bringWindowToFront(hobbiesWindow);
+        // Trigger typing animation if window already exists
+        setTimeout(() => {
+          triggerTypingAnimation(["#hobbies-title"]);
+        }, 50);
       }
     };
 
@@ -2369,6 +2403,8 @@ function initApp() {
             // Initialize project tabs after window is created
             setTimeout(() => {
               initProjectTabs();
+              // Trigger typing animation
+              triggerTypingAnimation(["#my-projects-title"]);
             }, 100);
           }
         }
@@ -2376,6 +2412,10 @@ function initApp() {
 
       if (projectsWindow) {
         bringWindowToFront(projectsWindow);
+        // Trigger typing animation if window already exists
+        setTimeout(() => {
+          triggerTypingAnimation(["#my-projects-title"]);
+        }, 50);
       }
     };
 
@@ -2388,7 +2428,7 @@ function initApp() {
         const windowHTML = `
           <win98-window title="Interactive.exe" resizable class="window-interactive">
             <div class="window-body" style="overflow: hidden; display: flex; align-items: center; gap: 10px;">
-              <p id="interactive-text-recreated" style="margin: 0; font-size: 1.15em; flex: 1;">you can interact with windows!</p>
+              <p id="interactive-text" class="animate-title-fast" style="margin: 0; font-size: 1.15em; flex: 1; visibility: hidden;">you can interact with windows!</p>
               <img src="${
                 getImageUrl("ascii-gif") || ""
               }" alt="Bear" style="max-width: 100px; height: auto; flex-shrink: 0; border: 2px solid #808080;">
@@ -2409,12 +2449,20 @@ function initApp() {
             const savedPalette =
               localStorage.getItem("colorPalette") || "default";
             applyColorPalette(savedPalette);
+            // Trigger typing animation
+            setTimeout(() => {
+              triggerTypingAnimation(["#interactive-text"]);
+            }, 50);
           }
         }
       }
 
       if (interactiveWindow) {
         bringWindowToFront(interactiveWindow);
+        // Trigger typing animation if window already exists
+        setTimeout(() => {
+          triggerTypingAnimation(["#interactive-text"]);
+        }, 50);
       }
     };
 
