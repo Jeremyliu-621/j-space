@@ -1205,6 +1205,27 @@ function initApp() {
       }
     }
 
+    // Helper function to minimize a window
+    function minimizeWindow(window) {
+      if (!window) return;
+      // Hide the window forcefully
+      window.style.setProperty("display", "none", "important");
+      window.style.setProperty("visibility", "hidden", "important");
+      window.setAttribute("data-minimized", "true");
+      // Also add a class to help with CSS targeting
+      window.classList.add("minimized");
+      // Update taskbar button to show minimized state
+      updateTaskbarButton(window, true);
+      console.log("Window minimized:", window.getAttribute("title"));
+    }
+
+    // Helper function to close a window
+    function closeWindow(window) {
+      if (!window) return;
+      window.remove();
+      console.log("Window closed:", window.getAttribute("title"));
+    }
+
     // Use a global click handler with composedPath to catch shadow DOM clicks
     document.addEventListener(
       "click",
@@ -1219,7 +1240,14 @@ function initApp() {
             (el.tagName === "BUTTON" && el.textContent?.trim() === "—")
         );
 
-        if (minimizeButton) {
+        // Find if any element in the path is a close button
+        const closeButton = path.find(
+          (el) =>
+            el.getAttribute?.("aria-label") === "Close" ||
+            (el.tagName === "BUTTON" && el.textContent?.trim() === "×")
+        );
+
+        if (minimizeButton || closeButton) {
           // Find the window that contains this button
           const window = path.find((el) => el.tagName === "WIN98-WINDOW");
 
@@ -1227,25 +1255,98 @@ function initApp() {
             e.preventDefault();
             e.stopPropagation();
 
-            // Hide the window forcefully
-            window.style.setProperty("display", "none", "important");
-            window.style.setProperty("visibility", "hidden", "important");
-            window.setAttribute("data-minimized", "true");
-
-            // Also add a class to help with CSS targeting
-            window.classList.add("minimized");
-
-            // Update taskbar button to show minimized state
-            updateTaskbarButton(window, true);
-
-            console.log("Window minimized:", window.getAttribute("title"));
+            if (minimizeButton) {
+              minimizeWindow(window);
+            } else if (closeButton) {
+              closeWindow(window);
+            }
           }
         }
       },
       true
     ); // Capture phase
 
-    // Also directly attach handlers to minimize buttons in shadow DOM
+    // Add touch event handler for mobile devices (fallback for buttons not directly handled)
+    let touchTarget = null;
+    document.addEventListener(
+      "touchstart",
+      (e) => {
+        const path = e.composedPath();
+        const minimizeButton = path.find(
+          (el) =>
+            el.getAttribute?.("aria-label") === "Minimize" ||
+            (el.tagName === "BUTTON" && el.textContent?.trim() === "—")
+        );
+        const closeButton = path.find(
+          (el) =>
+            el.getAttribute?.("aria-label") === "Close" ||
+            (el.tagName === "BUTTON" && el.textContent?.trim() === "×")
+        );
+
+        if (minimizeButton || closeButton) {
+          // Store target but don't preventDefault yet to avoid interfering with window dragging
+          const touch = e.touches[0];
+          touchTarget = {
+            button: minimizeButton || closeButton,
+            path,
+            startX: touch.clientX,
+            startY: touch.clientY,
+          };
+        }
+      },
+      true
+    );
+
+    document.addEventListener(
+      "touchend",
+      (e) => {
+        if (touchTarget) {
+          const { button, path, startX, startY } = touchTarget;
+          const touch = e.changedTouches[0];
+
+          // Only trigger if it's a tap (didn't move much)
+          const deltaX = Math.abs(touch.clientX - startX);
+          const deltaY = Math.abs(touch.clientY - startY);
+          const maxMovement = 10; // pixels
+
+          if (deltaX < maxMovement && deltaY < maxMovement) {
+            const window = path.find((el) => el.tagName === "WIN98-WINDOW");
+
+            if (window) {
+              e.preventDefault();
+              e.stopPropagation();
+
+              const isMinimize =
+                button.getAttribute?.("aria-label") === "Minimize" ||
+                (button.tagName === "BUTTON" &&
+                  button.textContent?.trim() === "—");
+              const isClose =
+                button.getAttribute?.("aria-label") === "Close" ||
+                (button.tagName === "BUTTON" &&
+                  button.textContent?.trim() === "×");
+
+              if (isMinimize) {
+                minimizeWindow(window);
+              } else if (isClose) {
+                closeWindow(window);
+              }
+            }
+          }
+          touchTarget = null;
+        }
+      },
+      true
+    );
+
+    document.addEventListener(
+      "touchcancel",
+      () => {
+        touchTarget = null;
+      },
+      true
+    );
+
+    // Also directly attach handlers to minimize and close buttons in shadow DOM
     function attachMinimizeHandlers() {
       document.querySelectorAll("win98-window").forEach((window) => {
         if (window.dataset.minimizeHandlerAttached) return;
@@ -1259,31 +1360,81 @@ function initApp() {
           const minimizeBtn = window.shadowRoot.querySelector(
             '[aria-label="Minimize"]'
           );
+          const closeBtn = window.shadowRoot.querySelector(
+            '[aria-label="Close"]'
+          );
+
           if (minimizeBtn && !minimizeBtn.dataset.handlerAttached) {
             minimizeBtn.dataset.handlerAttached = "true";
             window.dataset.minimizeHandlerAttached = "true";
 
+            // Add click handler
             minimizeBtn.addEventListener(
               "click",
               (e) => {
-                // Hide the window forcefully
-                window.style.setProperty("display", "none", "important");
-                window.style.setProperty("visibility", "hidden", "important");
-                window.setAttribute("data-minimized", "true");
-                window.classList.add("minimized");
-
-                // Update taskbar button to show minimized state
-                updateTaskbarButton(window, true);
-
-                console.log(
-                  "Window minimized (direct):",
-                  window.getAttribute("title")
-                );
+                e.preventDefault();
+                e.stopPropagation();
+                minimizeWindow(window);
               },
               true
             );
+
+            // Add touch handlers for mobile
+            minimizeBtn.addEventListener(
+              "touchstart",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              },
+              { passive: false, capture: true }
+            );
+
+            minimizeBtn.addEventListener(
+              "touchend",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                minimizeWindow(window);
+              },
+              { passive: false, capture: true }
+            );
           } else if (!minimizeBtn) {
             setTimeout(tryAttach, 100);
+          }
+
+          if (closeBtn && !closeBtn.dataset.closeHandlerAttached) {
+            closeBtn.dataset.closeHandlerAttached = "true";
+
+            // Add click handler
+            closeBtn.addEventListener(
+              "click",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeWindow(window);
+              },
+              true
+            );
+
+            // Add touch handlers for mobile
+            closeBtn.addEventListener(
+              "touchstart",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              },
+              { passive: false, capture: true }
+            );
+
+            closeBtn.addEventListener(
+              "touchend",
+              (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeWindow(window);
+              },
+              { passive: false, capture: true }
+            );
           }
         };
 
