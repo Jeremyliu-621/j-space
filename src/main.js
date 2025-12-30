@@ -65,12 +65,12 @@ export const content = {
     ],
   },
   skills: {
-    languages: "Python, JavaScript, TypeScript, HTML, CSS, Swift",
+    languages: "Python, JavaScript, C, MATLAB, TypeScript, HTML, CSS, Swift",
     frameworks:
       "React, Next.js, Node.js, Bootstrap, Tailwind CSS, Matplotlib, Tkinter, Email.js",
     libraries: "OpenCV, Pandas, NumPy, Selenium, BeautifulSoup",
     tools:
-      "Git, PostgreSQL, Visual Studio Code, Google Cloud Platform, Cursor.ai",
+      "Git, PostgreSQL, Arduino,Visual Studio Code, Google Cloud Platform, Cursor.ai",
 
     improvingBy: [
       "Applying knowledge to create useful projects",
