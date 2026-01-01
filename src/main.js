@@ -8,12 +8,6 @@ import "98-components";
 
 // Import components
 import {
-  openBlogWindow,
-  generateBlogWindowHTML,
-  createCategoryHTML,
-  initBlogTabs,
-} from "./components/blog.js";
-import {
   createProjectHTML,
   createSingleProjectHTML,
   generateProjectsWindowHTML,
@@ -152,81 +146,6 @@ export const content = {
   ],
   hobbies:
     "I create origami, train Brazilian Jiu-Jitsu, write (legal) graffiti, and longboard.",
-  // ============================================
-  // BLOG CATEGORIES - Easy to add more categories and posts!
-  // ============================================
-  // Structure: Each category has a name, description, image, and posts array
-  // Each post can have:
-  //   - title: The post title
-  //   - date: Publication date (any format you want)
-  //   - image: Single image filename (string) OR array for multiple images
-  //            For multiple images, can be:
-  //              - Array of strings: ["img1", "img2"] (uses default size)
-  //              - Array of objects: [{filename: "img1", size: "large"}, {filename: "img2", width: 300}]
-  //            Size options: "small", "medium", "large", "full" OR numeric pixel width (e.g., 300, "400px")
-  //            You can also specify: {filename: "img", width: 300, height: 200} for exact dimensions
-  //            Images should be in assets folder (without extension), or null for no images
-  //   - text: The blog post content (can use HTML for formatting)
-  // To add a new category, copy one of the existing categories and modify it
-  // To add a new post to a category, add an object to that category's posts array
-  blogCategories: {
-    misc: {
-      name: "Misc",
-      description: "Random thoughts, ideas, and miscellaneous content.",
-      image: "directory_computer",
-      posts: [
-        {
-          title: "Welcome to Misc",
-          date: "January 2025",
-          image: "j-gif-space",
-          text: "This is where I'll share random thoughts and ideas that don't fit into other categories.",
-        },
-      ],
-    },
-    graffiti: {
-      name: "Graffiti",
-      description: "My graffiti art and street art projects.",
-      image: "stop",
-      posts: [
-        {
-          title: "Graffiti Collection",
-          date: "January 2025",
-          image: "stop",
-          text: "Check out my graffiti work! More posts coming soon.",
-        },
-      ],
-    },
-    bjj: {
-      name: "BJJ",
-      description: "Brazilian Jiu-Jitsu training, techniques, and experiences.",
-      image: "bjj-grappling",
-      posts: [
-        {
-          title: "BJJ Journey",
-          date: "January 2025",
-          image: "bjj-grappling",
-          text: "Documenting my Brazilian Jiu-Jitsu journey. Training updates, techniques, and experiences.",
-        },
-      ],
-    },
-    updates: {
-      name: "Updates",
-      description: "Life updates, achievements, and what I'm working on.",
-      image: "animation",
-      posts: [
-        {
-          title: "Website Launch",
-          date: "January 2025",
-          image: [
-            { filename: "j-gif-space", size: "small" },
-            { filename: "ascii-gif", size: "small" },
-            { filename: "website-icon", size: "small" },
-          ],
-          text: "Just launched this Windows 98 themed website! Built with 98-components and lots of help from AI assistants.\n\nAlso just finished first semester at UofT. It was quite rough, but I'm glad I made it through and want to make the most of my time there. Coding more nowadays because i'm locked in.",
-        },
-      ],
-    },
-  },
   // ============================================
   // THANKS & CREDITS - Easy to add more!
   // ============================================
@@ -2671,13 +2590,13 @@ function initApp() {
     setupDesktopIcon("#desktop-folder", openFolderWindow);
     setupDesktopIcon("#desktop-blog", () => {
       // Open blog as a separate website
-      window.location.href = "/blog/index.html";
+      window.open("https://your-blog-url.com", "_blank");
     });
     setupDesktopIcon("#desktop-chatbox", openChatboxWindow);
     setupDesktopIcon("#desktop-theme", openSettingsWindow);
     setupDesktopIcon("#desktop-thanks", openThanksWindow);
 
-    // Functions to open/recreate static windows (similar to openBlogWindow)
+    // Functions to open/recreate static windows
     const openAboutMeWindow = () => {
       let aboutMeWindow = document.querySelector(
         'win98-window[title="About Me.exe"]'
@@ -3007,7 +2926,7 @@ function initApp() {
       "menu-folder": () => openFolderWindow(),
       "menu-blog": () => {
         // Open blog as a separate website
-        window.location.href = "/blog/index.html";
+        window.open("https://your-blog-url.com", "_blank");
       },
       "menu-chatbox": () => openChatboxWindow(),
       "menu-thanks": () => openThanksWindow(),
