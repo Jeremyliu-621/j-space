@@ -1486,64 +1486,11 @@ function initApp() {
       });
     }
 
-    // Convert windows positioned with 'right' to 'left' for proper resizing
-    // Uses CSS calc() with original vh values to maintain zoom-independent positioning
-    // Note: This only applies on initial load. Responsive media queries in CSS will override
-    // for smaller screens to prevent overlapping.
-    function convertRightPositionedWindows() {
-      document
-        .querySelectorAll(".window-skills, .window-hobbies")
-        .forEach((winElement) => {
-          // Only convert once
-          if (winElement.dataset.convertedToLeft) return;
-          winElement.dataset.convertedToLeft = "true";
-
-          // Check if we're in a responsive breakpoint where CSS handles positioning
-          const viewportWidth = window.innerWidth;
-          if (viewportWidth < 1535) {
-            // For screens less than 1535px, let CSS media queries handle it
-            // Just remove right positioning to allow CSS to take over
-            winElement.style.right = "auto";
-            winElement.style.left = ""; // Clear any inline left positioning
-            return;
-          }
-
-          // Get the original CSS values from the stylesheet
-          // Skills: right: 12vh, width: 42vh
-          // Hobbies: right: 15vh, width: 38vh
-          const isSkills = winElement.classList.contains("window-skills");
-          const rightVh = isSkills ? 12 : 15;
-          const widthVh = isSkills ? 42 : 38;
-
-          // Use CSS calc() to convert: left = 100vw - right - width
-          // This maintains relative positioning that scales with zoom
-          winElement.style.right = "auto";
-          winElement.style.left = `calc(100vw - ${rightVh}vh - ${widthVh}vh)`;
-          // Width stays as set in CSS (42vh or 38vh)
-        });
-    }
-
-    // Re-convert on window resize to handle responsive breakpoints
-    let resizeTimeoutPosition;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeoutPosition);
-      resizeTimeoutPosition = setTimeout(() => {
-        // Reset conversion flag for responsive recalculation
-        document
-          .querySelectorAll(".window-skills, .window-hobbies")
-          .forEach((winElement) => {
-            winElement.dataset.convertedToLeft = "false";
-          });
-        convertRightPositionedWindows();
-      }, 100);
-    });
-
     // Setup minimize buttons and registration for existing windows
     setTimeout(() => {
       ensureMinimizeButtons();
       ensureWindowsRegistered();
       setupRestoreHandlers();
-      convertRightPositionedWindows();
       makeTitleBarsResponsive();
     }, 300);
 
@@ -1551,7 +1498,6 @@ function initApp() {
     const minimizeObserver = new MutationObserver(() => {
       ensureMinimizeButtons();
       ensureWindowsRegistered();
-      convertRightPositionedWindows();
       makeTitleBarsResponsive();
     });
 

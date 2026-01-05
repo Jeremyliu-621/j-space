@@ -52,7 +52,7 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.74.5;
+  opacity: 0.745;
   background-image: repeating-linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.05) 0px,
@@ -187,9 +187,6 @@ h1 {
 
 #start-menu .window-body {
   border: 2px solid #808080 !important;
-}
-
-#start-menu .window-body {
   padding-bottom: 8px !important;
 }
 
@@ -328,14 +325,14 @@ win98-window[resizable] {
 
   .window-skills {
     bottom: 43vh;
-    left: 1446px; /* Fixed position - calculated for typical large screen (1920px wide: 1920 - 12vh - 42vh ≈ 1446px at 1080px height) */
+    right: 12vh;
     width: 42vh;
     height: 35vh;
   }
 
   .window-hobbies {
     bottom: 16vh;
-    left: 1462px; /* Fixed position - calculated for typical large screen (1920px wide: 1920 - 15vh - 38vh ≈ 1462px at 1080px height) */
+    right: 15vh;
     width: 38vh;
     height: 24vh;
   }
@@ -370,20 +367,16 @@ win98-window[resizable] {
 
   .window-skills {
     bottom: 294px; /* 43vh ≈ 344px */
-    left: 966px; /* 141vh ≈ 1128px */
+    right: 12vh;
     width: 304px; /* 38vh ≈ 304px */
     height: 244px;
-    /* Positions are fixed px values - won't change on browser resize */
-    /* Inline styles from component can still override for manual dragging/resizing */
   }
 
   .window-hobbies {
     bottom: 74px; /* 16vh ≈ 128px */
-    left: 966px; /* 142vh ≈ 1136px */
+    right: 15vh;
     width: 240px; /* 35vh ≈ 280px */
     height: 200px;
-    /* Positions are fixed px values - won't change on browser resize */
-    /* Inline styles from component can still override for manual dragging/resizing */
   }
 
   .window-projects {
@@ -442,11 +435,6 @@ win98-window[resizable] {
     bottom: 156px;
     left: 855px;
     width: 180px;
-  }
-
-  /* Make "My Projects" text smaller */
-  .window-projects .window-body h1 {
-    font-size: 3em;
   }
 
   /* Stack project images below title */
@@ -531,11 +519,6 @@ win98-window[resizable] {
     height: 200px;
   }
 
-  /* Make "My Projects" text smaller */
-  .window-projects .window-body h1 {
-    font-size: 3em;
-  }
-
   /* Hide icons in all buttons */
   .social-btn img,
   button img,
@@ -588,11 +571,6 @@ win98-window[resizable] {
     display: none;
   }
 
-  /* Make "My Projects" text smaller */
-  .window-projects .window-body h1 {
-    font-size: 3em;
-  }
-
   /* Hide icons in all buttons */
   .social-btn img,
   button img,
@@ -643,11 +621,6 @@ win98-window[resizable] {
 
   .window-interactive {
     display: none !important;
-  }
-
-  /* Make "My Projects" text smaller */
-  .window-projects .window-body h1 {
-    font-size: 3em;
   }
 
   /* Hide icons in all buttons */
@@ -804,7 +777,8 @@ win98-window .window-body {
 /* Window body variations */
 .window-projects .window-body {
   padding: 0;
-  overflow: hidden;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   display: flex;
   flex-direction: column;
 }
@@ -812,12 +786,6 @@ win98-window .window-body {
 .window-skills .window-body,
 .window-hobbies .window-body {
   min-height: 0;
-}
-
-/* Projects window specific - ensure proper overflow */
-.window-projects .window-body {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
 }
 
 .window-projects .projects-tab-content {
