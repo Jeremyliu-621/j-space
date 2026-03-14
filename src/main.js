@@ -631,71 +631,6 @@ function initApp() {
     </div>
   `;
 
-  // Helper function to bring window to front (needed by window opening functions)
-  function bringWindowToFront(window) {
-    // Update taskbar button to show active state when window is brought to front
-    if (window && !window.hasAttribute("data-minimized")) {
-      updateTaskbarButton(window, false);
-    }
-    if (window) {
-      window.style.display = "block";
-      window.style.visibility = "visible";
-      window.classList.add("window-pop-open");
-      const allWindows = document.querySelectorAll("win98-window");
-      let maxZ = 0;
-      allWindows.forEach((w) => {
-        const z = parseInt(w.style.zIndex) || 0;
-        if (z > maxZ) maxZ = z;
-      });
-      window.style.zIndex = (maxZ + 1).toString();
-    }
-  }
-
-  // Helper function to setup desktop icon click handlers
-  function setupDesktopIcon(iconId, onDoubleClick) {
-    const icon = document.querySelector(iconId);
-    if (!icon) {
-      console.warn(`Desktop icon not found: ${iconId}`);
-      return;
-    }
-
-    let clickTimer = null;
-    let isSelected = false;
-
-    icon.addEventListener("click", (e) => {
-      e.stopPropagation();
-
-      if (clickTimer) {
-        clearTimeout(clickTimer);
-        clickTimer = null;
-        icon.classList.add("selected");
-        onDoubleClick();
-      } else {
-        clickTimer = setTimeout(() => {
-          if (isSelected) {
-            icon.classList.remove("selected");
-            isSelected = false;
-          } else {
-            document.querySelectorAll(".desktop-folder").forEach((f) => {
-              f.classList.remove("selected");
-            });
-            icon.classList.add("selected");
-            isSelected = true;
-          }
-          clickTimer = null;
-        }, 250);
-      }
-    });
-
-    // Deselect when clicking elsewhere
-    document.addEventListener("click", (e) => {
-      if (!icon.contains(e.target)) {
-        icon.classList.remove("selected");
-        isSelected = false;
-      }
-    });
-  }
-
   // Desktop icons will be set up after all functions are defined (see end of initApp)
 
   // Wait for custom elements to be defined
@@ -1075,7 +1010,6 @@ function initApp() {
     const windowObserver = new MutationObserver(() => {
       constrainWindowPositions();
       ensureMinimizeButtons();
-      fixLeftResizeForRightPositionedWindows();
     });
 
     const desktop = document.querySelector("win98-desktop");
@@ -1176,14 +1110,12 @@ function initApp() {
       window.classList.add("minimized");
       // Update taskbar button to show minimized state
       updateTaskbarButton(window, true);
-      console.log("Window minimized:", window.getAttribute("title"));
     }
 
     // Helper function to close a window
     function closeWindow(window) {
       if (!window) return;
       window.remove();
-      console.log("Window closed:", window.getAttribute("title"));
     }
 
     // Use a global click handler with composedPath to catch shadow DOM clicks
@@ -2457,35 +2389,6 @@ function initApp() {
           );
           if (radio) radio.checked = true;
         }, 100);
-
-        // Function to reapply current theme (useful after dynamic content changes)
-        const reapplyCurrentTheme = () => {
-          const savedPalette = localStorage.getItem("colorPalette");
-          if (
-            savedPalette &&
-            savedPalette !== "default" &&
-            colorPalettes[savedPalette]
-          ) {
-            const colors = colorPalettes[savedPalette].colors;
-            // Apply to buttons and interactive elements - use darker colors (index 0 or 1) with lighter text
-            document
-              .querySelectorAll("button, .social-btn, a[href*='github']")
-              .forEach((btn) => {
-                btn.style.backgroundColor = colors[0] || "#c0c0c0"; // Darkest color
-                btn.style.color = colors[3] || "#ffffff"; // Lightest color for text
-              });
-          } else {
-            // Apply Windows 98 default colors
-            document
-              .querySelectorAll("button, .social-btn, a[href*='github']")
-              .forEach((btn) => {
-                btn.style.backgroundColor = "#c0c0c0";
-                btn.style.color = "#000000";
-              });
-          }
-        };
-
-        // Use the global applyColorPalette function
 
         // Add event listeners
         if (settingsWindow) {
