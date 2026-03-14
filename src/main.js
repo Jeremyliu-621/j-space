@@ -72,6 +72,19 @@ export const content = {
     ],
   },
   projects: [
+    // {
+    //   title: "Beavertrails",
+    //   description: "A DAW that turns your voice into any instrument of your choice.",
+    //   front: "React, TypeScript, Vite, Tailwind CSS, Three.js",
+    //   back: "Python, FastAPI, Supabase (PostgreSQL, Auth), Spotify Basic Pitch, Gradium",
+    //   image: "sinatra",
+    //   github: "https://github.com/e-yang6/sinatra",
+    //   website: "https://sinatra-daw.vercel.app/",
+    //   additionalInfo:
+    //     "Built an AI-assisted DAW that turns voices into instrument tracks with BPM-alignment and chord generation." +
+    //     "Implemented a FastAPI pipeline that detects drum BPM (librosa), transcribes vocals to MIDI (Spotify’s Basic Pitch), and renders MIDI to WAV (FluidSynth)." +
+    //     "Used Gradium speech-to-text and Gemini API to create “Frank”, an in-app assistant that responds to natural-language prompts to create chord progressions, rearrange music, and give compositional feedback",
+    // },
     {
       title: "Sinatra",
       description: "A DAW that turns your voice into any instrument of your choice.",
@@ -147,28 +160,6 @@ export const content = {
         "Used HTML, CSS, JavaScript, and Vite to build an interactive space that gets my creativity into the computer." +
         " Experimented with the lengths that different AIs can go to to help with coding projects." +
         " Used the open-source98-components library and cursor.ai to try and replicate that nostalgic feel to old websites.",
-    },
-    {
-      title: "My First Portfolio Website",
-      description: "A page that displays everything about me.",
-      front: "HTML, CSS, Javascript, Bootstrap",
-      image: "portfolio-works-gif",
-      website: "https://jeremyliu.vercel.app/",
-      github: "https://github.com/Jeremyliu-621/portfolio-works",
-      additionalInfo:
-        "Built purely using HTML and CSS, using Bootstrap components for some styling." +
-        " My first ever website, and I'm proud of it." +
-        " No AI used.",
-    },
-    {
-      title: "Cookie Clicker Bot",
-      description: "Bot that clicks cookies and buys upgrades!",
-      back: "Python, selenium",
-      image: "cookie-clicker-bot",
-      github: "https://github.com/Jeremyliu-621/cookie-clicker",
-      additionalInfo:
-        "Used Python and Selenium to build a bot that opens a browser, clicks cookies and buys upgrades." +
-        " Small project to practice using open-source libraries.",
     },
   ],
   hobbies:
@@ -456,7 +447,9 @@ function initApp() {
     .join("");
 
   app.innerHTML = `
-    <win98-desktop>
+    <!-- Station 1: Win98 Desktop -->
+    <section class="station station-win98" data-station="win98">
+      <win98-desktop>
       <!-- Desktop Folder Icon -->
       <div class="desktop-folder" id="desktop-folder">
         <img src="${getImageUrl("directory_computer") || ""}" alt="Folder">
@@ -629,6 +622,135 @@ function initApp() {
         </ul>
       </div>
     </div>
+    </section>
+
+    <!-- Station 2: Graffiti -->
+    <section class="station station-graffiti" data-station="graffiti">
+      <div class="graffiti-container">
+        <div class="graffiti-header">
+          <h1>STREET TAGS</h1>
+          <p class="graffiti-tagline">legal pieces + community walls</p>
+        </div>
+
+        <div class="graffiti-grid">
+          <div class="graffiti-piece">
+            <div class="graffiti-image-placeholder">[IMAGE: Graffiti Piece #1]</div>
+            <div class="graffiti-label">Piece 1</div>
+          </div>
+          <div class="graffiti-piece">
+            <div class="graffiti-image-placeholder">[IMAGE: Graffiti Piece #2]</div>
+            <div class="graffiti-label">Piece 2</div>
+          </div>
+          <div class="graffiti-piece">
+            <div class="graffiti-image-placeholder">[IMAGE: Graffiti Piece #3]</div>
+            <div class="graffiti-label">Piece 3</div>
+          </div>
+          <div class="graffiti-piece">
+            <div class="graffiti-image-placeholder">[IMAGE: Graffiti Piece #4]</div>
+            <div class="graffiti-label">Piece 4</div>
+          </div>
+        </div>
+
+        <div class="scroll-cue">↓ scroll to continue</div>
+      </div>
+    </section>
+
+    <!-- Station 3: BJJ (Brazilian Jiu-Jitsu) -->
+    <section class="station station-bjj" data-station="bjj">
+      <div class="bjj-container">
+        <div class="bjj-center">
+          <div class="bjj-image-placeholder">[IMAGE: Training/Grappling]</div>
+          <h1 class="bjj-title">BJJ</h1>
+          <p class="bjj-subtitle">Brazilian Jiu-Jitsu</p>
+        </div>
+
+        <div class="bjj-stats">
+          <div class="bjj-stat">
+            <div class="stat-number">?</div>
+            <div class="stat-label">Belt</div>
+          </div>
+          <div class="bjj-stat">
+            <div class="stat-number">~</div>
+            <div class="stat-label">Years</div>
+          </div>
+          <div class="bjj-stat">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Submissions</div>
+          </div>
+        </div>
+
+        <div class="scroll-cue">↓ scroll to continue</div>
+      </div>
+    </section>
+
+    <!-- Station 4: Art / Calm Maximalism -->
+    <section class="station station-art" data-station="art">
+      <div class="art-container">
+        <div class="art-header">
+          <h1>CALM MAXIMALISM</h1>
+          <p class="art-subtitle">Layered. Considered. Intentional.</p>
+        </div>
+
+        <div class="art-gallery">
+          <div class="art-piece art-piece-1">
+            <div class="art-image">[IMAGE: Own Work #1]</div>
+            <div class="art-meta">Personal Series</div>
+          </div>
+          <div class="art-piece art-piece-2">
+            <div class="art-image">[IMAGE: Inspired Artist #1]</div>
+            <div class="art-meta">Inspiration</div>
+          </div>
+          <div class="art-piece art-piece-3">
+            <div class="art-image">[IMAGE: Own Work #2]</div>
+            <div class="art-meta">Process</div>
+          </div>
+          <div class="art-piece art-piece-4">
+            <div class="art-image">[IMAGE: Aesthetic Study]</div>
+            <div class="art-meta">Aesthetic</div>
+          </div>
+          <div class="art-piece art-piece-5">
+            <div class="art-image">[IMAGE: Collaboration]</div>
+            <div class="art-meta">Collaboration</div>
+          </div>
+        </div>
+
+        <div class="scroll-cue">↓ scroll to continue</div>
+      </div>
+    </section>
+
+    <!-- Station 5: Yohji Yamamoto / Fashion -->
+    <section class="station station-fashion" data-station="fashion">
+      <div class="fashion-container">
+        <div class="fashion-left">
+          <div class="fashion-image-large">[IMAGE: Yohji/Fashion Piece]</div>
+        </div>
+        <div class="fashion-right">
+          <div class="fashion-content">
+            <h1>YOHJI YAMAMOTO</h1>
+            <div class="fashion-divider"></div>
+            <div class="fashion-philosophy">
+              <div class="philosophy-item">
+                <span class="philosophy-label">ANTI-MAINSTREAM</span>
+              </div>
+              <div class="philosophy-item">
+                <span class="philosophy-label">DECONSTRUCTION</span>
+              </div>
+              <div class="philosophy-item">
+                <span class="philosophy-label">WABI-SABI</span>
+              </div>
+              <div class="philosophy-item">
+                <span class="philosophy-label">DARKNESS</span>
+              </div>
+              <div class="philosophy-item">
+                <span class="philosophy-label">INTENTIONALITY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scroll-cue">← scroll back to start</div>
+      </div>
+    </section>
   `;
 
   // Desktop icons will be set up after all functions are defined (see end of initApp)
@@ -2945,6 +3067,37 @@ function setGlobalCursor() {
 }
 
 // Run after a short delay to ensure 98.css has loaded, and on window load
+// ============================================
+// SCROLL DETECTION - Update identity card per station
+// ============================================
+const updateIdentityCardStyle = () => {
+  const identityCard = document.querySelector(".identity-card");
+  if (!identityCard) return;
+
+  const stations = document.querySelectorAll(".station");
+  const scrollY = window.scrollY + window.innerHeight / 2;
+
+  for (const station of stations) {
+    const stationTop = station.offsetTop;
+    const stationBottom = stationTop + station.offsetHeight;
+
+    if (scrollY >= stationTop && scrollY < stationBottom) {
+      const stationClass = station.className.match(/station-\w+/)?.[0];
+      stations.forEach((s) => {
+        const sClass = s.className.match(/station-\w+/)?.[0];
+        identityCard.classList.remove(sClass);
+      });
+      if (stationClass) {
+        identityCard.classList.add(stationClass);
+      }
+      break;
+    }
+  }
+};
+
+window.addEventListener("scroll", updateIdentityCardStyle);
+window.addEventListener("load", updateIdentityCardStyle);
+
 const setupCursor = () => {
   setGlobalCursor();
   window.addEventListener("load", setGlobalCursor, { once: true });
