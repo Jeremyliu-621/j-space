@@ -28,3 +28,6 @@ src/assets/j-space-gif.gif
 # Temporary directories
 temp-98-components
 
+# Claude analysis files
+.claude/
+
