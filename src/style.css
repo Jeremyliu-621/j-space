@@ -271,162 +271,57 @@ win98-window[resizable] {
    ============================================ */
 
 /* ============================================
-   DEFAULT WINDOW POSITIONS (Large Screens)
-   Only applies to screens wider than 1536px
-   This allows window resizing to work properly on smaller screens
+   DESKTOP LAYOUT (>=1065px)
+   Single vw/vh-based layout that scales proportionally
    ============================================ */
-@media screen and (min-width: 1536px) {
+@media screen and (min-width: 1065px) {
   .window-about-me {
     top: 12vh;
-    left: 26.5vh;
-    width: 55vh;
-    height: 440px;
+    left: 13.5vw;
+    width: 29vw;
+    height: 55vh;
+  }
+
+  .window-projects {
+    top: 2vh;
+    left: 39vw;
+    width: 33vw;
+    height: 88vh;
   }
 
   .window-skills {
-    bottom: 43vh;
-    right: 12vh;
-    width: 42vh;
+    top: 12vh;
+    right: 2vw;
+    width: 20vw;
     height: 35vh;
   }
 
   .window-hobbies {
-    bottom: 16vh;
-    right: 15vh;
-    width: 38vh;
+    bottom: 8vh;
+    right: 3vw;
+    width: 18vw;
     height: 24vh;
   }
 
-  .window-projects {
-    top: 20px;
-    left: 85.5vh;
-    width: 35vw;
-    height: 88vh;
-  }
-
   .window-interactive {
-    bottom: 8vh;
-    left: 44vh;
-    width: 32vh;
-    height: 18.5vh;
+    bottom: 6vh;
+    left: 15vw;
+    width: 18vw;
+    height: 18vh;
   }
 }
 
 /* ============================================
-   BREAKPOINT 1: Medium-Large Screens
-   (1301px - 1400px)
+   FONT SCALING for narrower desktop screens
    ============================================ */
-@media screen and (min-width: 1290px) and (max-width: 1535px) {
-  .window-about-me {
-    top: 96px; /* 12vh ≈ 96px */
-    left: 160px; /* 20vh ≈ 160px */
-    width: 330px; /* 55vh ≈ 440px */
-    min-width: 250px;
-    max-width: none;
+@media screen and (min-width: 1065px) and (max-width: 1400px) {
+  .win98-window .window-body {
+    font-size: 0.85em;
   }
 
-  .window-skills {
-    bottom: 294px; /* 43vh ≈ 344px */
-    right: 12vh;
-    width: 304px; /* 38vh ≈ 304px */
-    height: 244px;
-  }
-
-  .window-hobbies {
-    bottom: 74px; /* 16vh ≈ 128px */
-    right: 15vh;
-    width: 240px; /* 35vh ≈ 280px */
-    height: 200px;
-  }
-
-  .window-projects {
-    top: 20px;
-    left: 506px; /* 77vh ≈ 616px */
-    width: 446px; /* 62vh ≈ 496px */
-    height: 600px;
-  }
-
-  .window-interactive {
-    bottom: 35px; /* 2vh ≈ 16px */
-    left: 250px; /* 40vh ≈ 320px */
-    width: 224px; /* 28vh ≈ 224px */
-  }
-}
-
-/* ============================================
-   BREAKPOINT 2: Medium Screens (Tablets/Laptops)
-   (1065px - 1300px)
-   ============================================ */
-@media screen and (min-width: 1065px) and (max-width: 1289px) {
-  .window-about-me {
-    left: 140px;
-    width: 280px;
-    height: 320px;
-    min-height: 200px;
-    top: 73px;
-  }
-
-  .window-about-me p {
-    display: none;
-  }
-
-  .window-skills {
-    left: 170px;
-    width: 250px;
-    bottom: 65px;
-    height: 190px;
-  }
-
-  .window-hobbies {
-    left: 849px;
-    width: 200px;
-    top: 140px;
-    height: 200px;
-  }
-
-  .window-projects {
-    left: 435px;
-    width: 400px;
-    height: 600px;
-    top: 10px;
-  }
-
-  .window-interactive {
-    bottom: 156px;
-    left: 855px;
-    width: 180px;
-  }
-
-  /* Stack project images below title */
-  .window-projects .tab-pane[data-tab-content="all"] > div {
-    flex-direction: column !important;
-  }
-
-  /* Project images - stacked layout */
-  .window-projects .project-list-image {
-    float: none !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    margin-top: 8px !important;
-    margin-bottom: 8px !important;
-    margin-left: 0 !important;
-    max-height: 180px !important;
-    object-fit: cover !important;
-  }
-
-  /* Individual project tab images */
-  .window-projects .tab-pane:not([data-tab-content="all"]) img {
-    max-width: 400px;
-    height: 140px;
-  }
-
-  /* Hide icons in all buttons */
-  .social-btn img,
-  button img,
-  a[href*="github"] img,
-  a[href*="http"] img {
-    display: none;
+  .win98-window .window-body h2,
+  .win98-window .window-body h3 {
+    font-size: 0.9em;
   }
 }
 
