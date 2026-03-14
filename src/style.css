@@ -277,35 +277,35 @@ win98-window[resizable] {
 @media screen and (min-width: 1065px) {
   .window-about-me {
     top: 10vh;
-    left: 7vw;
+    left: 10vw;
     width: 22vw;
     height: 55vh;
   }
 
   .window-projects {
     top: 2vh;
-    left: 30vw;
+    left: 33vw;
     width: 42vw;
     height: 88vh;
   }
 
   .window-skills {
-    top: 10vh;
-    right: 1.5vw;
-    width: 19vw;
+    top: 13vh;
+    right: 6vw;
+    width: 18vw;
     height: 35vh;
   }
 
   .window-hobbies {
-    bottom: 8vh;
-    right: 1.5vw;
+    bottom: 17vh;
+    right: 5vw;
     width: 18vw;
     height: 24vh;
   }
 
   .window-interactive {
-    bottom: 6vh;
-    left: 8vw;
+    bottom: 10vh;
+    left: 16vw;
     width: 16vw;
     height: 18vh;
   }
