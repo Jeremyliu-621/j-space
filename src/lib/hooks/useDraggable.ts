@@ -1,0 +1,98 @@
+import { useCallback, useRef } from 'react';
+
+interface DragOptions {
+  onDragEnd?: (left: number, top: number) => void;
+  constrainTop?: number; // minimum top value
+}
+
+export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, options: DragOptions = {}) {
+  const isDragging = useRef(false);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only drag from title bar area (caller should attach this to title bar)
+    if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+    e.preventDefault();
+
+    const el = elementRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    // Create ghost outline
+    const ghost = document.createElement('div');
+    ghost.style.cssText = `
+      position: fixed; width: ${rect.width}px; height: ${rect.height}px;
+      left: ${rect.left}px; top: ${rect.top}px;
+      border: 2px solid white; mix-blend-mode: difference;
+      z-index: 99999; pointer-events: none; box-sizing: border-box;
+    `;
+    document.body.appendChild(ghost);
+
+    isDragging.current = true;
+
+    const onMouseMove = (me: MouseEvent) => {
+      ghost.style.left = `${me.clientX - offsetX}px`;
+      ghost.style.top = `${Math.max(options.constrainTop ?? 0, me.clientY - offsetY)}px`;
+    };
+
+    const onMouseUp = (ue: MouseEvent) => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      ghost.remove();
+      isDragging.current = false;
+
+      const newLeft = ue.clientX - offsetX;
+      const newTop = Math.max(options.constrainTop ?? 0, ue.clientY - offsetY);
+      options.onDragEnd?.(newLeft, newTop);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [elementRef, options]);
+
+  // Touch support
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+
+    const el = elementRef.current;
+    if (!el) return;
+
+    const touch = e.touches[0];
+    const rect = el.getBoundingClientRect();
+    const offsetX = touch.clientX - rect.left;
+    const offsetY = touch.clientY - rect.top;
+
+    // Check if touch is in the title bar area (~30px from top)
+    if (touch.clientY - rect.top > 30) return;
+
+    e.preventDefault();
+    isDragging.current = true;
+
+    const onTouchMove = (me: TouchEvent) => {
+      me.preventDefault();
+      const t = me.touches[0];
+      el.style.left = `${t.clientX - offsetX}px`;
+      el.style.top = `${Math.max(options.constrainTop ?? 0, t.clientY - offsetY)}px`;
+    };
+
+    const onTouchEnd = (ue: TouchEvent) => {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      document.removeEventListener('touchcancel', onTouchEnd);
+      isDragging.current = false;
+
+      const t = ue.changedTouches[0];
+      const newLeft = t.clientX - offsetX;
+      const newTop = Math.max(options.constrainTop ?? 0, t.clientY - offsetY);
+      options.onDragEnd?.(newLeft, newTop);
+    };
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+    document.addEventListener('touchcancel', onTouchEnd);
+  }, [elementRef, options]);
+
+  return { onMouseDown, onTouchStart, isDragging };
+}
