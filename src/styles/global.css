@@ -155,6 +155,11 @@ html {
   margin-bottom: 3px;
 }
 
+.identity-initial {
+  font-style: italic;
+  font-size: 1.3em;
+}
+
 .identity-links {
   display: flex;
   gap: 4px;
@@ -641,6 +646,11 @@ html {
 .station-win98 .window {
   display: flex;
   flex-direction: column;
+}
+
+/* Flat gray title bar for all windows */
+.station-win98 .window .title-bar {
+  background: #808080 !important;
 }
 
 /* Constant opacity for all windows */
@@ -1335,7 +1345,8 @@ html {
 
 .project-tab {
   padding: 6px 12px;
-  background: #c0c0c0;
+  background: var(--palette-color-1, #c0c0c0);
+  color: var(--palette-color-4, #000000);
   border: none;
   border-right: 1px solid #808080;
   cursor: pointer;

@@ -12,11 +12,19 @@ import { getImageUrl } from '../../lib/images';
 import * as content from '../../lib/content';
 
 // Typewriter title component
-function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, trigger = true }: {
-  text: string; tag?: 'h1' | 'h2' | 'h3' | 'p'; className?: string; style?: React.CSSProperties; trigger?: boolean;
+function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, trigger = true, styledIndices }: {
+  text: string; tag?: 'h1' | 'h2' | 'h3' | 'p'; className?: string; style?: React.CSSProperties; trigger?: boolean; styledIndices?: { indices: number[]; style: React.CSSProperties };
 }) {
   const { displayText } = useTypewriter(text, { trigger });
-  return <Tag className={className} style={{ minHeight: '1.2em', ...style }}>{displayText}</Tag>;
+  const rendered = styledIndices
+    ? displayText.split('').map((ch, i) => {
+        const originalIndex = text.indexOf(displayText.charAt(0)) === -1 ? i : i;
+        return styledIndices.indices.includes(i)
+          ? <span key={i} style={styledIndices.style}>{ch}</span>
+          : <React.Fragment key={i}>{ch}</React.Fragment>;
+      })
+    : displayText;
+  return <Tag className={className} style={{ minHeight: '1.2em', ...style }}>{rendered}</Tag>;
 }
 
 // Project card in list view
@@ -197,7 +205,7 @@ export default function Win98Station() {
         {/* About Me Window */}
         {isWindowAlive('aboutMe') && (
           <Window id="aboutMe" title="About Me.exe" resizable className="window-about-me window-pop-open" onClose={() => handleCloseWindow('aboutMe')}>
-            <TypewriterTitle text="Jeremy Liu" tag="h2" trigger={windowsVisible.aboutMe} style={{ color: 'var(--palette-color-1, #000000)' }} />
+            <TypewriterTitle text="Jeremy Liu" tag="h2" trigger={windowsVisible.aboutMe} style={{ color: 'var(--palette-color-1, #000000)' }} styledIndices={{ indices: [0, 7], style: { fontStyle: 'italic', fontSize: '1.3em' } }} />
             <p className="bold-title">{content.aboutMe.title}</p>
             <p>{content.aboutMe.bio}</p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
