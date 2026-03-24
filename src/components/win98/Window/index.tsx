@@ -19,10 +19,14 @@ type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 const RESIZE_DIRS: ResizeDir[] = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
 
 const RESIZE_CURSOR: Record<ResizeDir, string> = {
-  n: 'ns-resize', s: 'ns-resize',
-  e: 'ew-resize', w: 'ew-resize',
-  ne: 'nesw-resize', sw: 'nesw-resize',
-  nw: 'nwse-resize', se: 'nwse-resize',
+  n: `url('/cursors/ns-resize.svg') 6 16, ns-resize`,
+  s: `url('/cursors/ns-resize.svg') 6 16, ns-resize`,
+  e: `url('/cursors/ew-resize.svg') 16 6, ew-resize`,
+  w: `url('/cursors/ew-resize.svg') 16 6, ew-resize`,
+  ne: `url('/cursors/nesw-resize.svg') 16 16, nesw-resize`,
+  sw: `url('/cursors/nesw-resize.svg') 16 16, nesw-resize`,
+  nw: `url('/cursors/nwse-resize.svg') 16 16, nwse-resize`,
+  se: `url('/cursors/nwse-resize.svg') 16 16, nwse-resize`,
 };
 
 const RESIZE_POS: Record<ResizeDir, React.CSSProperties> = {

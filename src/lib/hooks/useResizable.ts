@@ -9,10 +9,14 @@ interface ResizeOptions {
 }
 
 const CURSOR_MAP: Record<ResizeDir, string> = {
-  n: 'ns-resize', s: 'ns-resize',
-  e: 'ew-resize', w: 'ew-resize',
-  ne: 'nesw-resize', sw: 'nesw-resize',
-  nw: 'nwse-resize', se: 'nwse-resize',
+  n: `url('/cursors/ns-resize.svg') 6 16, ns-resize`,
+  s: `url('/cursors/ns-resize.svg') 6 16, ns-resize`,
+  e: `url('/cursors/ew-resize.svg') 16 6, ew-resize`,
+  w: `url('/cursors/ew-resize.svg') 16 6, ew-resize`,
+  ne: `url('/cursors/nesw-resize.svg') 16 16, nesw-resize`,
+  sw: `url('/cursors/nesw-resize.svg') 16 16, nesw-resize`,
+  nw: `url('/cursors/nwse-resize.svg') 16 16, nwse-resize`,
+  se: `url('/cursors/nwse-resize.svg') 16 16, nwse-resize`,
 };
 
 export function useResizable(elementRef: React.RefObject<HTMLElement | null>, options: ResizeOptions = {}) {
@@ -30,17 +34,7 @@ export function useResizable(elementRef: React.RefObject<HTMLElement | null>, op
     const startX = e.clientX;
     const startY = e.clientY;
 
-    // Create ghost
-    const ghost = document.createElement('div');
-    ghost.style.cssText = `
-      position: fixed; width: ${startRect.width}px; height: ${startRect.height}px;
-      left: ${startRect.left}px; top: ${startRect.top}px;
-      border: 2px solid white; mix-blend-mode: difference;
-      z-index: 99999; pointer-events: none; box-sizing: border-box;
-    `;
-    document.body.appendChild(ghost);
-
-    // Create overlay for cursor
+    // Overlay to lock cursor during resize
     const overlay = document.createElement('div');
     overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99998; cursor: ${CURSOR_MAP[dir]};`;
     document.body.appendChild(overlay);
@@ -58,13 +52,17 @@ export function useResizable(elementRef: React.RefObject<HTMLElement | null>, op
 
     const onMouseMove = (me: MouseEvent) => {
       const r = calc(me.clientX - startX, me.clientY - startY);
-      Object.assign(ghost.style, { width: `${r.width}px`, height: `${r.height}px`, left: `${r.left}px`, top: `${r.top}px` });
+      el.style.width = `${r.width}px`;
+      el.style.height = `${r.height}px`;
+      el.style.left = `${r.left}px`;
+      el.style.top = `${r.top}px`;
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
     };
 
     const onMouseUp = (ue: MouseEvent) => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      ghost.remove();
       overlay.remove();
 
       const r = calc(ue.clientX - startX, ue.clientY - startY);

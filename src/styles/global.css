@@ -31,7 +31,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-family: var(--custom-font, "Jersey 10", sans-serif);
-  cursor: default !important;
+  cursor: url('/cursors/default.svg') 4 0, default;
   position: relative;
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
@@ -64,12 +64,13 @@ body::before {
   mix-blend-mode: multiply;
 }
 
-/* Apply Windows 98 cursor to all elements */
-* {
-  cursor: default !important;
+/* Vintage white cursor everywhere */
+*,
+html {
+  cursor: url('/cursors/default.svg') 4 0, default;
 }
 
-/* Keep pointer cursor for clickable elements */
+/* Pointer hand for clickable elements */
 a,
 button,
 .social-btn,
@@ -78,11 +79,15 @@ button,
 a:hover,
 button:hover,
 .social-btn:hover {
-  cursor: pointer !important;
+  cursor: url('/cursors/pointer.svg') 10 1, pointer !important;
 }
 
-html {
-  cursor: default !important;
+/* Move cursor for title bars */
+.title-bar {
+  cursor: url('/cursors/move.svg') 16 16, move !important;
+}
+.title-bar button {
+  cursor: url('/cursors/pointer.svg') 10 1, pointer !important;
 }
 
 #scroll-container {

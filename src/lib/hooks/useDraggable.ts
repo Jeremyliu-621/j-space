@@ -22,6 +22,11 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
 
     isDragging.current = true;
 
+    // Overlay to lock move cursor during drag
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99998; cursor: url('/cursors/move.svg') 16 16, move;`;
+    document.body.appendChild(overlay);
+
     const onMouseMove = (me: MouseEvent) => {
       const newLeft = me.clientX - offsetX;
       const newTop = Math.max(options.constrainTop ?? 0, me.clientY - offsetY);
@@ -34,6 +39,7 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const onMouseUp = (ue: MouseEvent) => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      overlay.remove();
       isDragging.current = false;
 
       const newLeft = ue.clientX - offsetX;
