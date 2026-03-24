@@ -166,6 +166,8 @@ export default function Win98Station() {
   const isWindowAlive = (id: string) => !closedWindows.has(id) && windowsVisible[id];
 
   const btnStyle = theme.getButtonStyle();
+  const borderColor = theme.palette.colors[1];
+  const itemBg = theme.paletteKey === 'default' ? '#e0e0e0' : theme.palette.colors[3];
 
   // Start menu items
   const menuItems = [
@@ -199,8 +201,8 @@ export default function Win98Station() {
             <p className="bold-title">{content.aboutMe.title}</p>
             <p>{content.aboutMe.bio}</p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-              <img src={getImageUrl('cruisesunset') || ''} alt="Cruise Sunset" style={{ width: '60%', height: 100, margin: '8px 2px', border: '2px solid #808080', boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
-              <img src={getImageUrl('pixelbjj') || ''} alt="bjj pixel art" style={{ width: '60%', height: 100, margin: '8px 2px', border: '2px solid #808080', boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
+              <img src={getImageUrl('cruisesunset') || ''} alt="Cruise Sunset" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
+              <img src={getImageUrl('pixelbjj') || ''} alt="bjj pixel art" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
             </div>
             <div className="social-buttons-grid">
               {content.socialLinks.map(link => (
@@ -251,7 +253,7 @@ export default function Win98Station() {
                 { src: 'Rodney', alt: 'Skating', maxWidth: 100 },
                 { src: 'stop', alt: 'graffiti', maxWidth: 100 },
               ].map(img => (
-                <img key={img.src} src={getImageUrl(img.src) || ''} alt={img.alt} style={{ maxWidth: img.maxWidth, width: 'auto', height: 'auto', objectFit: 'contain', display: 'block', margin: '8px 0 0 0', border: '2px solid #808080' }} />
+                <img key={img.src} src={getImageUrl(img.src) || ''} alt={img.alt} style={{ maxWidth: img.maxWidth, width: 'auto', height: 'auto', objectFit: 'contain', display: 'block', margin: '8px 0 0 0', border: `2px solid ${borderColor}` }} />
               ))}
             </div>
           </Window>
@@ -290,7 +292,7 @@ export default function Win98Station() {
           <Window id="interactive" title="Interactive.exe" resizable className="window-interactive window-pop-open" onClose={() => handleCloseWindow('interactive')}>
             <div style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 10 }}>
               <TypewriterTitle text="you can interact with windows!" tag="p" trigger={windowsVisible.interactive} style={{ margin: 0, fontSize: '1.15em', flex: 1 }} />
-              <img src={getImageUrl('ascii-gif') || ''} alt="Bear" style={{ maxWidth: 100, height: 'auto', flexShrink: 0, border: '2px solid #808080' }} />
+              <img src={getImageUrl('ascii-gif') || ''} alt="Bear" style={{ maxWidth: 100, height: 'auto', flexShrink: 0, border: `2px solid ${borderColor}` }} />
             </div>
           </Window>
         )}
@@ -299,27 +301,27 @@ export default function Win98Station() {
         {folderOpen && (
           <Window id="folder" title="Folder.exe" resizable style={{ top: 100, left: 100, width: 600, height: 500 }} onClose={() => { setFolderOpen(false); handleCloseWindow('folder'); }}>
             <h3 style={{ marginTop: 0, marginBottom: 8, fontWeight: 'bold' }}>Images</h3>
-            <div style={{ marginBottom: 20, padding: 8, background: '#e0e0e0', border: '1px solid #c0c0c0' }}>
+            <div style={{ marginBottom: 20, padding: 8, background: itemBg, border: `1px solid ${borderColor}` }}>
               {content.ASSET_IMAGES.map((img, index) => {
                 const imgUrl = getImageUrl(img.split('.')[0]);
                 return (
                   <div key={img} style={{ display: 'inline-block', margin: 8, textAlign: 'center', verticalAlign: 'top', width: 100, cursor: 'pointer' }}
                     onDoubleClick={() => openImageViewer(index)}>
-                    <img src={imgUrl || ''} alt={img} style={{ width: 64, height: 64, objectFit: 'contain', border: '1px solid #808080', background: '#fff', padding: 2, display: 'block', margin: '0 auto 4px auto' }} />
+                    <img src={imgUrl || ''} alt={img} style={{ width: 64, height: 64, objectFit: 'contain', border: `1px solid ${borderColor}`, background: '#fff', padding: 2, display: 'block', margin: '0 auto 4px auto' }} />
                     <span style={{ fontSize: '0.85em', color: '#000', display: 'block', wordBreak: 'break-word' }}>{img}</span>
                   </div>
                 );
               })}
             </div>
             <h3 style={{ marginTop: 0, marginBottom: 8, fontWeight: 'bold' }}>Source Code Files</h3>
-            <div style={{ padding: 8, background: '#e0e0e0', border: '1px solid #c0c0c0' }}>
+            <div style={{ padding: 8, background: itemBg, border: `1px solid ${borderColor}` }}>
               {[
                 { name: 'main.tsx', description: 'Main application entry point' },
                 { name: 'App.tsx', description: 'Root React component' },
                 { name: 'global.css', description: 'Global styles' },
                 { name: 'package.json', description: 'Project dependencies' },
               ].map(file => (
-                <div key={file.name} style={{ padding: '4px 8px', borderBottom: '1px solid #c0c0c0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div key={file.name} style={{ padding: '4px 8px', borderBottom: `1px solid ${borderColor}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontWeight: 'bold', minWidth: 120 }}>{file.name}</span>
                   <span style={{ color: '#666', fontSize: '0.9em' }}>{file.description}</span>
                 </div>
@@ -338,7 +340,7 @@ export default function Win98Station() {
         {/* Chatbox Window */}
         {chatboxOpen && (
           <Window id="chatbox" title="Chatbox.exe" resizable style={{ top: 100, left: 100, width: 600, height: 550 }} onClose={() => { setChatboxOpen(false); handleCloseWindow('chatbox'); }}>
-            <iframe src="https://www3.cbox.ws/box/?boxid=3551058&boxtag=a6HwaA" width="100%" height="100%" allowTransparency frameBorder={0} style={{ border: '1px solid #808080', background: '#fff' }} />
+            <iframe src="https://www3.cbox.ws/box/?boxid=3551058&boxtag=a6HwaA" width="100%" height="100%" allowTransparency frameBorder={0} style={{ border: `1px solid ${borderColor}`, background: '#fff' }} />
           </Window>
         )}
 
@@ -369,7 +371,7 @@ export default function Win98Station() {
           <Window id="thanks" title="Thank you!.exe" resizable style={{ top: 50, left: 50, width: 600, height: 500 }} onClose={() => { setThanksOpen(false); handleCloseWindow('thanks'); }}>
             <h2 style={{ marginTop: 0, marginBottom: 20, fontWeight: 'bold', fontSize: '1.8em', textAlign: 'center' }}>Thank You!</h2>
             {content.thanks.map((item, i) => (
-              <div key={i} className="thanks-item" style={{ marginBottom: 20, padding: 8, border: `1px solid ${theme.paletteKey === 'default' ? '#808080' : theme.palette.colors[1]}`, backgroundColor: theme.paletteKey === 'default' ? '#e0e0e0' : theme.palette.colors[3] }}>
+              <div key={i} className="thanks-item" style={{ marginBottom: 20, padding: 8, border: `1px solid ${borderColor}`, backgroundColor: itemBg }}>
                 <h3 style={{ margin: '4px 0 8px 2px', fontWeight: 'bold', fontSize: '1.2em' }}>
                   {item.link ? (
                     <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: '#000080', textDecoration: 'underline', padding: '3px 6px' }}>{item.name}</a>

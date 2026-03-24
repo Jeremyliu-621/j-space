@@ -11,10 +11,10 @@
 
 :root {
   --custom-font: "Jersey 10", sans-serif;
-  --palette-color-1: #c0c0c0;
-  --palette-color-2: #808080;
-  --palette-color-3: #000000;
-  --palette-color-4: #ffffff;
+  --palette-color-1: #000000;  /* darkest: buttons bg, h2 color */
+  --palette-color-2: #808080;  /* primary: borders */
+  --palette-color-3: #e0e0e0;  /* lightest: window body bg */
+  --palette-color-4: #e0e0e0;  /* lightest: button text, light fills */
 }
 
 body {
@@ -911,7 +911,7 @@ html {
   width: 250px;
   min-width: 200px;
   height: 180px;
-  border: 1px solid #808080;
+  border: 1px solid var(--palette-color-2, #808080);
   object-fit: cover;
   object-position: center;
   margin: 0 0 8px 8px;
@@ -983,7 +983,7 @@ html {
   width: 99.3%;
   max-width: 500px;
   height: 170px;
-  border: 2px solid #808080;
+  border: 2px solid var(--palette-color-2, #808080);
   margin-bottom: 12px;
   display: block;
   object-fit: cover;
@@ -1031,6 +1031,8 @@ html {
   min-height: 0;
   padding: 8px;
   position: relative;
+  background-color: var(--palette-color-3, #e0e0e0);
+  border: 2px solid var(--palette-color-2, #808080);
 }
 
 /* Window body variations */
@@ -1244,8 +1246,8 @@ html {
 .palette-option {
   margin-bottom: 12px;
   padding: 8px;
-  border: 1px solid #808080;
-  background: #e0e0e0;
+  border: 1px solid var(--palette-color-2, #808080);
+  background: var(--palette-color-3, #e0e0e0);
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -1429,7 +1431,7 @@ html {
 
 .window-body .viewer-image-inner {
   background: inherit !important;
-  border: 2px solid #808080 !important;
+  border: 2px solid var(--palette-color-2, #808080) !important;
 }
 
 /* Icons in project tabs (including image viewer buttons) */

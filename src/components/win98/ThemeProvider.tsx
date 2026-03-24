@@ -77,11 +77,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Set CSS variables on :root whenever palette changes
   useEffect(() => {
     const colors = palette.colors;
-    document.documentElement.style.setProperty('--palette-color-1', colors[0]);
-    document.documentElement.style.setProperty('--palette-color-2', colors[1]);
-    document.documentElement.style.setProperty('--palette-color-3', colors[2]);
-    document.documentElement.style.setProperty('--palette-color-4', colors[3]);
-  }, [palette]);
+    if (paletteKey === 'default') {
+      // Default palette resets to hardcoded Win98 visual defaults
+      document.documentElement.style.setProperty('--palette-color-1', '#000000');
+      document.documentElement.style.setProperty('--palette-color-2', '#808080');
+      document.documentElement.style.setProperty('--palette-color-3', '#e0e0e0');
+      document.documentElement.style.setProperty('--palette-color-4', '#e0e0e0');
+    } else {
+      document.documentElement.style.setProperty('--palette-color-1', colors[0]);
+      document.documentElement.style.setProperty('--palette-color-2', colors[1]);
+      document.documentElement.style.setProperty('--palette-color-3', colors[3]);
+      document.documentElement.style.setProperty('--palette-color-4', colors[3]);
+    }
+  }, [palette, paletteKey]);
 
   const getDesktopBackground = useCallback((): React.CSSProperties => {
     if (paletteKey === 'dark') {
@@ -121,9 +129,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const getWindowBodyStyle = useCallback((): React.CSSProperties => {
     if (paletteKey === 'default') {
-      return {};
+      return { backgroundColor: '#e0e0e0', borderColor: '#808080' };
     }
-    return { backgroundColor: palette.colors[3] };
+    return { backgroundColor: palette.colors[3], borderColor: palette.colors[1] };
   }, [paletteKey, palette]);
 
   const getButtonStyle = useCallback((): React.CSSProperties => {
