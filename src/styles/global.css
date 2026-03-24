@@ -11,10 +11,14 @@
 
 :root {
   --custom-font: "Jersey 10", sans-serif;
-  --palette-color-1: #000000;  /* darkest: buttons bg, h2 color */
-  --palette-color-2: #808080;  /* primary: borders */
-  --palette-color-3: #e0e0e0;  /* lightest: window body bg */
-  --palette-color-4: #e0e0e0;  /* lightest: button text, light fills */
+  --palette-color-1: #000000;
+  /* darkest: buttons bg, h2 color */
+  --palette-color-2: #808080;
+  /* primary: borders */
+  --palette-color-3: #e0e0e0;
+  /* lightest: window body bg */
+  --palette-color-4: #e0e0e0;
+  /* lightest: button text, light fills */
 }
 
 body {
@@ -44,22 +48,18 @@ body::before {
   pointer-events: none;
   z-index: 9999;
   opacity: 0.745;
-  background-image: repeating-linear-gradient(
-      0deg,
+  background-image: repeating-linear-gradient(0deg,
       rgba(0, 0, 0, 0.05) 0px,
       transparent 0px,
       transparent 1px,
       rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px
-    ),
-    repeating-linear-gradient(
-      90deg,
+      transparent 2px),
+    repeating-linear-gradient(90deg,
       rgba(0, 0, 0, 0.05) 0px,
       transparent 0px,
       transparent 1px,
       rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px
-    );
+      transparent 2px);
   background-size: 3px 3px;
   mix-blend-mode: multiply;
 }
@@ -121,8 +121,15 @@ html {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(10px);
+  }
 }
 
 /* Identity Card - Persistent across all stations */
@@ -282,13 +289,11 @@ html {
   left: 0;
   right: 0;
   bottom: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 10px,
-    rgba(0, 0, 0, 0.1) 10px,
-    rgba(0, 0, 0, 0.1) 20px
-  );
+  background: repeating-linear-gradient(45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.1) 10px,
+      rgba(0, 0, 0, 0.1) 20px);
   pointer-events: none;
 }
 
@@ -305,8 +310,15 @@ html {
 }
 
 @keyframes graffiti-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 /* ============================================
@@ -676,6 +688,7 @@ html {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -718,15 +731,15 @@ html {
   }
 
   .window-skills {
-    top: 13vh;
-    right: 6vw;
+    top: 15vh;
+    right: 4.75vw;
     width: 18vw;
     height: 35vh;
   }
 
   .window-hobbies {
     bottom: 17vh;
-    right: 5vw;
+    right: 4.5vw;
     width: 18vw;
     height: 24vh;
   }
@@ -915,18 +928,6 @@ html {
   }
 }
 
-/* Project list images in "All" tab - float right so text wraps around */
-.project-list-image {
-  float: right;
-  width: 250px;
-  min-width: 200px;
-  height: 180px;
-  border: 1px solid var(--palette-color-2, #808080);
-  object-fit: cover;
-  object-position: center;
-  margin: 0 0 8px 8px;
-}
-
 /* Project card styles */
 .project-card {
   margin: 4px 0;
@@ -934,10 +935,23 @@ html {
   border: 1px solid #808080;
   background: #e0e0e0;
   overflow: hidden;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
-.project-card-content {
-  width: 100%;
+.project-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-card-image {
+  flex: 0 0 auto;
+  width: 250px;
+  height: 180px;
+  border: 1px solid var(--palette-color-2, #808080);
+  object-fit: cover;
+  object-position: center;
 }
 
 .project-card-title {
@@ -965,7 +979,6 @@ html {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
-  clear: both;
 }
 
 /* Ensure buttons can shrink but maintain minimum usable size */

@@ -37,9 +37,8 @@ function ProjectCard({ project, index, onSpecifics }: {
 
   return (
     <div className="project-card">
-      <div className="project-card-content">
+      <div className="project-card-text">
         <h3 className="project-card-title">{project.title}</h3>
-        {imgUrl && <img src={imgUrl} className="project-list-image" alt={project.title} />}
         <p className="project-card-description">{project.description}</p>
         {(project.front || project.back) && (
           <p className="project-card-stack">
@@ -63,6 +62,7 @@ function ProjectCard({ project, index, onSpecifics }: {
           </a>
         </div>
       </div>
+      {imgUrl && <img src={imgUrl} className="project-card-image" alt={project.title} />}
     </div>
   );
 }
