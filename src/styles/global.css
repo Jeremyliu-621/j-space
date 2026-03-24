@@ -665,6 +665,28 @@ html {
   background: #808080 !important;
 }
 
+/* Window control buttons spacing */
+.title-bar-controls {
+  display: flex;
+  gap: 0;
+}
+
+.title-bar-controls button {
+  width: 16px;
+  height: 14px;
+  padding: 1px;
+  margin: 1px 0 1px 3px;
+  flex-shrink: 0;
+}
+
+.title-bar-controls button:first-child {
+  margin-left: 1px;
+}
+
+.title-bar-controls button:last-child {
+  margin-right: 1px;
+}
+
 /* Constant opacity for all windows */
 .window-about-me,
 .window-skills,

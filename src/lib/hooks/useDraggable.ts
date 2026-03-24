@@ -20,27 +20,20 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
-    // Create ghost outline
-    const ghost = document.createElement('div');
-    ghost.style.cssText = `
-      position: fixed; width: ${rect.width}px; height: ${rect.height}px;
-      left: ${rect.left}px; top: ${rect.top}px;
-      border: 2px solid white; mix-blend-mode: difference;
-      z-index: 99999; pointer-events: none; box-sizing: border-box;
-    `;
-    document.body.appendChild(ghost);
-
     isDragging.current = true;
 
     const onMouseMove = (me: MouseEvent) => {
-      ghost.style.left = `${me.clientX - offsetX}px`;
-      ghost.style.top = `${Math.max(options.constrainTop ?? 0, me.clientY - offsetY)}px`;
+      const newLeft = me.clientX - offsetX;
+      const newTop = Math.max(options.constrainTop ?? 0, me.clientY - offsetY);
+      el.style.left = `${newLeft}px`;
+      el.style.top = `${newTop}px`;
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
     };
 
     const onMouseUp = (ue: MouseEvent) => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      ghost.remove();
       isDragging.current = false;
 
       const newLeft = ue.clientX - offsetX;
