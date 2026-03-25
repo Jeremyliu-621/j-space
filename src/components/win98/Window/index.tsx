@@ -49,6 +49,18 @@ export default function Window({ id, title, children, resizable = false, classNa
   // Find this window's state
   const windowState = wm.windows.find(w => w.id === id);
 
+  // The drag/resize hooks set width/height directly on the DOM element.
+  // React's style prop can't clear those since it only tracks what it set itself.
+  // So we clear them manually when maximized.
+  useEffect(() => {
+    const el = windowRef.current;
+    if (!el || !windowState) return;
+    if (windowState.isMaximized) {
+      el.style.width = 'auto';
+      el.style.height = 'auto';
+    }
+  }, [windowState?.isMaximized]);
+
   // Register on mount
   useEffect(() => {
     if (!registeredRef.current) {
@@ -112,8 +124,11 @@ export default function Window({ id, title, children, resizable = false, classNa
     ...(windowState.left != null ? { left: windowState.left } : {}),
     ...(windowState.right != null ? { right: windowState.right } : {}),
     ...(windowState.bottom != null ? { bottom: windowState.bottom } : {}),
-    ...(windowState.width != null ? { width: windowState.width } : {}),
-    ...(windowState.height != null ? { height: windowState.height } : {}),
+    // When maximized, explicitly set 'auto' to override CSS class width/height.
+    // 'auto' on an abs-positioned element with left+right (or top+bottom) set stretches to fill.
+    // 'undefined' would just remove the inline style and let the CSS class win again.
+    width: windowState.isMaximized ? 'auto' : (windowState.width != null ? windowState.width : undefined),
+    height: windowState.isMaximized ? 'auto' : (windowState.height != null ? windowState.height : undefined),
   };
 
   const bodyStyle = theme.getWindowBodyStyle();

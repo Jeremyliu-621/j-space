@@ -396,8 +396,6 @@ export default function Win98Station() {
         {/* Start Menu */}
         <StartMenu items={menuItems} visible={startMenuOpen} onClose={() => setStartMenuOpen(false)} />
 
-        {/* Taskbar */}
-        <Taskbar onStartClick={() => setStartMenuOpen(prev => !prev)} startMenuOpen={startMenuOpen} />
       </Desktop>
     </section>
   );

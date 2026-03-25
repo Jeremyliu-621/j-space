@@ -65,6 +65,8 @@ export function WindowManagerProvider({ children }: { children: React.ReactNode 
             isMaximized: false,
             top: w.prevTop,
             left: w.prevLeft,
+            right: undefined,
+            bottom: undefined,
             width: w.prevWidth,
             height: w.prevHeight,
           };
@@ -76,10 +78,12 @@ export function WindowManagerProvider({ children }: { children: React.ReactNode 
           prevLeft: w.left,
           prevWidth: w.width,
           prevHeight: w.height,
-          top: '0',
-          left: '0',
-          width: '100%',
-          height: '100%',
+          top: '4px',
+          left: '4px',
+          right: '4px',
+          bottom: '4px',
+          width: undefined,
+          height: undefined,
         };
       })
     );
