@@ -16,9 +16,10 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const el = elementRef.current;
     if (!el) return;
 
-    const rect = el.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
+    const startLeft = el.offsetLeft;
+    const startTop = el.offsetTop;
+    const startX = e.clientX;
+    const startY = e.clientY;
 
     isDragging.current = true;
 
@@ -28,8 +29,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     document.body.appendChild(overlay);
 
     const onMouseMove = (me: MouseEvent) => {
-      const newLeft = me.clientX - offsetX;
-      const newTop = Math.max(options.constrainTop ?? 0, me.clientY - offsetY);
+      const newLeft = startLeft + (me.clientX - startX);
+      const newTop = Math.max(options.constrainTop ?? 0, startTop + (me.clientY - startY));
       el.style.left = `${newLeft}px`;
       el.style.top = `${newTop}px`;
       el.style.right = 'auto';
@@ -42,8 +43,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
       overlay.remove();
       isDragging.current = false;
 
-      const newLeft = ue.clientX - offsetX;
-      const newTop = Math.max(options.constrainTop ?? 0, ue.clientY - offsetY);
+      const newLeft = startLeft + (ue.clientX - startX);
+      const newTop = Math.max(options.constrainTop ?? 0, startTop + (ue.clientY - startY));
       options.onDragEnd?.(newLeft, newTop);
     };
 
@@ -60,11 +61,14 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
 
     const touch = e.touches[0];
     const rect = el.getBoundingClientRect();
-    const offsetX = touch.clientX - rect.left;
-    const offsetY = touch.clientY - rect.top;
 
     // Check if touch is in the title bar area (~30px from top)
     if (touch.clientY - rect.top > 30) return;
+
+    const startLeft = el.offsetLeft;
+    const startTop = el.offsetTop;
+    const startX = touch.clientX;
+    const startY = touch.clientY;
 
     e.preventDefault();
     isDragging.current = true;
@@ -72,8 +76,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const onTouchMove = (me: TouchEvent) => {
       me.preventDefault();
       const t = me.touches[0];
-      el.style.left = `${t.clientX - offsetX}px`;
-      el.style.top = `${Math.max(options.constrainTop ?? 0, t.clientY - offsetY)}px`;
+      el.style.left = `${startLeft + (t.clientX - startX)}px`;
+      el.style.top = `${Math.max(options.constrainTop ?? 0, startTop + (t.clientY - startY))}px`;
     };
 
     const onTouchEnd = (ue: TouchEvent) => {
@@ -83,8 +87,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
       isDragging.current = false;
 
       const t = ue.changedTouches[0];
-      const newLeft = t.clientX - offsetX;
-      const newTop = Math.max(options.constrainTop ?? 0, t.clientY - offsetY);
+      const newLeft = startLeft + (t.clientX - startX);
+      const newTop = Math.max(options.constrainTop ?? 0, startTop + (t.clientY - startY));
       options.onDragEnd?.(newLeft, newTop);
     };
 

@@ -31,6 +31,8 @@ export function useResizable(elementRef: React.RefObject<HTMLElement | null>, op
     if (!el) return;
 
     const startRect = el.getBoundingClientRect();
+    const startLeft = el.offsetLeft;
+    const startTop = el.offsetTop;
     const startX = e.clientX;
     const startY = e.clientY;
 
@@ -40,12 +42,12 @@ export function useResizable(elementRef: React.RefObject<HTMLElement | null>, op
     document.body.appendChild(overlay);
 
     const calc = (dx: number, dy: number) => {
-      let w = startRect.width, h = startRect.height, l = startRect.left, t = startRect.top;
+      let w = startRect.width, h = startRect.height, l = startLeft, t = startTop;
 
       if (dir.includes('e')) w = Math.max(minW, startRect.width + dx);
-      if (dir.includes('w')) { w = Math.max(minW, startRect.width - dx); l = startRect.left + (startRect.width - w); }
+      if (dir.includes('w')) { w = Math.max(minW, startRect.width - dx); l = startLeft + (startRect.width - w); }
       if (dir.includes('s')) h = Math.max(minH, startRect.height + dy);
-      if (dir.includes('n')) { h = Math.max(minH, startRect.height - dy); t = startRect.top + (startRect.height - h); }
+      if (dir.includes('n')) { h = Math.max(minH, startRect.height - dy); t = startTop + (startRect.height - h); }
 
       return { width: w, height: h, left: l, top: t };
     };
