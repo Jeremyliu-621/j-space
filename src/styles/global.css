@@ -31,7 +31,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-family: var(--custom-font, "Jersey 10", sans-serif);
-  cursor: url('/cursors/Normal Select.cur'), default;
+  cursor: url("/cursors/Normal Select.cur"), default;
   position: relative;
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
@@ -48,18 +48,23 @@ body::before {
   pointer-events: none;
   z-index: 9999;
   opacity: 0.745;
-  background-image: repeating-linear-gradient(0deg,
+  background-image:
+    repeating-linear-gradient(
+      0deg,
       rgba(0, 0, 0, 0.05) 0px,
       transparent 0px,
       transparent 1px,
       rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px),
-    repeating-linear-gradient(90deg,
+      transparent 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
       rgba(0, 0, 0, 0.05) 0px,
       transparent 0px,
       transparent 1px,
       rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px);
+      transparent 2px
+    );
   background-size: 3px 3px;
   mix-blend-mode: multiply;
 }
@@ -67,7 +72,7 @@ body::before {
 /* Default cursor everywhere */
 *,
 html {
-  cursor: url('/cursors/Normal Select.cur'), default;
+  cursor: url("/cursors/Normal Select.cur"), default;
 }
 
 /* Pointer hand for clickable elements */
@@ -79,95 +84,104 @@ button,
 a:hover,
 button:hover,
 .social-btn:hover {
-  cursor: url('/cursors/Link Select.cur'), pointer !important;
+  cursor: url("/cursors/Link Select.cur"), pointer !important;
 }
 
 /* Move cursor for title bars */
 .title-bar {
-  cursor: url('/cursors/Move.cur'), move !important;
+  cursor: url("/cursors/Move.cur"), move !important;
 }
 .title-bar button {
-  cursor: url('/cursors/Link Select.cur'), pointer !important;
+  cursor: url("/cursors/Link Select.cur"), pointer !important;
 }
 
 /* Grabbing / active drag */
 .title-bar:active {
-  cursor: url('/cursors/Move.cur'), grabbing !important;
+  cursor: url("/cursors/Move.cur"), grabbing !important;
 }
 
 /* Text inputs */
 input,
 textarea,
 [contenteditable] {
-  cursor: url('/cursors/Text Select.ani'), text !important;
+  cursor: url("/cursors/Text Select.ani"), text !important;
 }
 
 /* Help */
 [title],
 [data-tooltip],
 abbr {
-  cursor: url('/cursors/Help Select.cur'), help !important;
+  cursor: url("/cursors/Help Select.cur"), help !important;
 }
 
 /* Precision / crosshair */
 canvas,
 .precision {
-  cursor: url('/cursors/Precision Select.ani'), crosshair !important;
+  cursor: url("/cursors/Precision Select.ani"), crosshair !important;
 }
 
 /* Alternate select / context menu */
 *:active {
-  cursor: url('/cursors/Alternate Select.cur'), default !important;
+  cursor: url("/cursors/Alternate Select.cur"), default !important;
 }
 
 /* Unavailable / not-allowed */
 [disabled],
 [aria-disabled="true"],
 .disabled {
-  cursor: url('/cursors/Unavailable.ani'), not-allowed !important;
+  cursor: url("/cursors/Unavailable.ani"), not-allowed !important;
 }
 
 /* Resize handles — vertical */
-.window-resize-n, [style*="n-resize"],
-.window-resize-s, [style*="s-resize"] {
-  cursor: url('/cursors/Vertical Resize.cur'), ns-resize !important;
+.window-resize-n,
+[style*="n-resize"],
+.window-resize-s,
+[style*="s-resize"] {
+  cursor: url("/cursors/Vertical Resize.cur"), ns-resize !important;
 }
 
 /* Resize handles — horizontal */
-.window-resize-e, [style*="e-resize"],
-.window-resize-w, [style*="w-resize"] {
-  cursor: url('/cursors/Horizontal Resize.cur'), ew-resize !important;
+.window-resize-e,
+[style*="e-resize"],
+.window-resize-w,
+[style*="w-resize"] {
+  cursor: url("/cursors/Horizontal Resize.cur"), ew-resize !important;
 }
 
 /* Resize handles — diagonal NWSE */
-.window-resize-nw, [style*="nw-resize"],
-.window-resize-se, [style*="se-resize"] {
-  cursor: url('/cursors/Diagonal Resize 1.cur'), nwse-resize !important;
+.window-resize-nw,
+[style*="nw-resize"],
+.window-resize-se,
+[style*="se-resize"] {
+  cursor: url("/cursors/Diagonal Resize 1.cur"), nwse-resize !important;
 }
 
 /* Resize handles — diagonal NESW */
-.window-resize-ne, [style*="ne-resize"],
-.window-resize-sw, [style*="sw-resize"] {
-  cursor: url('/cursors/Diagonal Resize 2.cur'), nesw-resize !important;
+.window-resize-ne,
+[style*="ne-resize"],
+.window-resize-sw,
+[style*="sw-resize"] {
+  cursor: url("/cursors/Diagonal Resize 2.cur"), nesw-resize !important;
 }
 
 /* Wait / loading states */
 .loading,
 [aria-busy="true"] {
-  cursor: url('/cursors/Busy (Spinning Wheel).ani'), wait !important;
+  cursor: url("/cursors/Busy (Spinning Wheel).ani"), wait !important;
 }
 
 /* Progress / working in background */
 .progress,
 [aria-busy="true"][aria-live] {
-  cursor: url('/cursors/Working in Background (Spinning Wheel).ani'), progress !important;
+  cursor:
+    url("/cursors/Working in Background (Spinning Wheel).ani"), progress !important;
 }
 
 /* Location select */
 .location,
 .pin,
 [data-location] {
-  cursor: url('/cursors/Location Select.cur'), cell !important;
+  cursor: url("/cursors/Location Select.cur"), cell !important;
 }
 
 /* Person select */
@@ -175,14 +189,14 @@ canvas,
 .avatar,
 .profile,
 [data-user] {
-  cursor: url('/cursors/Person Select.cur'), default !important;
+  cursor: url("/cursors/Person Select.cur"), default !important;
 }
 
 /* Handwriting */
 .handwriting,
 .draw,
 .signature {
-  cursor: url('/cursors/Handwriting.ani'), default !important;
+  cursor: url("/cursors/Handwriting.ani"), default !important;
 }
 
 #scroll-container {
@@ -257,7 +271,6 @@ canvas,
   scroll-snap-stop: always;
 }
 
-
 /* Identity Card - Persistent across all stations */
 .identity-card {
   position: fixed;
@@ -268,7 +281,9 @@ canvas,
   border: 2px solid;
   border-color: #dfdfdf #808080 #808080 #dfdfdf;
   padding: 6px;
-  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #000000;
+  box-shadow:
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #000000;
   font-family: var(--custom-font, "Jersey 10", sans-serif);
   font-size: 0.85rem;
   transition: all 0.3s ease;
@@ -319,7 +334,9 @@ canvas,
 
 .identity-links a:active {
   border-color: #808080 #dfdfdf #dfdfdf #808080;
-  box-shadow: inset 1px 1px 0 #000000, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #000000,
+    inset -1px -1px 0 #ffffff;
 }
 
 .identity-links a:hover {
@@ -371,13 +388,11 @@ canvas,
   color: var(--palette-color-1, #000);
   background: var(--palette-color-3, #c0c0c0);
   border: 2px solid;
-  border-color: var(--palette-color-2, #808080) var(--palette-color-4, #dfdfdf) var(--palette-color-4, #dfdfdf) var(--palette-color-2, #808080);
-  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.15);
+  border-color: var(--palette-color-2, #808080) var(--palette-color-4, #dfdfdf)
+    var(--palette-color-4, #dfdfdf) var(--palette-color-2, #808080);
+  box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.15);
   z-index: 5;
 }
-
-
-
 
 /* ============================================
    WIN98 WINDOW STYLES
@@ -914,7 +929,10 @@ canvas,
   display: block;
   font-size: 1.2em;
   color: #000;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
     1px 1px 0 #fff;
   word-break: break-word;
   line-height: 1.1;
@@ -1256,6 +1274,35 @@ canvas,
   background: var(--palette-color-1);
   box-sizing: border-box;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+}
+
+/* Reset global 98.css button chrome (raised bevels, fake text color) inside pseudo-browser only.
+   Only neutralize shadows — any other property here would lose the cascade fight to .pseudo-browser button (0,2,0). */
+.pseudo-browser button {
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.pseudo-browser button:hover,
+.pseudo-browser button:active {
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.pseudo-browser button:focus {
+  outline: none;
+}
+
+.pseudo-browser button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--palette-color-2) 55%, transparent);
+  outline-offset: 2px;
 }
 
 /* ---- Tab strip ---- */
@@ -1265,11 +1312,21 @@ canvas,
   align-items: flex-end;
   gap: 0;
   padding: 8px 10px 0;
-  background: var(--palette-color-1);
+  background-color: #c0c0c0;
   height: 42px;
   user-select: none;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+}
+
+.pb-tab-strip-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  width: 100%;
 }
 
 .pb-tab-strip::after {
@@ -1282,76 +1339,126 @@ canvas,
   background: color-mix(in srgb, var(--palette-color-2) 30%, transparent);
 }
 
-/* Base tab */
+/* Base tab — inactive: flat on strip, separators only (no “card” container) */
 .pb-tab {
   display: flex;
   align-items: center;
   gap: 8px;
   height: 34px;
-  padding: 0 12px;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding: 0 14px;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   font-size: 12px;
   font-weight: 400;
-  background: color-mix(in srgb, var(--palette-color-2) 48%, var(--palette-color-1));
-  color: var(--palette-color-3);
-  border: 1px solid color-mix(in srgb, var(--palette-color-2) 36%, transparent);
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
+  background: transparent;
+  /* Always solid black (independent of theme palette). */
+  color: #000000;
+  border: none;
+  border-radius: 0;
   cursor: pointer;
   position: relative;
-  min-width: 96px;
+  min-width: 72px;
   max-width: 220px;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  margin-right: 6px;
+  flex: 0 1 220px;
+  transition: color 0.15s;
+  margin-right: 0;
   margin-bottom: 1px;
 }
 
-.pb-tab:hover:not(.pb-tab-active) {
-  background: color-mix(in srgb, var(--palette-color-2) 58%, var(--palette-color-1));
+/* Inactive hover: full-tab capsule (Chrome-style), not a tight text wrap */
+.pb-tab:not(.pb-tab-active)::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 3px;
+  bottom: 4px;
+  border-radius: 9999px;
+  background: color-mix(
+    in srgb,
+    var(--palette-color-3) 14%,
+    var(--palette-color-1)
+  );
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Active tab — merges into toolbar below */
-.pb-tab-active {
-  background: var(--palette-color-3);
-  color: color-mix(in srgb, var(--palette-color-1) 86%, black);
-  border-color: color-mix(in srgb, var(--palette-color-2) 24%, transparent);
+.pb-tab:hover:not(.pb-tab-active)::before {
+  opacity: 1;
+}
+
+.pb-tab > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Divider only between two inactive tabs — inset line, softened (not full height) */
+.pb-tab-strip-inner
+  > .pb-tab:not(.pb-tab-active)
+  + .pb-tab:not(.pb-tab-active)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  transform: translateX(-0.5px);
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--palette-color-3) 42%, var(--palette-color-1)) 22%,
+    color-mix(in srgb, var(--palette-color-3) 42%, var(--palette-color-1)) 78%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Active tab — connects to toolbar with flared bottom corners (shadow = solid fill, no blur) */
+.pb-tab-strip-inner > .pb-tab.pb-tab-active {
+  --pb-tab-surface: var(--palette-color-3);
+  background: var(--pb-tab-surface);
+  color: #000000;
+  border: 1px solid color-mix(in srgb, var(--palette-color-2) 24%, transparent);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
   z-index: 2;
   margin-bottom: -1px;
-  isolation: isolate;
-  box-shadow: 0 1px 0 var(--palette-color-3);
 }
 
-.pb-tab-active::before,
-.pb-tab-active::after {
+.pb-tab-strip-inner > .pb-tab.pb-tab-active::before,
+.pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
   content: "";
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   width: 12px;
   height: 12px;
+  /* Keep the active tab shoulders fully opaque (no texture bleed-through). */
+  background: var(--pb-tab-surface);
   pointer-events: none;
+  z-index: 0;
 }
 
-.pb-tab-active::before {
+/* Left / right “shoulders”: same color as tab, no Win98 bevel */
+.pb-tab-strip-inner > .pb-tab.pb-tab-active::before {
   left: -12px;
-  border-bottom-right-radius: 12px;
-  box-shadow: 6px 6px 0 0 var(--palette-color-3);
+  /* Quarter-circle shoulder (prevents square "bleed" behind the active tab). */
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: circle(12px at 100% 100%);
 }
 
-.pb-tab-active::after {
+.pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
   right: -12px;
-  border-bottom-left-radius: 12px;
-  box-shadow: -6px 6px 0 0 var(--palette-color-3);
-}
-
-.pb-tab:not(.pb-tab-active)::after {
-  content: "";
-  position: absolute;
-  right: -3px;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: color-mix(in srgb, var(--palette-color-2) 32%, transparent);
-  pointer-events: none;
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: circle(12px at 0% 100%);
 }
 
 /* Favicon placeholder */
@@ -1389,7 +1496,9 @@ canvas,
   line-height: 1;
   flex-shrink: 0;
   opacity: 0;
-  transition: opacity 0.1s, background 0.1s;
+  transition:
+    opacity 0.1s,
+    background 0.1s;
 }
 
 .pb-tab:hover .pb-tab-close,
@@ -1399,7 +1508,6 @@ canvas,
 
 .pb-tab-close:hover {
   opacity: 1 !important;
-  background: color-mix(in srgb, var(--palette-color-1) 15%, transparent);
 }
 
 /* New tab button */
@@ -1412,17 +1520,18 @@ canvas,
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--palette-color-3);
+  color: #000000;
   font-size: 16px;
   cursor: pointer;
-  margin-left: 2px;
+  margin-left: 0;
   margin-bottom: 3px;
-  opacity: 0.6;
-  transition: background 0.15s, opacity 0.15s;
+  opacity: 1;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
 }
 
 .pb-tab-new:hover {
-  background: color-mix(in srgb, var(--palette-color-3) 15%, transparent);
   opacity: 1;
 }
 
@@ -1435,7 +1544,8 @@ canvas,
   height: 38px;
   padding: 0 10px;
   background: var(--palette-color-3);
-  border-bottom: 1px solid color-mix(in srgb, var(--palette-color-2) 30%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--palette-color-2) 30%, transparent);
   user-select: none;
 }
 
@@ -1457,12 +1567,11 @@ canvas,
   font-size: 15px;
   cursor: pointer;
   opacity: 0.6;
-  transition: background 0.15s, opacity 0.15s;
+  transition: opacity 0.15s;
   padding: 0;
 }
 
 .pb-nav-btn:hover {
-  background: color-mix(in srgb, var(--palette-color-1) 10%, transparent);
   opacity: 1;
 }
 
@@ -1475,26 +1584,27 @@ canvas,
   height: 28px;
   margin: 0 6px;
   padding: 0 12px;
-  background: color-mix(in srgb, var(--palette-color-1) 6%, var(--palette-color-3));
+  background: var(--palette-color-3);
   border: 1px solid color-mix(in srgb, var(--palette-color-2) 20%, transparent);
   border-radius: 14px;
 }
 
-.pb-address-bar:hover {
-  border-color: color-mix(in srgb, var(--palette-color-2) 40%, transparent);
-}
-
 .pb-lock {
   font-size: 12px;
+  color: #000000;
   opacity: 0.5;
   flex-shrink: 0;
 }
 
 .pb-url {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   font-size: 13px;
-  color: var(--palette-color-1);
-  opacity: 0.7;
+  color: #000000;
+  opacity: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1530,28 +1640,40 @@ canvas,
   background-color: var(--palette-color-3);
   background-image: repeating-linear-gradient(
     45deg,
-    var(--palette-color-2) 0px, var(--palette-color-2) 1px,
-    transparent 1px, transparent 19px
+    var(--palette-color-2) 0px,
+    var(--palette-color-2) 1px,
+    transparent 1px,
+    transparent 19px
   );
 }
 
 .pb-panel[data-tab="bjj"] {
   background-color: var(--palette-color-3);
   background-image:
-    repeating-linear-gradient(0deg,
-      var(--palette-color-2) 0px, var(--palette-color-2) 1px,
-      transparent 1px, transparent 40px),
-    repeating-linear-gradient(90deg,
-      var(--palette-color-2) 0px, var(--palette-color-2) 1px,
-      transparent 1px, transparent 40px);
+    repeating-linear-gradient(
+      0deg,
+      var(--palette-color-2) 0px,
+      var(--palette-color-2) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--palette-color-2) 0px,
+      var(--palette-color-2) 1px,
+      transparent 1px,
+      transparent 40px
+    );
 }
 
 .pb-panel[data-tab="art"] {
   background-color: var(--palette-color-3);
   background-image: repeating-linear-gradient(
     0deg,
-    var(--palette-color-2) 0px, var(--palette-color-2) 1px,
-    transparent 1px, transparent 8px
+    var(--palette-color-2) 0px,
+    var(--palette-color-2) 1px,
+    transparent 1px,
+    transparent 8px
   );
 }
 
@@ -1569,8 +1691,658 @@ canvas,
   line-height: 0.9;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  color: var(--palette-color-2);
+  /* Keep ghost label readable/consistent with Win98 black text. */
+  color: #000000;
   opacity: 0.35;
   user-select: none;
   pointer-events: none;
+}
+
+/* ============================================================
+   TAB 1: GRAFFITI.EXE — Infinite Canvas
+   ============================================================ */
+
+.graffiti-canvas {
+  background: var(--palette-color-3);
+  cursor: grab;
+  user-select: none;
+}
+
+.graffiti-canvas:active {
+  cursor: grabbing;
+}
+
+.graffiti-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--palette-color-2) 40%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.graffiti-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+
+.graffiti-node {
+  position: absolute;
+  border: 2px solid color-mix(in srgb, var(--palette-color-1) 30%, transparent);
+  background: color-mix(in srgb, var(--palette-color-3) 85%, white);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 0.15s;
+}
+
+.graffiti-node:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.graffiti-node-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.graffiti-node-label {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--palette-color-1);
+  opacity: 0.6;
+  text-align: center;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.graffiti-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    color-mix(in srgb, var(--palette-color-2) 50%, transparent) 40%,
+    color-mix(in srgb, var(--palette-color-2) 50%, transparent) 50%,
+    transparent 50%,
+    transparent 60%,
+    color-mix(in srgb, var(--palette-color-2) 50%, transparent) 60%,
+    color-mix(in srgb, var(--palette-color-2) 50%, transparent) 70%,
+    transparent 70%
+  );
+}
+
+/* Hide legacy resize handle when node is selected (selection handles take over) */
+.graffiti-node--selected .graffiti-resize-handle {
+  display: none;
+}
+
+/* ── Selection UI (Figma/Canva style) ── */
+
+.graffiti-node--selected {
+  border-color: transparent !important;
+}
+
+.graffiti-selection {
+  position: absolute;
+  inset: -1px;
+  z-index: 999;
+}
+
+.graffiti-selection-box {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #1a73e8;
+  pointer-events: none;
+}
+
+.graffiti-handle {
+  position: absolute;
+  background: #ffffff;
+  border: 2px solid #1a73e8;
+  border-radius: 1px;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.graffiti-handle--rotate {
+  border-radius: 50%;
+}
+
+.graffiti-rotate-line {
+  position: absolute;
+  width: 1px;
+  background: #1a73e8;
+  pointer-events: none;
+}
+
+.graffiti-rotation-tooltip {
+  position: fixed;
+  background: #1a73e8;
+  color: #ffffff;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 10000;
+  white-space: nowrap;
+}
+
+.graffiti-hud {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--palette-color-1) 80%, transparent);
+  padding: 6px 12px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+.graffiti-hud-zoom {
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  color: var(--palette-color-3);
+  min-width: 36px;
+  text-align: right;
+}
+
+.graffiti-hud-reset {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 11px;
+  color: var(--palette-color-3);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--palette-color-3) 30%, transparent);
+  padding: 2px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.graffiti-hud-reset:hover {
+  background: color-mix(in srgb, var(--palette-color-3) 15%, transparent);
+}
+
+/* Override panel backgrounds for tabs that have their own content */
+.pb-panel[data-tab="graffiti"] {
+  background: none;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TAB 2: BJJ.EXE — Fight Tape
+   ============================================================ */
+
+.bjj-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: var(--palette-color-1);
+  font-family: "Courier New", "Consolas", monospace;
+  color: var(--palette-color-3);
+  overflow: hidden;
+}
+
+.bjj-player {
+  flex: 0 0 60%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid color-mix(in srgb, var(--palette-color-2) 30%, transparent);
+}
+
+.bjj-video-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 24px;
+}
+
+.bjj-video-placeholder {
+  width: 100%;
+  height: 100%;
+  background: color-mix(in srgb, var(--palette-color-1) 70%, var(--palette-color-2));
+  border: 1px solid color-mix(in srgb, var(--palette-color-2) 25%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bjj-video-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.3;
+  text-align: center;
+  padding: 20px;
+}
+
+.bjj-video-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 4px
+  );
+  pointer-events: none;
+}
+
+.bjj-controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-top: 1px solid color-mix(in srgb, var(--palette-color-2) 20%, transparent);
+}
+
+.bjj-play-btn {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--palette-color-3) 40%, transparent);
+  color: var(--palette-color-3);
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.bjj-play-btn:hover {
+  background: color-mix(in srgb, var(--palette-color-3) 10%, transparent);
+}
+
+.bjj-timestamp {
+  font-size: 13px;
+  opacity: 0.7;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.bjj-scrubber {
+  flex: 1;
+  height: 6px;
+  background: color-mix(in srgb, var(--palette-color-2) 25%, transparent);
+  position: relative;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.bjj-scrubber-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--palette-color-3);
+  opacity: 0.5;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.bjj-scrubber-head {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--palette-color-3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.bjj-scrubber-marker {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 10px;
+  background: color-mix(in srgb, var(--palette-color-3) 30%, transparent);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.bjj-fullscreen-btn {
+  background: transparent;
+  border: none;
+  color: var(--palette-color-3);
+  opacity: 0.5;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bjj-fullscreen-btn:hover {
+  opacity: 1;
+}
+
+/* Right panel: annotation feed */
+.bjj-feed {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bjj-feed-header {
+  padding: 16px 20px 12px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  border-bottom: 1px solid color-mix(in srgb, var(--palette-color-2) 20%, transparent);
+  flex-shrink: 0;
+}
+
+.bjj-feed-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.bjj-card {
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.bjj-card:hover {
+  background: color-mix(in srgb, var(--palette-color-2) 10%, transparent);
+}
+
+.bjj-card-active {
+  background: color-mix(in srgb, var(--palette-color-2) 15%, transparent);
+  border-left-color: var(--palette-color-3);
+}
+
+.bjj-card-ts {
+  font-size: 12px;
+  opacity: 0.5;
+  min-width: 36px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.bjj-card-active .bjj-card-ts {
+  opacity: 0.9;
+}
+
+.bjj-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.bjj-card-move {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.bjj-card-note {
+  font-size: 12px;
+  opacity: 0.6;
+  line-height: 1.5;
+}
+
+.bjj-card-active .bjj-card-note {
+  opacity: 0.85;
+}
+
+/* Override panel for BJJ */
+.pb-panel[data-tab="bjj"] {
+  background: none;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TAB 3: ART.EXE — 3D Object Room
+   ============================================================ */
+
+.art-scene canvas {
+  display: block;
+}
+
+.art-label {
+  position: absolute;
+  max-width: 240px;
+  padding: 10px 14px;
+  background: rgba(10, 10, 10, 0.88);
+  color: #d4d0c8;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  border-left: 2px solid rgba(212, 208, 200, 0.3);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Override panel for Art */
+.pb-panel[data-tab="art"] {
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TAB 4: YOHJI.EXE — The Lookbook
+   ============================================================ */
+
+.yohji-lookbook {
+  background: #111;
+  color: #e8e4df;
+  width: 100%;
+  min-height: 100%;
+  font-family: "Playfair Display", "Georgia", serif;
+}
+
+.yohji-bleed {
+  width: 100%;
+}
+
+.yohji-img-placeholder {
+  width: 100%;
+  background: #1a1a1a;
+  border-bottom: 1px solid #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.yohji-img-tall {
+  height: 85vh;
+}
+
+.yohji-img-wide {
+  height: 55vh;
+}
+
+.yohji-bleed-close {
+  margin-bottom: 0;
+}
+
+/* Typographic interruptions */
+.yohji-type {
+  padding: 10vh 5vw;
+  font-size: clamp(48px, 10vw, 140px);
+  font-weight: 900;
+  line-height: 0.88;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  color: #e8e4df;
+  overflow: hidden;
+}
+
+.yohji-type-left {
+  text-align: left;
+}
+
+.yohji-type-left span {
+  display: block;
+}
+
+.yohji-type-right {
+  text-align: right;
+  padding-right: 3vw;
+  font-size: clamp(56px, 12vw, 180px);
+  /* Cropped: overflows right */
+  white-space: nowrap;
+  margin-right: -5vw;
+}
+
+.yohji-type-center {
+  text-align: center;
+  font-size: clamp(64px, 14vw, 200px);
+  padding: 15vh 0;
+  opacity: 0.15;
+}
+
+.yohji-type-overflow {
+  font-size: clamp(72px, 18vw, 260px);
+  padding: 8vh 0 8vh 8vw;
+  /* Partially off-screen left */
+  margin-left: -3vw;
+  letter-spacing: -0.06em;
+}
+
+.yohji-type-final {
+  padding: 20vh 5vw 10vh;
+  font-size: clamp(40px, 8vw, 120px);
+  opacity: 0.7;
+}
+
+/* Split sections */
+.yohji-split {
+  display: flex;
+  width: 100%;
+  min-height: 60vh;
+}
+
+.yohji-split-img {
+  flex: 0 0 60%;
+}
+
+.yohji-split-img .yohji-img-placeholder {
+  height: 100%;
+  min-height: 60vh;
+}
+
+.yohji-split-text {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 5vw;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #aaa;
+}
+
+.yohji-split-text p {
+  margin: 0 0 1.5em;
+}
+
+.yohji-split-text p:last-child {
+  margin-bottom: 0;
+  color: #e8e4df;
+  font-style: italic;
+}
+
+.yohji-split-reverse {
+  flex-direction: row-reverse;
+}
+
+.yohji-split-reverse .yohji-split-img {
+  flex: 0 0 60%;
+}
+
+.yohji-split-reverse .yohji-split-text {
+  flex: 0 0 40%;
+}
+
+/* Override panel for Yohji */
+.pb-panel[data-tab="yohji"] {
+  background: #111;
+}
+
+/* ============================================================
+   TV HERO — CRT Television Section
+   ============================================================ */
+
+.tv-hero {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #0d0c0b;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.tv-hero canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.tv-scroll-cue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  animation: tv-cue-blink 2s ease-in-out infinite;
+}
+
+.tv-scroll-cue-text {
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  color: #b8c4d8;
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 8px rgba(184, 196, 216, 0.4);
+  opacity: 0.6;
+}
+
+@keyframes tv-cue-blink {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.15; }
 }
