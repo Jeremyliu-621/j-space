@@ -55,6 +55,55 @@ function getHandlePosition(
   return positions[dir];
 }
 
+/**
+ * Returns the anchor point (the fixed point opposite the dragged handle)
+ * in the node's local coordinate space.
+ */
+function getAnchorLocal(dir: string, w: number, h: number) {
+  let ax: number, ay: number;
+  // X: opposite of handle's horizontal position
+  if (dir.includes("e")) ax = 0;
+  else if (dir.includes("w")) ax = w;
+  else ax = w / 2;
+  // Y: opposite of handle's vertical position
+  if (dir.includes("s")) ay = 0;
+  else if (dir.includes("n")) ay = h;
+  else ay = h / 2;
+  return { x: ax, y: ay };
+}
+
+/**
+ * Compute new (x, y) position so that the anchor point stays fixed in world
+ * space after a resize, accounting for CSS rotation around the element center.
+ */
+function positionForFixedAnchor(
+  oldX: number, oldY: number, oldW: number, oldH: number,
+  newW: number, newH: number,
+  dir: string, rotDeg: number,
+) {
+  const θ = rotDeg * Math.PI / 180;
+  const c = Math.cos(θ);
+  const s = Math.sin(θ);
+
+  const aOld = getAnchorLocal(dir, oldW, oldH);
+  const aNew = getAnchorLocal(dir, newW, newH);
+
+  // Anchor offsets from element center, before and after
+  const dox = aOld.x - oldW / 2;
+  const doy = aOld.y - oldH / 2;
+  const dnx = aNew.x - newW / 2;
+  const dny = aNew.y - newH / 2;
+
+  // Difference in rotated anchor offsets
+  const ddx = dox - dnx;
+  const ddy = doy - dny;
+
+  return {
+    x: oldX + (oldW - newW) / 2 + ddx * c - ddy * s,
+    y: oldY + (oldH - newH) / 2 + ddx * s + ddy * c,
+  };
+}
+
 export default function GraffitiTab() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [nodes, setNodes] = useState<ImageNode[]>(INITIAL_NODES);
@@ -276,55 +325,45 @@ export default function GraffitiTab() {
         );
       } else if (d.type === "resize" && d.nodeId != null && d.handleDir) {
         const dir = d.handleDir;
-        const sdx = dx / zoom;
-        const sdy = dy / zoom;
-        const isShift = e.shiftKey;
         const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
+
+        // Project screen-space delta into the node's local (rotated) frame
+        const rad = d.startRotation * Math.PI / 180;
+        const cosR = Math.cos(rad);
+        const sinR = Math.sin(rad);
+        const localDx = (dx * cosR + dy * sinR) / zoom;
+        const localDy = (-dx * sinR + dy * cosR) / zoom;
 
         setNodes((prev) =>
           prev.map((n) => {
             if (n.id !== d.nodeId) return n;
 
-            let newX = d.startNodeX;
-            let newY = d.startNodeY;
             let newW = d.startNodeW;
             let newH = d.startNodeH;
 
-            // Apply resize based on direction
-            if (dir.includes("e")) {
-              newW = Math.max(80, d.startNodeW + sdx);
-            }
-            if (dir.includes("w")) {
-              const dw = Math.min(sdx, d.startNodeW - 80);
-              newX = d.startNodeX + dw;
-              newW = d.startNodeW - dw;
-            }
-            if (dir.includes("s")) {
-              newH = Math.max(60, d.startNodeH + sdy);
-            }
-            if (dir.includes("n")) {
-              const dh = Math.min(sdy, d.startNodeH - 60);
-              newY = d.startNodeY + dh;
-              newH = d.startNodeH - dh;
-            }
+            // Compute new dimensions in local space
+            if (dir.includes("e")) newW = Math.max(80, d.startNodeW + localDx);
+            if (dir.includes("w")) newW = Math.max(80, d.startNodeW - localDx);
+            if (dir.includes("s")) newH = Math.max(60, d.startNodeH + localDy);
+            if (dir.includes("n")) newH = Math.max(60, d.startNodeH - localDy);
 
             // Proportional constraint on corners when shift held
-            if (isCorner && isShift) {
+            if (isCorner && e.shiftKey) {
               const ar = d.aspectRatio;
-              if (Math.abs(sdx) > Math.abs(sdy)) {
+              if (Math.abs(localDx) > Math.abs(localDy)) {
                 newH = newW / ar;
-                if (dir.includes("n")) {
-                  newY = d.startNodeY + d.startNodeH - newH;
-                }
               } else {
                 newW = newH * ar;
-                if (dir.includes("w")) {
-                  newX = d.startNodeX + d.startNodeW - newW;
-                }
               }
             }
 
-            return { ...n, x: newX, y: newY, w: newW, h: newH };
+            // Reposition to keep the anchor (opposite corner/edge) fixed in world space
+            const pos = positionForFixedAnchor(
+              d.startNodeX, d.startNodeY, d.startNodeW, d.startNodeH,
+              newW, newH, dir, d.startRotation,
+            );
+
+            return { ...n, x: pos.x, y: pos.y, w: newW, h: newH };
           })
         );
       } else if (d.type === "rotate" && d.nodeId != null) {
