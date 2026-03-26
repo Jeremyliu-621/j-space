@@ -1318,7 +1318,7 @@ canvas,
   user-select: none;
   position: relative;
   z-index: 1;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .pb-tab-strip-inner {
@@ -1361,7 +1361,6 @@ canvas,
   border-radius: 0;
   cursor: pointer;
   position: relative;
-  overflow: visible; /* buttons default to overflow:hidden in Chrome, which clips ::before/::after shoulders */
   min-width: 72px;
   max-width: 220px;
   flex: 0 1 220px;
@@ -1422,7 +1421,6 @@ canvas,
   z-index: 2;
 }
 
-/* Active tab — connects to toolbar with flared bottom corners (shadow = solid fill, no blur) */
 /* Active tab — rounded top, concave shoulder transition into toolbar */
 .pb-tab-strip-inner > .pb-tab.pb-tab-active {
   background: var(--palette-color-3);
@@ -1434,32 +1432,22 @@ canvas,
   margin-bottom: -1px;
 }
 
-/*
-  Concave shoulders: 12×12 squares just outside each bottom corner.
-  bottom: -1px compensates for the tab's margin-bottom: -1px so the shoulder
-  flush-aligns with the toolbar top.
-  radial-gradient hole corner faces the tab edge (top-right for left shoulder,
-  top-left for right shoulder) so the transparent arc = the concave dip.
-*/
-.pb-tab-strip-inner > .pb-tab.pb-tab-active::before,
-.pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
-  content: “”;
+/* Concave shoulder DOM elements — positioned by JS relative to the strip */
+.pb-shoulder {
   position: absolute;
-  bottom: -1px;
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
+  bottom: 0;
   pointer-events: none;
-  z-index: 3;
+  z-index: 1;
 }
 
-.pb-tab-strip-inner > .pb-tab.pb-tab-active::before {
-  left: -12px;
-  background: red;
+.pb-shoulder-left {
+  background: radial-gradient(circle at 0% 0%, transparent 8px, var(--palette-color-3) 8px);
 }
 
-.pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
-  right: -12px;
-  background: blue;
+.pb-shoulder-right {
+  background: radial-gradient(circle at 100% 0%, transparent 8px, var(--palette-color-3) 8px);
 }
 
 /* Favicon placeholder */
