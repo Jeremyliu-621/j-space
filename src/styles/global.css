@@ -1267,9 +1267,12 @@ canvas,
    ============================================ */
 
 .pseudo-browser {
+  position: relative;
+  z-index: 1;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  margin-top: -55px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   background: var(--palette-color-1);
@@ -1442,11 +1445,19 @@ canvas,
 }
 
 .pb-shoulder-left {
-  background: radial-gradient(circle at 0% 0%, transparent 8px, var(--palette-color-3) 8px);
+  background: radial-gradient(
+    circle at 0% 0%,
+    transparent 8px,
+    var(--palette-color-3) 8px
+  );
 }
 
 .pb-shoulder-right {
-  background: radial-gradient(circle at 100% 0%, transparent 8px, var(--palette-color-3) 8px);
+  background: radial-gradient(
+    circle at 100% 0%,
+    transparent 8px,
+    var(--palette-color-3) 8px
+  );
 }
 
 /* Favicon placeholder */
@@ -1722,7 +1733,9 @@ canvas,
   cursor: pointer;
   color: #555;
   padding: 0;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 
 .art-sidebar-item:hover {
@@ -1834,7 +1847,11 @@ canvas,
   position: fixed;
   background: #1a73e8;
   color: #ffffff;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 3px;
@@ -1848,4 +1865,3 @@ canvas,
   background: #fafafa;
   overflow: hidden;
 }
-
