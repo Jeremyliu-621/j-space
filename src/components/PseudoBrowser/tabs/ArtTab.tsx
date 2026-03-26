@@ -819,6 +819,8 @@ export default function ArtTab() {
         e.preventDefault();
         redo();
       } else if (e.key === "Backspace" || e.key === "Delete") {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
         if (selectedId != null) {
           e.preventDefault();
           const next = elements.filter((el) => el.id !== selectedId);

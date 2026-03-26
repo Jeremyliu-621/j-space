@@ -1911,7 +1911,7 @@ canvas,
   width: 30px;
   height: 100%;
   cursor: pointer;
-  font-family: inherit;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 18px;
   font-weight: 300;
   display: flex;
@@ -1921,6 +1921,8 @@ canvas,
   transition: background 0.1s, color 0.1s;
   padding: 0;
   line-height: 1;
+  position: relative;
+  top: -1px;
 }
 
 .art-toolbar-btn:hover {
@@ -1934,7 +1936,7 @@ canvas,
   text-align: center;
   border: none !important;
   box-shadow: none !important;
-  background: transparent;
+  background-color: #f2f2f4 !important;
   font-family: inherit;
   font-size: 13px;
   color: inherit;
