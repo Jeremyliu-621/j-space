@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -41,6 +41,9 @@ interface CanvasElement {
   file?: string;
   shape?: ShapeKind;
   content?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontColor?: string;
 }
 
 /* ── Build initial elements from image config + a default text ── */
@@ -68,6 +71,9 @@ const INITIAL_ELEMENTS: CanvasElement[] = [
     rotation: -2,
     zIndex: ART_IMAGES.length + 1,
     content: "everything is a canvas",
+    fontSize: 26,
+    fontFamily: "'Playfair Display', Georgia, serif",
+    fontColor: "#1a1a1a",
   },
 ];
 
@@ -442,6 +448,7 @@ export default function ArtTab() {
     centerScreenX: number;
     centerScreenY: number;
     didMove: boolean;
+    startFontSize?: number;
   } | null>(null);
 
   /* ── Helpers ── */
@@ -486,7 +493,7 @@ export default function ArtTab() {
         rotation: 0,
         zIndex: z,
         ...(type === "shape" ? { shape } : {}),
-        ...(type === "text" ? { content: "Double-click to edit" } : {}),
+        ...(type === "text" ? { content: "Double-click to edit", fontSize: 22, fontFamily: "'Playfair Display', Georgia, serif", fontColor: "#1a1a1a" } : {}),
       };
       setElements((prev) => {
         const next = [...prev, newEl];
@@ -632,6 +639,7 @@ export default function ArtTab() {
             centerScreenX: 0,
             centerScreenY: 0,
             didMove: false,
+            startFontSize: el.fontSize,
           };
         }
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -692,6 +700,7 @@ export default function ArtTab() {
     } else if (d.type === "resize" && d.handleDir) {
       const dir = d.handleDir;
       const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
+      const isSideOnly = dir === "e" || dir === "w";
       const rad = (d.startRotation * Math.PI) / 180;
       const cosR = Math.cos(rad),
         sinR = Math.sin(rad);
@@ -701,6 +710,37 @@ export default function ArtTab() {
       setElements((prev) =>
         prev.map((el) => {
           if (el.id !== d.nodeId) return el;
+          const isText = el.type === "text";
+
+          if (isText && isCorner) {
+            // Corner drag on text: scale container and font proportionally
+            const scale = Math.max(0.3, 1 + (dir.includes("e") || dir.includes("s") ? 1 : -1) *
+              (Math.abs(localDx) > Math.abs(localDy) ? localDx / d.startNodeW : localDy / d.startNodeH));
+            const newW = Math.max(40, d.startNodeW * scale);
+            const newH = Math.max(20, d.startNodeH * scale);
+            const newFontSize = Math.max(8, (d.startFontSize ?? 22) * scale);
+            const pos = positionForFixedAnchor(
+              d.startNodeX, d.startNodeY,
+              d.startNodeW, d.startNodeH,
+              newW, newH, dir, d.startRotation,
+            );
+            return { ...el, x: pos.x, y: pos.y, w: newW, h: newH, fontSize: newFontSize };
+          }
+
+          if (isText && isSideOnly) {
+            // Side drag on text: change width only, height auto-adjusts via CSS
+            let newW = d.startNodeW;
+            if (dir === "e") newW = Math.max(40, d.startNodeW + localDx);
+            if (dir === "w") newW = Math.max(40, d.startNodeW - localDx);
+            const pos = positionForFixedAnchor(
+              d.startNodeX, d.startNodeY,
+              d.startNodeW, d.startNodeH,
+              newW, d.startNodeH, dir, d.startRotation,
+            );
+            return { ...el, x: pos.x, y: pos.y, w: newW };
+          }
+
+          // Non-text elements: original behavior
           let newW = d.startNodeW,
             newH = d.startNodeH;
           if (dir.includes("e")) newW = Math.max(40, d.startNodeW + localDx);
@@ -713,14 +753,9 @@ export default function ArtTab() {
             else newW = newH * ar;
           }
           const pos = positionForFixedAnchor(
-            d.startNodeX,
-            d.startNodeY,
-            d.startNodeW,
-            d.startNodeH,
-            newW,
-            newH,
-            dir,
-            d.startRotation,
+            d.startNodeX, d.startNodeY,
+            d.startNodeW, d.startNodeH,
+            newW, newH, dir, d.startRotation,
           );
           return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
         }),
@@ -783,11 +818,19 @@ export default function ArtTab() {
       ) {
         e.preventDefault();
         redo();
+      } else if (e.key === "Backspace" || e.key === "Delete") {
+        if (selectedId != null) {
+          e.preventDefault();
+          const next = elements.filter((el) => el.id !== selectedId);
+          pushHistory(next);
+          setElements(next);
+          setSelectedId(null);
+        }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [undo, redo]);
+  }, [undo, redo, selectedId, elements, pushHistory]);
 
   /* ── Double-click to edit text ── */
   const onDoubleClick = useCallback(
@@ -816,9 +859,117 @@ export default function ArtTab() {
     setEditingId(null);
   }, [pushHistory]);
 
+  /* ── Measure text element heights and sync back ── */
+  const textElRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  useLayoutEffect(() => {
+    textElRefs.current.forEach((div, id) => {
+      const el = elements.find((e) => e.id === id);
+      if (!el || el.type !== "text") return;
+      const measuredH = div.offsetHeight;
+      if (measuredH > 0 && Math.abs(measuredH - el.h) > 2) {
+        // Only update h if not currently dragging this element
+        if (dragRef.current?.nodeId === id) return;
+        setElements((prev) =>
+          prev.map((e) => (e.id === id ? { ...e, h: measuredH } : e)),
+        );
+      }
+    });
+  });
+
+  /* ── Text toolbar helpers ── */
+  const selectedEl = elements.find((el) => el.id === selectedId);
+  const showTextToolbar = selectedEl?.type === "text";
+  const [fontSelectOpen, setFontSelectOpen] = useState(false);
+
+  const updateTextProp = useCallback(
+    (prop: "fontSize" | "fontFamily" | "fontColor", value: string | number) => {
+      if (selectedId == null) return;
+      setElements((prev) => {
+        const next = prev.map((el) =>
+          el.id === selectedId ? { ...el, [prop]: value } : el,
+        );
+        pushHistory(next);
+        return next;
+      });
+    },
+    [selectedId, pushHistory],
+  );
+
+  const FONT_OPTIONS = [
+    { label: "Playfair Display", value: "'Playfair Display', Georgia, serif" },
+    { label: "Arial", value: "Arial, Helvetica, sans-serif" },
+    { label: "Georgia", value: "Georgia, serif" },
+    { label: "Courier New", value: "'Courier New', monospace" },
+    { label: "Times New Roman", value: "'Times New Roman', serif" },
+    { label: "Verdana", value: "Verdana, sans-serif" },
+    { label: "Impact", value: "Impact, sans-serif" },
+    { label: "Comic Sans MS", value: "'Comic Sans MS', cursive" },
+  ];
+
   /* ── Render ── */
   return (
     <div className="art-container">
+      {/* ── Text Toolbar ── */}
+      {showTextToolbar && selectedEl && (
+        <div className="art-text-toolbar" onPointerDown={(e) => e.stopPropagation()}>
+          <div className={`art-toolbar-select-wrap${fontSelectOpen ? " art-toolbar-select-wrap--open" : ""}`}>
+            <select
+              className="art-toolbar-select"
+              value={selectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"}
+              onChange={(e) => {
+                updateTextProp("fontFamily", e.target.value);
+                e.target.blur();
+              }}
+              onFocus={() => setFontSelectOpen(true)}
+              onBlur={() => setFontSelectOpen(false)}
+            >
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="art-toolbar-divider" />
+          <div className="art-toolbar-size">
+            <button
+              className="art-toolbar-btn"
+              onClick={() =>
+                updateTextProp("fontSize", Math.max(8, (selectedEl.fontSize ?? 22) - 2))
+              }
+            >
+              −
+            </button>
+            <input
+              className="art-toolbar-size-input"
+              type="number"
+              min={8}
+              max={200}
+              value={Math.round(selectedEl.fontSize ?? 22)}
+              onChange={(e) =>
+                updateTextProp("fontSize", Math.max(8, Number(e.target.value)))
+              }
+            />
+            <button
+              className="art-toolbar-btn"
+              onClick={() =>
+                updateTextProp("fontSize", Math.min(200, (selectedEl.fontSize ?? 22) + 2))
+              }
+            >
+              +
+            </button>
+          </div>
+          <div className="art-toolbar-divider" />
+          <div className="art-toolbar-color-wrap">
+            <input
+              className="art-toolbar-color"
+              type="color"
+              value={selectedEl.fontColor ?? "#1a1a1a"}
+              onChange={(e) => updateTextProp("fontColor", e.target.value)}
+            />
+          </div>
+        </div>
+      )}
       {/* ── Sidebar ── */}
       <div className="art-sidebar">
         {SIDEBAR_TOOLS.map((tool) => (
@@ -851,7 +1002,8 @@ export default function ArtTab() {
               left: el.x,
               top: el.y,
               width: el.w,
-              height: el.h,
+              height: el.type === "text" ? "auto" : el.h,
+              minHeight: el.type === "text" ? el.h : undefined,
               zIndex: el.zIndex,
               transform: `rotate(${el.rotation}deg)`,
             }}
@@ -875,6 +1027,10 @@ export default function ArtTab() {
             {el.type === "text" && (
               <div
                 className="art-text-content"
+                ref={(node) => {
+                  if (node) textElRefs.current.set(el.id, node);
+                  else textElRefs.current.delete(el.id);
+                }}
                 contentEditable={editingId === el.id}
                 suppressContentEditableWarning
                 data-editing={editingId === el.id ? "true" : undefined}
@@ -886,7 +1042,11 @@ export default function ArtTab() {
                     ? (e: React.PointerEvent) => e.stopPropagation()
                     : undefined
                 }
-                style={{ fontSize: Math.max(12, el.h * 0.4) }}
+                style={{
+                  fontSize: el.fontSize ?? 22,
+                  fontFamily: el.fontFamily ?? "'Playfair Display', Georgia, serif",
+                  color: el.fontColor ?? "#1a1a1a",
+                }}
               >
                 {el.content}
               </div>
