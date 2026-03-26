@@ -1,22 +1,13 @@
 import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import { useTheme } from "../win98/ThemeProvider";
-import GraffitiTab from "./tabs/GraffitiTab";
-import BjjTab from "./tabs/BjjTab";
 import ArtTab from "./tabs/ArtTab";
-import YohjiTab from "./tabs/YohjiTab";
 
 const TABS = [
-  { id: "graffiti", label: "Graffiti.exe", url: "C:\\Jeremy\\graffiti" },
-  { id: "bjj", label: "BJJ.exe", url: "C:\\Jeremy\\bjj" },
   { id: "art", label: "Art.exe", url: "C:\\Jeremy\\art" },
-  { id: "yohji", label: "Yohji.exe", url: "C:\\Jeremy\\yohji" },
 ];
 
 const TAB_COMPONENTS: Record<string, React.ComponentType> = {
-  graffiti: GraffitiTab,
-  bjj: BjjTab,
   art: ArtTab,
-  yohji: YohjiTab,
 };
 
 export default function PseudoBrowser() {
@@ -66,9 +57,8 @@ export default function PseudoBrowser() {
       const content = contentRef.current;
       if (!content || !content.contains(e.target as Node)) return;
 
-      // Let tabs that manage their own wheel events handle it (Graffiti zoom, Art orbit, etc.)
       const target = e.target as HTMLElement;
-      if (target.closest(".graffiti-canvas, .art-scene, canvas")) return;
+      if (target.closest(".art-canvas, canvas")) return;
 
       const panel = content.querySelector(
         ".pb-panel-active",
