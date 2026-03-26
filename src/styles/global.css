@@ -1425,8 +1425,7 @@ canvas,
 .pb-tab-strip-inner > .pb-tab.pb-tab-active {
   background: var(--palette-color-3);
   color: #000000;
-  border: 1px solid color-mix(in srgb, var(--palette-color-2) 30%, transparent);
-  border-bottom: none;
+  border: none;
   border-radius: 8px 8px 0 0;
   z-index: 2;
   margin-bottom: -1px;
