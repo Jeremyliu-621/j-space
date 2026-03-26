@@ -2048,3 +2048,17 @@ canvas,
   background: #fafafa;
   overflow: hidden;
 }
+
+/* ── Art intro tilt (JS-driven, choppy) ── */
+.art-element--tilting {
+  transform-origin: center center;
+}
+
+/* Show selection box on the text element during intro */
+.art-element--tilt-selected .art-selection {
+  pointer-events: none;
+}
+
+.art-element--tilt-selected .art-selection-box {
+  border: 2px solid #1a73e8;
+}

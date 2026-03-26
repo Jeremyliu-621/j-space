@@ -382,6 +382,22 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
 const HANDLE_SIZE = 8;
 const HANDLE_DIRS: HandleDir[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 
+/* ── Per-element intro tilt config (seeded once) ── */
+function randTilt(max: number) {
+  return ((Math.random() - 0.5) * 2 * max).toFixed(1) + "deg";
+}
+const TILT_STEPS = 7; // steps per element
+const TILT_CONFIG: Record<number, { angles: string[]; isText: boolean }> = {};
+for (const el of INITIAL_ELEMENTS) {
+  const isText = el.type === "text";
+  const mag = isText ? 2.5 : 1.8;
+  const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
+  TILT_CONFIG[el.id] = {
+    angles: Array.from({ length: steps }, () => randTilt(mag)),
+    isText,
+  };
+}
+
 export default function ArtTab() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>(INITIAL_ELEMENTS);
@@ -394,6 +410,106 @@ export default function ArtTab() {
   } | null>(null);
   const nextIdRef = useRef(INITIAL_ELEMENTS.length + 1);
   const topZRef = useRef(INITIAL_ELEMENTS.length + 1);
+
+  /* ── Per-element intro tilt: each triggers when it enters viewport ── */
+  const [tiltingIds, setTiltingIds] = useState<Set<number>>(new Set());
+  const firedIds = useRef<Set<number>>(new Set());
+  const elRefsForObserver = useRef<Map<number, HTMLDivElement>>(new Map());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const newIds: number[] = [];
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const id = Number((entry.target as HTMLElement).dataset.elementId);
+          if (!id || firedIds.current.has(id)) continue;
+          firedIds.current.add(id);
+          newIds.push(id);
+          observer.unobserve(entry.target);
+        }
+        if (newIds.length > 0) {
+          setTiltingIds((prev) => {
+            const next = new Set(prev);
+            for (const id of newIds) next.add(id);
+            return next;
+          });
+          // Clear each element's tilt after its steps finish (steps * 80ms + buffer)
+          for (const id of newIds) {
+            const cfg = TILT_CONFIG[id];
+            const dur = (cfg?.angles.length ?? TILT_STEPS) * 160 + 200;
+            timers.push(setTimeout(() => {
+              setTiltingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+              });
+            }, dur));
+          }
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observerRef.current = observer;
+
+    // Observe any already-registered elements
+    elRefsForObserver.current.forEach((div) => observer.observe(div));
+
+    return () => {
+      observer.disconnect();
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  const registerElRef = useCallback((id: number, node: HTMLDivElement | null) => {
+    if (node) {
+      elRefsForObserver.current.set(id, node);
+      if (observerRef.current && !firedIds.current.has(id)) {
+        observerRef.current.observe(node);
+      }
+    } else {
+      const prev = elRefsForObserver.current.get(id);
+      if (prev) observerRef.current?.unobserve(prev);
+      elRefsForObserver.current.delete(id);
+    }
+  }, []);
+
+  /* ── Step through tilt angles for each tilting element ── */
+  const tiltIntervalsRef = useRef<Map<number, ReturnType<typeof setInterval>>>(new Map());
+  useEffect(() => {
+    const STEP_MS = 160; // choppy frame rate
+
+    for (const id of tiltingIds) {
+      if (tiltIntervalsRef.current.has(id)) continue; // already running
+      const cfg = TILT_CONFIG[id];
+      if (!cfg) continue;
+      let step = 0;
+      const iv = setInterval(() => {
+        const div = elRefsForObserver.current.get(id);
+        if (!div || step >= cfg.angles.length) {
+          clearInterval(iv);
+          tiltIntervalsRef.current.delete(id);
+          if (div) div.style.rotate = "";
+          return;
+        }
+        div.style.rotate = cfg.angles[step];
+        step++;
+      }, STEP_MS);
+      tiltIntervalsRef.current.set(id, iv);
+    }
+
+    // Clean up intervals for elements no longer tilting
+    for (const [id, iv] of tiltIntervalsRef.current) {
+      if (!tiltingIds.has(id)) {
+        clearInterval(iv);
+        tiltIntervalsRef.current.delete(id);
+        const div = elRefsForObserver.current.get(id);
+        if (div) div.style.rotate = "";
+      }
+    }
+  }, [tiltingIds]);
 
   /* ── Undo / Redo history ── */
   const historyRef = useRef<CanvasElement[][]>([INITIAL_ELEMENTS]);
@@ -995,10 +1111,15 @@ export default function ArtTab() {
         onPointerUp={onPointerUp}
         onDoubleClick={onDoubleClick}
       >
-        {elements.map((el) => (
+        {elements.map((el) => {
+          const isTilting = tiltingIds.has(el.id);
+          const cfg = TILT_CONFIG[el.id];
+          const isTiltText = isTilting && cfg?.isText;
+          return (
           <div
             key={el.id}
-            className={`art-element${el.id === selectedId ? " art-element--selected" : ""}`}
+            ref={(node) => registerElRef(el.id, node)}
+            className={`art-element${el.id === selectedId ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}`}
             data-element-id={el.id}
             style={{
               left: el.x,
@@ -1055,7 +1176,7 @@ export default function ArtTab() {
             )}
 
             {/* Selection UI */}
-            {el.id === selectedId && (
+            {(el.id === selectedId || isTiltText) && (
               <div className="art-selection" style={{ pointerEvents: "none" }}>
                 <div className="art-selection-box" />
                 {HANDLE_DIRS.map((dir) => {
@@ -1100,7 +1221,8 @@ export default function ArtTab() {
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
 
         {/* Rotation tooltip */}
         {rotationTooltip && (
