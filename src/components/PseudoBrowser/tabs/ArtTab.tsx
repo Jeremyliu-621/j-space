@@ -11,7 +11,7 @@ const ART_IMAGES = [
   { file: "spiderverse.JPG", width: 260, height: 175, x: 870, y: 20 },
   { file: "BR0D4R.jpg", width: 195, height: 250, x: 880, y: 230 },
   { file: "drool.jpg", width: 175, height: 220, x: 1100, y: 60 },
-  { file: "resk12tag.png", width: 240, height: 165, x: 410, y: 270 },
+  { file: "resk12tag.png", width: 130, height: 100, x: 410, y: 270 },
   { file: "zephyr_tag.jpg", width: 200, height: 150, x: 680, y: 260 },
   { file: "annalauraart.PNG", width: 165, height: 215, x: 1110, y: 310 },
   { file: "beetlemoses.jpg", width: 215, height: 165, x: 50, y: 490 },
@@ -52,14 +52,16 @@ const INITIAL_ELEMENTS: CanvasElement[] = [
     y: img.y,
     w: img.width,
     h: img.height,
-    rotation: [-3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2][i] ?? 0,
+    rotation:
+      [-3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2][i] ??
+      0,
     zIndex: i + 1,
     file: img.file,
   })),
   {
     id: ART_IMAGES.length + 1,
     type: "text" as const,
-    x: 460,
+    x: 380,
     y: 380,
     w: 300,
     h: 64,
@@ -92,16 +94,28 @@ const SIDEBAR_TOOLS: SidebarTool[] = [
    GEOMETRY HELPERS
    ══════════════════════════════════════════════════════════════ */
 const HANDLE_CURSORS: Record<HandleDir, string> = {
-  nw: "nwse-resize", n: "ns-resize", ne: "nesw-resize", e: "ew-resize",
-  se: "nwse-resize", s: "ns-resize", sw: "nesw-resize", w: "ew-resize",
+  nw: "nwse-resize",
+  n: "ns-resize",
+  ne: "nesw-resize",
+  e: "ew-resize",
+  se: "nwse-resize",
+  s: "ns-resize",
+  sw: "nesw-resize",
+  w: "ew-resize",
   rotate: "crosshair",
 };
 
 function getHandlePosition(dir: HandleDir, w: number, h: number) {
   const map: Record<HandleDir, { x: number; y: number }> = {
-    nw: { x: 0, y: 0 }, n: { x: w / 2, y: 0 }, ne: { x: w, y: 0 },
-    e: { x: w, y: h / 2 }, se: { x: w, y: h }, s: { x: w / 2, y: h },
-    sw: { x: 0, y: h }, w: { x: 0, y: h / 2 }, rotate: { x: w / 2, y: -28 },
+    nw: { x: 0, y: 0 },
+    n: { x: w / 2, y: 0 },
+    ne: { x: w, y: 0 },
+    e: { x: w, y: h / 2 },
+    se: { x: w, y: h },
+    s: { x: w / 2, y: h },
+    sw: { x: 0, y: h },
+    w: { x: 0, y: h / 2 },
+    rotate: { x: w / 2, y: -28 },
   };
   return map[dir];
 }
@@ -113,16 +127,26 @@ function getAnchorLocal(dir: string, w: number, h: number) {
 }
 
 function positionForFixedAnchor(
-  oldX: number, oldY: number, oldW: number, oldH: number,
-  newW: number, newH: number, dir: string, rotDeg: number,
+  oldX: number,
+  oldY: number,
+  oldW: number,
+  oldH: number,
+  newW: number,
+  newH: number,
+  dir: string,
+  rotDeg: number,
 ) {
   const θ = (rotDeg * Math.PI) / 180;
-  const c = Math.cos(θ), s = Math.sin(θ);
+  const c = Math.cos(θ),
+    s = Math.sin(θ);
   const aOld = getAnchorLocal(dir, oldW, oldH);
   const aNew = getAnchorLocal(dir, newW, newH);
-  const dox = aOld.x - oldW / 2, doy = aOld.y - oldH / 2;
-  const dnx = aNew.x - newW / 2, dny = aNew.y - newH / 2;
-  const ddx = dox - dnx, ddy = doy - dny;
+  const dox = aOld.x - oldW / 2,
+    doy = aOld.y - oldH / 2;
+  const dnx = aNew.x - newW / 2,
+    dny = aNew.y - newH / 2;
+  const ddx = dox - dnx,
+    ddy = doy - dny;
   return {
     x: oldX + (oldW - newW) / 2 + ddx * c - ddy * s,
     y: oldY + (oldH - newH) / 2 + ddx * s + ddy * c,
@@ -141,36 +165,76 @@ function ShapeSvg({ shape, w, h }: { shape: ShapeKind; w: number; h: number }) {
     case "rect":
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <rect x={sw} y={sw} width={w - sw * 2} height={h - sw * 2} fill={none} stroke={stroke} strokeWidth={sw} />
+          <rect
+            x={sw}
+            y={sw}
+            width={w - sw * 2}
+            height={h - sw * 2}
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "circle":
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <ellipse cx={w / 2} cy={h / 2} rx={w / 2 - sw} ry={h / 2 - sw} fill={none} stroke={stroke} strokeWidth={sw} />
+          <ellipse
+            cx={w / 2}
+            cy={h / 2}
+            rx={w / 2 - sw}
+            ry={h / 2 - sw}
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "triangle":
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <polygon points={`${w / 2},${sw} ${w - sw},${h - sw} ${sw},${h - sw}`} fill={none} stroke={stroke} strokeWidth={sw} />
+          <polygon
+            points={`${w / 2},${sw} ${w - sw},${h - sw} ${sw},${h - sw}`}
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "line":
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <line x1={sw} y1={h / 2} x2={w - sw} y2={h / 2} stroke={stroke} strokeWidth={sw} />
+          <line
+            x1={sw}
+            y1={h / 2}
+            x2={w - sw}
+            y2={h / 2}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "arrow":
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <line x1={sw} y1={h / 2} x2={w - 14} y2={h / 2} stroke={stroke} strokeWidth={sw} />
-          <polygon points={`${w - sw},${h / 2} ${w - 14},${h / 2 - 6} ${w - 14},${h / 2 + 6}`} fill={stroke} stroke={none} />
+          <line
+            x1={sw}
+            y1={h / 2}
+            x2={w - 14}
+            y2={h / 2}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
+          <polygon
+            points={`${w - sw},${h / 2} ${w - 14},${h / 2 - 6} ${w - 14},${h / 2 + 6}`}
+            fill={stroke}
+            stroke={none}
+          />
         </svg>
       );
     case "star": {
-      const cx = w / 2, cy = h / 2;
+      const cx = w / 2,
+        cy = h / 2;
       const outer = Math.min(w, h) / 2 - sw;
       const inner = outer * 0.4;
       const pts: string[] = [];
@@ -181,7 +245,12 @@ function ShapeSvg({ shape, w, h }: { shape: ShapeKind; w: number; h: number }) {
       }
       return (
         <svg width={w} height={h} className="art-shape-svg">
-          <polygon points={pts.join(" ")} fill={none} stroke={stroke} strokeWidth={sw} />
+          <polygon
+            points={pts.join(" ")}
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     }
@@ -200,7 +269,9 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
   if (tool.type === "text") {
     return (
       <svg width={s} height={s} viewBox="0 0 22 22" fill="none">
-        <text x="4" y="17" fontFamily="serif" fontSize="18" fill={stroke}>T</text>
+        <text x="4" y="17" fontFamily="serif" fontSize="18" fill={stroke}>
+          T
+        </text>
       </svg>
     );
   }
@@ -209,36 +280,74 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
     case "rect":
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <rect x="3" y="5" width="16" height="12" fill={none} stroke={stroke} strokeWidth={sw} />
+          <rect
+            x="3"
+            y="5"
+            width="16"
+            height="12"
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "circle":
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <ellipse cx="11" cy="11" rx="8" ry="8" fill={none} stroke={stroke} strokeWidth={sw} />
+          <ellipse
+            cx="11"
+            cy="11"
+            rx="8"
+            ry="8"
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "triangle":
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <polygon points="11,3 20,19 2,19" fill={none} stroke={stroke} strokeWidth={sw} />
+          <polygon
+            points="11,3 20,19 2,19"
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "line":
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <line x1="3" y1="19" x2="19" y2="3" stroke={stroke} strokeWidth={sw} />
+          <line
+            x1="3"
+            y1="19"
+            x2="19"
+            y2="3"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     case "arrow":
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <line x1="3" y1="11" x2="16" y2="11" stroke={stroke} strokeWidth={sw} />
+          <line
+            x1="3"
+            y1="11"
+            x2="16"
+            y2="11"
+            stroke={stroke}
+            strokeWidth={sw}
+          />
           <polygon points="19,11 14,7 14,15" fill={stroke} />
         </svg>
       );
     case "star": {
-      const cx = 11, cy = 11, outer = 9, inner = 3.6;
+      const cx = 11,
+        cy = 11,
+        outer = 9,
+        inner = 3.6;
       const pts: string[] = [];
       for (let i = 0; i < 10; i++) {
         const r = i % 2 === 0 ? outer : inner;
@@ -247,7 +356,12 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
       }
       return (
         <svg width={s} height={s} viewBox="0 0 22 22">
-          <polygon points={pts.join(" ")} fill={none} stroke={stroke} strokeWidth={sw} />
+          <polygon
+            points={pts.join(" ")}
+            fill={none}
+            stroke={stroke}
+            strokeWidth={sw}
+          />
         </svg>
       );
     }
@@ -267,7 +381,11 @@ export default function ArtTab() {
   const [elements, setElements] = useState<CanvasElement[]>(INITIAL_ELEMENTS);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [rotationTooltip, setRotationTooltip] = useState<{ angle: number; x: number; y: number } | null>(null);
+  const [rotationTooltip, setRotationTooltip] = useState<{
+    angle: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const nextIdRef = useRef(INITIAL_ELEMENTS.length + 1);
   const topZRef = useRef(INITIAL_ELEMENTS.length + 1);
 
@@ -292,7 +410,9 @@ export default function ArtTab() {
   /* ── Helpers ── */
   const bringToFront = useCallback((id: number) => {
     const z = ++topZRef.current;
-    setElements((prev) => prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el)));
+    setElements((prev) =>
+      prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el)),
+    );
   }, []);
 
   const getElScreenCenter = useCallback((el: CanvasElement) => {
@@ -303,28 +423,39 @@ export default function ArtTab() {
   }, []);
 
   /* ── Create new element (from sidebar) ── */
-  const addElement = useCallback((type: ElementType, shape?: ShapeKind, x?: number, y?: number): number => {
-    const id = ++nextIdRef.current;
-    const z = ++topZRef.current;
-    const defaults: Record<string, { w: number; h: number }> = {
-      rect: { w: 120, h: 90 }, circle: { w: 100, h: 100 }, triangle: { w: 100, h: 100 },
-      line: { w: 180, h: 4 }, arrow: { w: 180, h: 24 }, star: { w: 100, h: 100 },
-      text: { w: 240, h: 56 },
-    };
-    const size = defaults[shape ?? type] ?? { w: 100, h: 100 };
-    const newEl: CanvasElement = {
-      id, type,
-      x: x ?? 200, y: y ?? 200,
-      w: size.w, h: size.h,
-      rotation: 0, zIndex: z,
-      ...(type === "shape" ? { shape } : {}),
-      ...(type === "text" ? { content: "Double-click to edit" } : {}),
-    };
-    setElements((prev) => [...prev, newEl]);
-    setSelectedId(id);
-    setEditingId(null);
-    return id;
-  }, []);
+  const addElement = useCallback(
+    (type: ElementType, shape?: ShapeKind, x?: number, y?: number): number => {
+      const id = ++nextIdRef.current;
+      const z = ++topZRef.current;
+      const defaults: Record<string, { w: number; h: number }> = {
+        rect: { w: 120, h: 90 },
+        circle: { w: 100, h: 100 },
+        triangle: { w: 100, h: 100 },
+        line: { w: 180, h: 4 },
+        arrow: { w: 180, h: 24 },
+        star: { w: 100, h: 100 },
+        text: { w: 240, h: 56 },
+      };
+      const size = defaults[shape ?? type] ?? { w: 100, h: 100 };
+      const newEl: CanvasElement = {
+        id,
+        type,
+        x: x ?? 200,
+        y: y ?? 200,
+        w: size.w,
+        h: size.h,
+        rotation: 0,
+        zIndex: z,
+        ...(type === "shape" ? { shape } : {}),
+        ...(type === "text" ? { content: "Double-click to edit" } : {}),
+      };
+      setElements((prev) => [...prev, newEl]);
+      setSelectedId(id);
+      setEditingId(null);
+      return id;
+    },
+    [],
+  );
 
   /* ── Sidebar pointer-down: supports click-to-add & drag-to-add ── */
   const onSidebarPointerDown = useCallback(
@@ -344,13 +475,18 @@ export default function ArtTab() {
           const rect = canvasRef.current?.getBoundingClientRect();
           if (!rect) return;
           const defaults: Record<string, { w: number; h: number }> = {
-            rect: { w: 120, h: 90 }, circle: { w: 100, h: 100 }, triangle: { w: 100, h: 100 },
-            line: { w: 180, h: 4 }, arrow: { w: 180, h: 24 }, star: { w: 100, h: 100 },
+            rect: { w: 120, h: 90 },
+            circle: { w: 100, h: 100 },
+            triangle: { w: 100, h: 100 },
+            line: { w: 180, h: 4 },
+            arrow: { w: 180, h: 24 },
+            star: { w: 100, h: 100 },
             text: { w: 240, h: 56 },
           };
           const size = defaults[tool.shape ?? tool.type] ?? { w: 100, h: 100 };
           elId = addElement(
-            tool.type, tool.shape,
+            tool.type,
+            tool.shape,
             ev.clientX - rect.left - size.w / 2,
             ev.clientY - rect.top - size.h / 2,
           );
@@ -361,7 +497,13 @@ export default function ArtTab() {
           if (!rect) return;
           setElements((prev) =>
             prev.map((el) =>
-              el.id === elId ? { ...el, x: ev.clientX - rect.left - el.w / 2, y: ev.clientY - rect.top - el.h / 2 } : el
+              el.id === elId
+                ? {
+                    ...el,
+                    x: ev.clientX - rect.left - el.w / 2,
+                    y: ev.clientY - rect.top - el.h / 2,
+                  }
+                : el,
             ),
           );
         }
@@ -371,7 +513,12 @@ export default function ArtTab() {
         if (!created) {
           const rect = canvasRef.current?.getBoundingClientRect();
           if (rect) {
-            addElement(tool.type, tool.shape, rect.width / 2 - 60, rect.height / 2 - 40);
+            addElement(
+              tool.type,
+              tool.shape,
+              rect.width / 2 - 60,
+              rect.height / 2 - 40,
+            );
           }
         }
         window.removeEventListener("pointermove", onMove);
@@ -392,7 +539,9 @@ export default function ArtTab() {
       // If editing text, let the contenteditable handle clicks
       if (editingId != null && target.closest("[data-editing]")) return;
 
-      const handleEl = target.closest("[data-handle-dir]") as HTMLElement | null;
+      const handleEl = target.closest(
+        "[data-handle-dir]",
+      ) as HTMLElement | null;
       const nodeEl = target.closest("[data-element-id]") as HTMLElement | null;
 
       if (handleEl && selectedId != null) {
@@ -402,21 +551,42 @@ export default function ArtTab() {
 
         if (dir === "rotate") {
           const center = getElScreenCenter(el);
-          const startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x);
+          const startAngle = Math.atan2(
+            e.clientY - center.y,
+            e.clientX - center.x,
+          );
           dragRef.current = {
-            type: "rotate", nodeId: selectedId, handleDir: dir,
-            startX: e.clientX, startY: e.clientY,
-            startNodeX: el.x, startNodeY: el.y, startNodeW: el.w, startNodeH: el.h,
-            startRotation: el.rotation, startAngle,
-            aspectRatio: el.w / el.h, centerScreenX: center.x, centerScreenY: center.y,
+            type: "rotate",
+            nodeId: selectedId,
+            handleDir: dir,
+            startX: e.clientX,
+            startY: e.clientY,
+            startNodeX: el.x,
+            startNodeY: el.y,
+            startNodeW: el.w,
+            startNodeH: el.h,
+            startRotation: el.rotation,
+            startAngle,
+            aspectRatio: el.w / el.h,
+            centerScreenX: center.x,
+            centerScreenY: center.y,
           };
         } else {
           dragRef.current = {
-            type: "resize", nodeId: selectedId, handleDir: dir,
-            startX: e.clientX, startY: e.clientY,
-            startNodeX: el.x, startNodeY: el.y, startNodeW: el.w, startNodeH: el.h,
-            startRotation: el.rotation, startAngle: 0,
-            aspectRatio: el.w / el.h, centerScreenX: 0, centerScreenY: 0,
+            type: "resize",
+            nodeId: selectedId,
+            handleDir: dir,
+            startX: e.clientX,
+            startY: e.clientY,
+            startNodeX: el.x,
+            startNodeY: el.y,
+            startNodeW: el.w,
+            startNodeH: el.h,
+            startRotation: el.rotation,
+            startAngle: 0,
+            aspectRatio: el.w / el.h,
+            centerScreenX: 0,
+            centerScreenY: 0,
           };
         }
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -432,11 +602,19 @@ export default function ArtTab() {
         setSelectedId(id);
         setEditingId(null);
         dragRef.current = {
-          type: "move", nodeId: id,
-          startX: e.clientX, startY: e.clientY,
-          startNodeX: el.x, startNodeY: el.y, startNodeW: el.w, startNodeH: el.h,
-          startRotation: el.rotation, startAngle: 0,
-          aspectRatio: el.w / el.h, centerScreenX: 0, centerScreenY: 0,
+          type: "move",
+          nodeId: id,
+          startX: e.clientX,
+          startY: e.clientY,
+          startNodeX: el.x,
+          startNodeY: el.y,
+          startNodeW: el.w,
+          startNodeH: el.h,
+          startRotation: el.rotation,
+          startAngle: 0,
+          aspectRatio: el.w / el.h,
+          centerScreenX: 0,
+          centerScreenY: 0,
         };
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
         return;
@@ -450,60 +628,81 @@ export default function ArtTab() {
     [elements, selectedId, editingId, bringToFront, getElScreenCenter],
   );
 
-  const onPointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      const d = dragRef.current;
-      if (!d) return;
-      const dx = e.clientX - d.startX;
-      const dy = e.clientY - d.startY;
+  const onPointerMove = useCallback((e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
 
-      if (d.type === "move") {
-        setElements((prev) =>
-          prev.map((el) =>
-            el.id === d.nodeId ? { ...el, x: d.startNodeX + dx, y: d.startNodeY + dy } : el
-          ),
-        );
-      } else if (d.type === "resize" && d.handleDir) {
-        const dir = d.handleDir;
-        const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
-        const rad = (d.startRotation * Math.PI) / 180;
-        const cosR = Math.cos(rad), sinR = Math.sin(rad);
-        const localDx = dx * cosR + dy * sinR;
-        const localDy = -dx * sinR + dy * cosR;
+    if (d.type === "move") {
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === d.nodeId
+            ? { ...el, x: d.startNodeX + dx, y: d.startNodeY + dy }
+            : el,
+        ),
+      );
+    } else if (d.type === "resize" && d.handleDir) {
+      const dir = d.handleDir;
+      const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
+      const rad = (d.startRotation * Math.PI) / 180;
+      const cosR = Math.cos(rad),
+        sinR = Math.sin(rad);
+      const localDx = dx * cosR + dy * sinR;
+      const localDy = -dx * sinR + dy * cosR;
 
-        setElements((prev) =>
-          prev.map((el) => {
-            if (el.id !== d.nodeId) return el;
-            let newW = d.startNodeW, newH = d.startNodeH;
-            if (dir.includes("e")) newW = Math.max(40, d.startNodeW + localDx);
-            if (dir.includes("w")) newW = Math.max(40, d.startNodeW - localDx);
-            if (dir.includes("s")) newH = Math.max(20, d.startNodeH + localDy);
-            if (dir.includes("n")) newH = Math.max(20, d.startNodeH - localDy);
-            if (isCorner && e.shiftKey) {
-              const ar = d.aspectRatio;
-              if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
-              else newW = newH * ar;
-            }
-            const pos = positionForFixedAnchor(
-              d.startNodeX, d.startNodeY, d.startNodeW, d.startNodeH,
-              newW, newH, dir, d.startRotation,
-            );
-            return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
-          }),
-        );
-      } else if (d.type === "rotate") {
-        const currentAngle = Math.atan2(e.clientY - d.centerScreenY, e.clientX - d.centerScreenX);
-        const angleDelta = (currentAngle - d.startAngle) * (180 / Math.PI);
-        let newRot = d.startRotation + angleDelta;
-        for (const snap of [0, 90, 180, 270, -90, -180, -270]) {
-          if (Math.abs(newRot - snap) < 3) { newRot = snap; break; }
+      setElements((prev) =>
+        prev.map((el) => {
+          if (el.id !== d.nodeId) return el;
+          let newW = d.startNodeW,
+            newH = d.startNodeH;
+          if (dir.includes("e")) newW = Math.max(40, d.startNodeW + localDx);
+          if (dir.includes("w")) newW = Math.max(40, d.startNodeW - localDx);
+          if (dir.includes("s")) newH = Math.max(20, d.startNodeH + localDy);
+          if (dir.includes("n")) newH = Math.max(20, d.startNodeH - localDy);
+          if (isCorner && e.shiftKey) {
+            const ar = d.aspectRatio;
+            if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
+            else newW = newH * ar;
+          }
+          const pos = positionForFixedAnchor(
+            d.startNodeX,
+            d.startNodeY,
+            d.startNodeW,
+            d.startNodeH,
+            newW,
+            newH,
+            dir,
+            d.startRotation,
+          );
+          return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
+        }),
+      );
+    } else if (d.type === "rotate") {
+      const currentAngle = Math.atan2(
+        e.clientY - d.centerScreenY,
+        e.clientX - d.centerScreenX,
+      );
+      const angleDelta = (currentAngle - d.startAngle) * (180 / Math.PI);
+      let newRot = d.startRotation + angleDelta;
+      for (const snap of [0, 90, 180, 270, -90, -180, -270]) {
+        if (Math.abs(newRot - snap) < 3) {
+          newRot = snap;
+          break;
         }
-        setElements((prev) => prev.map((el) => (el.id === d.nodeId ? { ...el, rotation: newRot } : el)));
-        setRotationTooltip({ angle: Math.round(newRot * 10) / 10, x: e.clientX, y: e.clientY });
       }
-    },
-    [],
-  );
+      setElements((prev) =>
+        prev.map((el) =>
+          el.id === d.nodeId ? { ...el, rotation: newRot } : el,
+        ),
+      );
+      setRotationTooltip({
+        angle: Math.round(newRot * 10) / 10,
+        x: e.clientX,
+        y: e.clientY,
+      });
+    }
+  }, []);
 
   const onPointerUp = useCallback(() => {
     dragRef.current = null;
@@ -515,26 +714,34 @@ export default function ArtTab() {
     const onKey = () => {}; // shift is read directly from event in onPointerMove
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKey);
-    return () => { window.removeEventListener("keydown", onKey); window.removeEventListener("keyup", onKey); };
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKey);
+    };
   }, []);
 
   /* ── Double-click to edit text ── */
-  const onDoubleClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const nodeEl = target.closest("[data-element-id]") as HTMLElement | null;
-    if (!nodeEl) return;
-    const id = Number(nodeEl.dataset.elementId);
-    const el = elements.find((n) => n.id === id);
-    if (el?.type === "text") {
-      setEditingId(id);
-      setSelectedId(id);
-      e.stopPropagation();
-    }
-  }, [elements]);
+  const onDoubleClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const nodeEl = target.closest("[data-element-id]") as HTMLElement | null;
+      if (!nodeEl) return;
+      const id = Number(nodeEl.dataset.elementId);
+      const el = elements.find((n) => n.id === id);
+      if (el?.type === "text") {
+        setEditingId(id);
+        setSelectedId(id);
+        e.stopPropagation();
+      }
+    },
+    [elements],
+  );
 
   /* ── Save text on blur ── */
   const onTextBlur = useCallback((id: number, text: string) => {
-    setElements((prev) => prev.map((el) => (el.id === id ? { ...el, content: text } : el)));
+    setElements((prev) =>
+      prev.map((el) => (el.id === id ? { ...el, content: text } : el)),
+    );
     setEditingId(null);
   }, []);
 
@@ -600,8 +807,14 @@ export default function ArtTab() {
                 contentEditable={editingId === el.id}
                 suppressContentEditableWarning
                 data-editing={editingId === el.id ? "true" : undefined}
-                onBlur={(e) => onTextBlur(el.id, e.currentTarget.textContent ?? "")}
-                onPointerDown={editingId === el.id ? (e: React.PointerEvent) => e.stopPropagation() : undefined}
+                onBlur={(e) =>
+                  onTextBlur(el.id, e.currentTarget.textContent ?? "")
+                }
+                onPointerDown={
+                  editingId === el.id
+                    ? (e: React.PointerEvent) => e.stopPropagation()
+                    : undefined
+                }
                 style={{ fontSize: Math.max(12, el.h * 0.4) }}
               >
                 {el.content}
@@ -632,7 +845,12 @@ export default function ArtTab() {
                 })}
                 <div
                   className="art-rotate-line"
-                  style={{ left: el.w / 2, top: -28, height: 28, pointerEvents: "none" }}
+                  style={{
+                    left: el.w / 2,
+                    top: -28,
+                    height: 28,
+                    pointerEvents: "none",
+                  }}
                 />
                 <div
                   className="art-handle art-handle--rotate"
@@ -655,7 +873,10 @@ export default function ArtTab() {
         {rotationTooltip && (
           <div
             className="art-rotation-tooltip"
-            style={{ left: rotationTooltip.x + 16, top: rotationTooltip.y - 12 }}
+            style={{
+              left: rotationTooltip.x + 16,
+              top: rotationTooltip.y - 12,
+            }}
           >
             {rotationTooltip.angle}°
           </div>
