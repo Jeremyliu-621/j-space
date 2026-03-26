@@ -18,7 +18,7 @@ export default function Desktop({ children }: DesktopProps) {
         position: 'relative',
         width: '100%',
         height: '100vh',
-        overflow: 'hidden',
+        overflow: 'visible',
         backgroundColor: '#c0c0c0',
         ...bgStyle,
       }}
@@ -52,7 +52,7 @@ export default function Desktop({ children }: DesktopProps) {
       )}
 
       {/* Desktop content area */}
-      <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 28px)', overflow: 'hidden', zIndex: 2 }}>
+      <div style={{ position: 'relative', width: '100%', height: 'calc(100% - 28px)', overflow: 'visible', zIndex: 2 }}>
         {children}
       </div>
     </div>

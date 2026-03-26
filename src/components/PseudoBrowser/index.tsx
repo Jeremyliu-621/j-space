@@ -59,34 +59,34 @@ export default function PseudoBrowser() {
         className="pb-tab-strip"
         style={{ backgroundColor: "#c0c0c0", ...bgStyle }}
       >
-        {beforeStyle.display !== "none" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: beforeStyle.backgroundImage,
-              backgroundRepeat: beforeStyle.backgroundRepeat as string,
-              backgroundPosition: beforeStyle.backgroundPosition as string,
-              backgroundSize: beforeStyle.backgroundSize as string,
-              filter: beforeStyle.filter,
-              pointerEvents: "none",
-              zIndex: 0,
-            }}
-          />
-        )}
-        {overlayStyle.display !== "none" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundColor: overlayStyle.backgroundColor,
-              pointerEvents: "none",
-              zIndex: 0,
-              mixBlendMode: "multiply",
-              opacity: 0.6,
-            }}
-          />
-        )}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
+          {beforeStyle.display !== "none" && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundImage: beforeStyle.backgroundImage,
+                backgroundRepeat: beforeStyle.backgroundRepeat as string,
+                backgroundPosition: beforeStyle.backgroundPosition as string,
+                backgroundSize: beforeStyle.backgroundSize as string,
+                filter: beforeStyle.filter,
+                pointerEvents: "none",
+              }}
+            />
+          )}
+          {overlayStyle.display !== "none" && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundColor: overlayStyle.backgroundColor,
+                pointerEvents: "none",
+                mixBlendMode: "multiply",
+                opacity: 0.6,
+              }}
+            />
+          )}
+        </div>
 
         <div className="pb-tab-strip-inner">
           {TABS.map((tab, idx) => (

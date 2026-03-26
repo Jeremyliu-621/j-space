@@ -269,6 +269,7 @@ canvas,
   padding: 0;
   margin: 0;
   scroll-snap-stop: always;
+  overflow: visible;
 }
 
 /* Identity Card - Persistent across all stations */
@@ -1317,7 +1318,7 @@ canvas,
   user-select: none;
   position: relative;
   z-index: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .pb-tab-strip-inner {
@@ -1360,6 +1361,7 @@ canvas,
   border-radius: 0;
   cursor: pointer;
   position: relative;
+  overflow: visible; /* buttons default to overflow:hidden in Chrome, which clips ::before/::after shoulders */
   min-width: 72px;
   max-width: 220px;
   flex: 0 1 220px;
@@ -1421,44 +1423,43 @@ canvas,
 }
 
 /* Active tab — connects to toolbar with flared bottom corners (shadow = solid fill, no blur) */
+/* Active tab — rounded top, concave shoulder transition into toolbar */
 .pb-tab-strip-inner > .pb-tab.pb-tab-active {
-  --pb-tab-surface: var(--palette-color-3);
-  background: var(--pb-tab-surface);
+  background: var(--palette-color-3);
   color: #000000;
-  border: 1px solid color-mix(in srgb, var(--palette-color-2) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--palette-color-2) 30%, transparent);
   border-bottom: none;
-  border-radius: 12px 12px 0 0;
+  border-radius: 8px 8px 0 0;
   z-index: 2;
   margin-bottom: -1px;
 }
 
+/*
+  Concave shoulders: 12×12 squares just outside each bottom corner.
+  bottom: -1px compensates for the tab's margin-bottom: -1px so the shoulder
+  flush-aligns with the toolbar top.
+  radial-gradient hole corner faces the tab edge (top-right for left shoulder,
+  top-left for right shoulder) so the transparent arc = the concave dip.
+*/
 .pb-tab-strip-inner > .pb-tab.pb-tab-active::before,
 .pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
-  content: "";
+  content: “”;
   position: absolute;
-  bottom: 0;
+  bottom: -1px;
   width: 12px;
   height: 12px;
-  /* Keep the active tab shoulders fully opaque (no texture bleed-through). */
-  background: var(--pb-tab-surface);
   pointer-events: none;
-  z-index: 0;
+  z-index: 3;
 }
 
-/* Left / right “shoulders”: same color as tab, no Win98 bevel */
 .pb-tab-strip-inner > .pb-tab.pb-tab-active::before {
   left: -12px;
-  /* Quarter-circle shoulder (prevents square "bleed" behind the active tab). */
-  border-radius: 0;
-  box-shadow: none;
-  clip-path: circle(12px at 100% 100%);
+  background: red;
 }
 
 .pb-tab-strip-inner > .pb-tab.pb-tab-active::after {
   right: -12px;
-  border-radius: 0;
-  box-shadow: none;
-  clip-path: circle(12px at 0% 100%);
+  background: blue;
 }
 
 /* Favicon placeholder */
