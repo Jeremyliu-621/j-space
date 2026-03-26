@@ -138,7 +138,10 @@ export default function PseudoBrowser() {
                 tabRefs.current[idx] = el;
               }}
               className={`pb-tab${idx === activeTab ? " pb-tab-active" : ""}`}
-              onClick={() => setActiveTab(idx)}
+              onClick={() => {
+                setActiveTab(idx);
+                browserRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              }}
             >
               <span className="pb-tab-favicon" aria-hidden="true" />
               <span className="pb-tab-label">{tab.label}</span>
@@ -147,9 +150,6 @@ export default function PseudoBrowser() {
               </span>
             </button>
           ))}
-          <button className="pb-tab-new" aria-label="New tab">
-            +
-          </button>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -41,6 +41,9 @@ interface CanvasElement {
   file?: string;
   shape?: ShapeKind;
   content?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontColor?: string;
 }
 
 /* ── Build initial elements from image config + a default text ── */
@@ -68,6 +71,9 @@ const INITIAL_ELEMENTS: CanvasElement[] = [
     rotation: -2,
     zIndex: ART_IMAGES.length + 1,
     content: "everything is a canvas",
+    fontSize: 26,
+    fontFamily: "'Playfair Display', Georgia, serif",
+    fontColor: "#1a1a1a",
   },
 ];
 
@@ -376,6 +382,22 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
 const HANDLE_SIZE = 8;
 const HANDLE_DIRS: HandleDir[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
 
+/* ── Per-element intro tilt config (seeded once) ── */
+function randTilt(max: number) {
+  return ((Math.random() - 0.5) * 2 * max).toFixed(1) + "deg";
+}
+const TILT_STEPS = 7; // steps per element
+const TILT_CONFIG: Record<number, { angles: string[]; isText: boolean }> = {};
+for (const el of INITIAL_ELEMENTS) {
+  const isText = el.type === "text";
+  const mag = isText ? 2.5 : 1.8;
+  const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
+  TILT_CONFIG[el.id] = {
+    angles: Array.from({ length: steps }, () => randTilt(mag)),
+    isText,
+  };
+}
+
 export default function ArtTab() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<CanvasElement[]>(INITIAL_ELEMENTS);
@@ -388,6 +410,142 @@ export default function ArtTab() {
   } | null>(null);
   const nextIdRef = useRef(INITIAL_ELEMENTS.length + 1);
   const topZRef = useRef(INITIAL_ELEMENTS.length + 1);
+
+  /* ── Per-element intro tilt: each triggers when it enters viewport ── */
+  const [tiltingIds, setTiltingIds] = useState<Set<number>>(new Set());
+  const firedIds = useRef<Set<number>>(new Set());
+  const elRefsForObserver = useRef<Map<number, HTMLDivElement>>(new Map());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const newIds: number[] = [];
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const id = Number((entry.target as HTMLElement).dataset.elementId);
+          if (!id || firedIds.current.has(id)) continue;
+          firedIds.current.add(id);
+          newIds.push(id);
+          observer.unobserve(entry.target);
+        }
+        if (newIds.length > 0) {
+          setTiltingIds((prev) => {
+            const next = new Set(prev);
+            for (const id of newIds) next.add(id);
+            return next;
+          });
+          // Clear each element's tilt after its steps finish (steps * 80ms + buffer)
+          for (const id of newIds) {
+            const cfg = TILT_CONFIG[id];
+            const dur = (cfg?.angles.length ?? TILT_STEPS) * 160 + 200;
+            timers.push(setTimeout(() => {
+              setTiltingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+              });
+            }, dur));
+          }
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observerRef.current = observer;
+
+    // Observe any already-registered elements
+    elRefsForObserver.current.forEach((div) => observer.observe(div));
+
+    return () => {
+      observer.disconnect();
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  const registerElRef = useCallback((id: number, node: HTMLDivElement | null) => {
+    if (node) {
+      elRefsForObserver.current.set(id, node);
+      if (observerRef.current && !firedIds.current.has(id)) {
+        observerRef.current.observe(node);
+      }
+    } else {
+      const prev = elRefsForObserver.current.get(id);
+      if (prev) observerRef.current?.unobserve(prev);
+      elRefsForObserver.current.delete(id);
+    }
+  }, []);
+
+  /* ── Step through tilt angles for each tilting element ── */
+  const tiltIntervalsRef = useRef<Map<number, ReturnType<typeof setInterval>>>(new Map());
+  useEffect(() => {
+    const STEP_MS = 160; // choppy frame rate
+
+    for (const id of tiltingIds) {
+      if (tiltIntervalsRef.current.has(id)) continue; // already running
+      const cfg = TILT_CONFIG[id];
+      if (!cfg) continue;
+      let step = 0;
+      const iv = setInterval(() => {
+        const div = elRefsForObserver.current.get(id);
+        if (!div || step >= cfg.angles.length) {
+          clearInterval(iv);
+          tiltIntervalsRef.current.delete(id);
+          if (div) div.style.rotate = "";
+          return;
+        }
+        div.style.rotate = cfg.angles[step];
+        step++;
+      }, STEP_MS);
+      tiltIntervalsRef.current.set(id, iv);
+    }
+
+    // Clean up intervals for elements no longer tilting
+    for (const [id, iv] of tiltIntervalsRef.current) {
+      if (!tiltingIds.has(id)) {
+        clearInterval(iv);
+        tiltIntervalsRef.current.delete(id);
+        const div = elRefsForObserver.current.get(id);
+        if (div) div.style.rotate = "";
+      }
+    }
+  }, [tiltingIds]);
+
+  /* ── Undo / Redo history ── */
+  const historyRef = useRef<CanvasElement[][]>([INITIAL_ELEMENTS]);
+  const historyIndexRef = useRef(0);
+
+  const pushHistory = useCallback((snapshot: CanvasElement[]) => {
+    const idx = historyIndexRef.current;
+    // Discard any redo states beyond current position
+    historyRef.current = historyRef.current.slice(0, idx + 1);
+    historyRef.current.push(snapshot);
+    historyIndexRef.current = historyRef.current.length - 1;
+  }, []);
+
+  const undo = useCallback(() => {
+    if (historyIndexRef.current <= 0) return;
+    historyIndexRef.current--;
+    const snapshot = historyRef.current[historyIndexRef.current];
+    setElements(snapshot);
+    setSelectedId(null);
+    setEditingId(null);
+  }, []);
+
+  const redo = useCallback(() => {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return;
+    historyIndexRef.current++;
+    const snapshot = historyRef.current[historyIndexRef.current];
+    setElements(snapshot);
+    setSelectedId(null);
+    setEditingId(null);
+  }, []);
+
+  /* Sync history head with current elements so cosmetic changes
+     (like bringToFront zIndex bumps) don't cause phantom undo steps */
+  const syncHistoryHead = useCallback((current: CanvasElement[]) => {
+    historyRef.current[historyIndexRef.current] = current;
+  }, []);
 
   /* ── Drag state ── */
   const dragRef = useRef<{
@@ -405,15 +563,19 @@ export default function ArtTab() {
     aspectRatio: number;
     centerScreenX: number;
     centerScreenY: number;
+    didMove: boolean;
+    startFontSize?: number;
   } | null>(null);
 
   /* ── Helpers ── */
   const bringToFront = useCallback((id: number) => {
     const z = ++topZRef.current;
-    setElements((prev) =>
-      prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el)),
-    );
-  }, []);
+    setElements((prev) => {
+      const next = prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el));
+      syncHistoryHead(next);
+      return next;
+    });
+  }, [syncHistoryHead]);
 
   const getElScreenCenter = useCallback((el: CanvasElement) => {
     const canvas = canvasRef.current;
@@ -447,14 +609,18 @@ export default function ArtTab() {
         rotation: 0,
         zIndex: z,
         ...(type === "shape" ? { shape } : {}),
-        ...(type === "text" ? { content: "Double-click to edit" } : {}),
+        ...(type === "text" ? { content: "Double-click to edit", fontSize: 22, fontFamily: "'Playfair Display', Georgia, serif", fontColor: "#1a1a1a" } : {}),
       };
-      setElements((prev) => [...prev, newEl]);
+      setElements((prev) => {
+        const next = [...prev, newEl];
+        pushHistory(next);
+        return next;
+      });
       setSelectedId(id);
       setEditingId(null);
       return id;
     },
-    [],
+    [pushHistory],
   );
 
   /* ── Sidebar pointer-down: supports click-to-add & drag-to-add ── */
@@ -570,6 +736,7 @@ export default function ArtTab() {
             aspectRatio: el.w / el.h,
             centerScreenX: center.x,
             centerScreenY: center.y,
+            didMove: false,
           };
         } else {
           dragRef.current = {
@@ -587,6 +754,8 @@ export default function ArtTab() {
             aspectRatio: el.w / el.h,
             centerScreenX: 0,
             centerScreenY: 0,
+            didMove: false,
+            startFontSize: el.fontSize,
           };
         }
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -615,6 +784,7 @@ export default function ArtTab() {
           aspectRatio: el.w / el.h,
           centerScreenX: 0,
           centerScreenY: 0,
+          didMove: false,
         };
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
         return;
@@ -633,6 +803,7 @@ export default function ArtTab() {
     if (!d) return;
     const dx = e.clientX - d.startX;
     const dy = e.clientY - d.startY;
+    if (dx !== 0 || dy !== 0) d.didMove = true;
 
     if (d.type === "move") {
       setElements((prev) =>
@@ -645,6 +816,7 @@ export default function ArtTab() {
     } else if (d.type === "resize" && d.handleDir) {
       const dir = d.handleDir;
       const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
+      const isSideOnly = dir === "e" || dir === "w";
       const rad = (d.startRotation * Math.PI) / 180;
       const cosR = Math.cos(rad),
         sinR = Math.sin(rad);
@@ -654,6 +826,37 @@ export default function ArtTab() {
       setElements((prev) =>
         prev.map((el) => {
           if (el.id !== d.nodeId) return el;
+          const isText = el.type === "text";
+
+          if (isText && isCorner) {
+            // Corner drag on text: scale container and font proportionally
+            const scale = Math.max(0.3, 1 + (dir.includes("e") || dir.includes("s") ? 1 : -1) *
+              (Math.abs(localDx) > Math.abs(localDy) ? localDx / d.startNodeW : localDy / d.startNodeH));
+            const newW = Math.max(40, d.startNodeW * scale);
+            const newH = Math.max(20, d.startNodeH * scale);
+            const newFontSize = Math.max(8, (d.startFontSize ?? 22) * scale);
+            const pos = positionForFixedAnchor(
+              d.startNodeX, d.startNodeY,
+              d.startNodeW, d.startNodeH,
+              newW, newH, dir, d.startRotation,
+            );
+            return { ...el, x: pos.x, y: pos.y, w: newW, h: newH, fontSize: newFontSize };
+          }
+
+          if (isText && isSideOnly) {
+            // Side drag on text: change width only, height auto-adjusts via CSS
+            let newW = d.startNodeW;
+            if (dir === "e") newW = Math.max(40, d.startNodeW + localDx);
+            if (dir === "w") newW = Math.max(40, d.startNodeW - localDx);
+            const pos = positionForFixedAnchor(
+              d.startNodeX, d.startNodeY,
+              d.startNodeW, d.startNodeH,
+              newW, d.startNodeH, dir, d.startRotation,
+            );
+            return { ...el, x: pos.x, y: pos.y, w: newW };
+          }
+
+          // Non-text elements: original behavior
           let newW = d.startNodeW,
             newH = d.startNodeH;
           if (dir.includes("e")) newW = Math.max(40, d.startNodeW + localDx);
@@ -666,14 +869,9 @@ export default function ArtTab() {
             else newW = newH * ar;
           }
           const pos = positionForFixedAnchor(
-            d.startNodeX,
-            d.startNodeY,
-            d.startNodeW,
-            d.startNodeH,
-            newW,
-            newH,
-            dir,
-            d.startRotation,
+            d.startNodeX, d.startNodeY,
+            d.startNodeW, d.startNodeH,
+            newW, newH, dir, d.startRotation,
           );
           return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
         }),
@@ -705,20 +903,52 @@ export default function ArtTab() {
   }, []);
 
   const onPointerUp = useCallback(() => {
-    dragRef.current = null;
-    setRotationTooltip(null);
-  }, []);
+    const d = dragRef.current;
+    if (d) {
+      const moved = d.didMove;
+      dragRef.current = null;
+      setRotationTooltip(null);
+      if (moved) {
+        setElements((cur) => {
+          pushHistory(cur);
+          return cur;
+        });
+      }
+    } else {
+      setRotationTooltip(null);
+    }
+  }, [pushHistory]);
 
-  /* ── Shift key tracking ── */
+  /* ── Keyboard shortcuts (undo/redo + delete) ── */
   useEffect(() => {
-    const onKey = () => {}; // shift is read directly from event in onPointerMove
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("keyup", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keyup", onKey);
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Only handle when this tab's canvas is in focus area
+      if ((e.target as HTMLElement).closest?.("[contenteditable=true]")) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if (
+        (e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey ||
+        (e.ctrlKey || e.metaKey) && e.key === "y"
+      ) {
+        e.preventDefault();
+        redo();
+      } else if (e.key === "Backspace" || e.key === "Delete") {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+        if (selectedId != null) {
+          e.preventDefault();
+          const next = elements.filter((el) => el.id !== selectedId);
+          pushHistory(next);
+          setElements(next);
+          setSelectedId(null);
+        }
+      }
     };
-  }, []);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [undo, redo, selectedId, elements, pushHistory]);
 
   /* ── Double-click to edit text ── */
   const onDoubleClick = useCallback(
@@ -739,15 +969,125 @@ export default function ArtTab() {
 
   /* ── Save text on blur ── */
   const onTextBlur = useCallback((id: number, text: string) => {
-    setElements((prev) =>
-      prev.map((el) => (el.id === id ? { ...el, content: text } : el)),
-    );
+    setElements((prev) => {
+      const next = prev.map((el) => (el.id === id ? { ...el, content: text } : el));
+      pushHistory(next);
+      return next;
+    });
     setEditingId(null);
-  }, []);
+  }, [pushHistory]);
+
+  /* ── Measure text element heights and sync back ── */
+  const textElRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  useLayoutEffect(() => {
+    textElRefs.current.forEach((div, id) => {
+      const el = elements.find((e) => e.id === id);
+      if (!el || el.type !== "text") return;
+      const measuredH = div.offsetHeight;
+      if (measuredH > 0 && Math.abs(measuredH - el.h) > 2) {
+        // Only update h if not currently dragging this element
+        if (dragRef.current?.nodeId === id) return;
+        setElements((prev) =>
+          prev.map((e) => (e.id === id ? { ...e, h: measuredH } : e)),
+        );
+      }
+    });
+  });
+
+  /* ── Text toolbar helpers ── */
+  const selectedEl = elements.find((el) => el.id === selectedId);
+  const showTextToolbar = selectedEl?.type === "text";
+  const [fontSelectOpen, setFontSelectOpen] = useState(false);
+
+  const updateTextProp = useCallback(
+    (prop: "fontSize" | "fontFamily" | "fontColor", value: string | number) => {
+      if (selectedId == null) return;
+      setElements((prev) => {
+        const next = prev.map((el) =>
+          el.id === selectedId ? { ...el, [prop]: value } : el,
+        );
+        pushHistory(next);
+        return next;
+      });
+    },
+    [selectedId, pushHistory],
+  );
+
+  const FONT_OPTIONS = [
+    { label: "Playfair Display", value: "'Playfair Display', Georgia, serif" },
+    { label: "Arial", value: "Arial, Helvetica, sans-serif" },
+    { label: "Georgia", value: "Georgia, serif" },
+    { label: "Courier New", value: "'Courier New', monospace" },
+    { label: "Times New Roman", value: "'Times New Roman', serif" },
+    { label: "Verdana", value: "Verdana, sans-serif" },
+    { label: "Impact", value: "Impact, sans-serif" },
+    { label: "Comic Sans MS", value: "'Comic Sans MS', cursive" },
+  ];
 
   /* ── Render ── */
   return (
     <div className="art-container">
+      {/* ── Text Toolbar ── */}
+      {showTextToolbar && selectedEl && (
+        <div className="art-text-toolbar" onPointerDown={(e) => e.stopPropagation()}>
+          <div className={`art-toolbar-select-wrap${fontSelectOpen ? " art-toolbar-select-wrap--open" : ""}`}>
+            <select
+              className="art-toolbar-select"
+              value={selectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"}
+              onChange={(e) => {
+                updateTextProp("fontFamily", e.target.value);
+                e.target.blur();
+              }}
+              onFocus={() => setFontSelectOpen(true)}
+              onBlur={() => setFontSelectOpen(false)}
+            >
+              {FONT_OPTIONS.map((f) => (
+                <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="art-toolbar-divider" />
+          <div className="art-toolbar-size">
+            <button
+              className="art-toolbar-btn"
+              onClick={() =>
+                updateTextProp("fontSize", Math.max(8, (selectedEl.fontSize ?? 22) - 2))
+              }
+            >
+              −
+            </button>
+            <input
+              className="art-toolbar-size-input"
+              type="number"
+              min={8}
+              max={200}
+              value={Math.round(selectedEl.fontSize ?? 22)}
+              onChange={(e) =>
+                updateTextProp("fontSize", Math.max(8, Number(e.target.value)))
+              }
+            />
+            <button
+              className="art-toolbar-btn"
+              onClick={() =>
+                updateTextProp("fontSize", Math.min(200, (selectedEl.fontSize ?? 22) + 2))
+              }
+            >
+              +
+            </button>
+          </div>
+          <div className="art-toolbar-divider" />
+          <div className="art-toolbar-color-wrap">
+            <input
+              className="art-toolbar-color"
+              type="color"
+              value={selectedEl.fontColor ?? "#1a1a1a"}
+              onChange={(e) => updateTextProp("fontColor", e.target.value)}
+            />
+          </div>
+        </div>
+      )}
       {/* ── Sidebar ── */}
       <div className="art-sidebar">
         {SIDEBAR_TOOLS.map((tool) => (
@@ -771,16 +1111,22 @@ export default function ArtTab() {
         onPointerUp={onPointerUp}
         onDoubleClick={onDoubleClick}
       >
-        {elements.map((el) => (
+        {elements.map((el) => {
+          const isTilting = tiltingIds.has(el.id);
+          const cfg = TILT_CONFIG[el.id];
+          const isTiltText = isTilting && cfg?.isText;
+          return (
           <div
             key={el.id}
-            className={`art-element${el.id === selectedId ? " art-element--selected" : ""}`}
+            ref={(node) => registerElRef(el.id, node)}
+            className={`art-element${el.id === selectedId ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}`}
             data-element-id={el.id}
             style={{
               left: el.x,
               top: el.y,
               width: el.w,
-              height: el.h,
+              height: el.type === "text" ? "auto" : el.h,
+              minHeight: el.type === "text" ? el.h : undefined,
               zIndex: el.zIndex,
               transform: `rotate(${el.rotation}deg)`,
             }}
@@ -804,6 +1150,10 @@ export default function ArtTab() {
             {el.type === "text" && (
               <div
                 className="art-text-content"
+                ref={(node) => {
+                  if (node) textElRefs.current.set(el.id, node);
+                  else textElRefs.current.delete(el.id);
+                }}
                 contentEditable={editingId === el.id}
                 suppressContentEditableWarning
                 data-editing={editingId === el.id ? "true" : undefined}
@@ -815,14 +1165,18 @@ export default function ArtTab() {
                     ? (e: React.PointerEvent) => e.stopPropagation()
                     : undefined
                 }
-                style={{ fontSize: Math.max(12, el.h * 0.4) }}
+                style={{
+                  fontSize: el.fontSize ?? 22,
+                  fontFamily: el.fontFamily ?? "'Playfair Display', Georgia, serif",
+                  color: el.fontColor ?? "#1a1a1a",
+                }}
               >
                 {el.content}
               </div>
             )}
 
             {/* Selection UI */}
-            {el.id === selectedId && (
+            {(el.id === selectedId || isTiltText) && (
               <div className="art-selection" style={{ pointerEvents: "none" }}>
                 <div className="art-selection-box" />
                 {HANDLE_DIRS.map((dir) => {
@@ -867,7 +1221,8 @@ export default function ArtTab() {
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
 
         {/* Rotation tooltip */}
         {rotationTooltip && (
