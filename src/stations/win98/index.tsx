@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import Desktop from '../../components/win98/Desktop';
-import Taskbar from '../../components/win98/Taskbar';
 import Window from '../../components/win98/Window';
 import DesktopIcon from '../../components/win98/DesktopIcon';
 import StartMenu from '../../components/win98/StartMenu';
@@ -18,7 +17,6 @@ function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, tr
   const { displayText } = useTypewriter(text, { trigger });
   const rendered = styledIndices
     ? displayText.split('').map((ch, i) => {
-        const originalIndex = text.indexOf(displayText.charAt(0)) === -1 ? i : i;
         return styledIndices.indices.includes(i)
           ? <span key={i} style={styledIndices.style}>{ch}</span>
           : <React.Fragment key={i}>{ch}</React.Fragment>;
