@@ -389,6 +389,42 @@ export default function ArtTab() {
   const nextIdRef = useRef(INITIAL_ELEMENTS.length + 1);
   const topZRef = useRef(INITIAL_ELEMENTS.length + 1);
 
+  /* ── Undo / Redo history ── */
+  const historyRef = useRef<CanvasElement[][]>([INITIAL_ELEMENTS]);
+  const historyIndexRef = useRef(0);
+
+  const pushHistory = useCallback((snapshot: CanvasElement[]) => {
+    const idx = historyIndexRef.current;
+    // Discard any redo states beyond current position
+    historyRef.current = historyRef.current.slice(0, idx + 1);
+    historyRef.current.push(snapshot);
+    historyIndexRef.current = historyRef.current.length - 1;
+  }, []);
+
+  const undo = useCallback(() => {
+    if (historyIndexRef.current <= 0) return;
+    historyIndexRef.current--;
+    const snapshot = historyRef.current[historyIndexRef.current];
+    setElements(snapshot);
+    setSelectedId(null);
+    setEditingId(null);
+  }, []);
+
+  const redo = useCallback(() => {
+    if (historyIndexRef.current >= historyRef.current.length - 1) return;
+    historyIndexRef.current++;
+    const snapshot = historyRef.current[historyIndexRef.current];
+    setElements(snapshot);
+    setSelectedId(null);
+    setEditingId(null);
+  }, []);
+
+  /* Sync history head with current elements so cosmetic changes
+     (like bringToFront zIndex bumps) don't cause phantom undo steps */
+  const syncHistoryHead = useCallback((current: CanvasElement[]) => {
+    historyRef.current[historyIndexRef.current] = current;
+  }, []);
+
   /* ── Drag state ── */
   const dragRef = useRef<{
     type: "move" | "resize" | "rotate";
@@ -405,15 +441,18 @@ export default function ArtTab() {
     aspectRatio: number;
     centerScreenX: number;
     centerScreenY: number;
+    didMove: boolean;
   } | null>(null);
 
   /* ── Helpers ── */
   const bringToFront = useCallback((id: number) => {
     const z = ++topZRef.current;
-    setElements((prev) =>
-      prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el)),
-    );
-  }, []);
+    setElements((prev) => {
+      const next = prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el));
+      syncHistoryHead(next);
+      return next;
+    });
+  }, [syncHistoryHead]);
 
   const getElScreenCenter = useCallback((el: CanvasElement) => {
     const canvas = canvasRef.current;
@@ -449,12 +488,16 @@ export default function ArtTab() {
         ...(type === "shape" ? { shape } : {}),
         ...(type === "text" ? { content: "Double-click to edit" } : {}),
       };
-      setElements((prev) => [...prev, newEl]);
+      setElements((prev) => {
+        const next = [...prev, newEl];
+        pushHistory(next);
+        return next;
+      });
       setSelectedId(id);
       setEditingId(null);
       return id;
     },
-    [],
+    [pushHistory],
   );
 
   /* ── Sidebar pointer-down: supports click-to-add & drag-to-add ── */
@@ -570,6 +613,7 @@ export default function ArtTab() {
             aspectRatio: el.w / el.h,
             centerScreenX: center.x,
             centerScreenY: center.y,
+            didMove: false,
           };
         } else {
           dragRef.current = {
@@ -587,6 +631,7 @@ export default function ArtTab() {
             aspectRatio: el.w / el.h,
             centerScreenX: 0,
             centerScreenY: 0,
+            didMove: false,
           };
         }
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -615,6 +660,7 @@ export default function ArtTab() {
           aspectRatio: el.w / el.h,
           centerScreenX: 0,
           centerScreenY: 0,
+          didMove: false,
         };
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
         return;
@@ -633,6 +679,7 @@ export default function ArtTab() {
     if (!d) return;
     const dx = e.clientX - d.startX;
     const dy = e.clientY - d.startY;
+    if (dx !== 0 || dy !== 0) d.didMove = true;
 
     if (d.type === "move") {
       setElements((prev) =>
@@ -705,20 +752,42 @@ export default function ArtTab() {
   }, []);
 
   const onPointerUp = useCallback(() => {
-    dragRef.current = null;
-    setRotationTooltip(null);
-  }, []);
+    const d = dragRef.current;
+    if (d) {
+      const moved = d.didMove;
+      dragRef.current = null;
+      setRotationTooltip(null);
+      if (moved) {
+        setElements((cur) => {
+          pushHistory(cur);
+          return cur;
+        });
+      }
+    } else {
+      setRotationTooltip(null);
+    }
+  }, [pushHistory]);
 
-  /* ── Shift key tracking ── */
+  /* ── Keyboard shortcuts (undo/redo + delete) ── */
   useEffect(() => {
-    const onKey = () => {}; // shift is read directly from event in onPointerMove
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("keyup", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keyup", onKey);
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Only handle when this tab's canvas is in focus area
+      if ((e.target as HTMLElement).closest?.("[contenteditable=true]")) return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if (
+        (e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey ||
+        (e.ctrlKey || e.metaKey) && e.key === "y"
+      ) {
+        e.preventDefault();
+        redo();
+      }
     };
-  }, []);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [undo, redo]);
 
   /* ── Double-click to edit text ── */
   const onDoubleClick = useCallback(
@@ -739,11 +808,13 @@ export default function ArtTab() {
 
   /* ── Save text on blur ── */
   const onTextBlur = useCallback((id: number, text: string) => {
-    setElements((prev) =>
-      prev.map((el) => (el.id === id ? { ...el, content: text } : el)),
-    );
+    setElements((prev) => {
+      const next = prev.map((el) => (el.id === id ? { ...el, content: text } : el));
+      pushHistory(next);
+      return next;
+    });
     setEditingId(null);
-  }, []);
+  }, [pushHistory]);
 
   /* ── Render ── */
   return (
