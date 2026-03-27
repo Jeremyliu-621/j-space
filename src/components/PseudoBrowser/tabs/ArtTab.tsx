@@ -1,4 +1,10 @@
-import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
+import {
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -11,7 +17,7 @@ const ART_IMAGES = [
   { file: "spiderverse.JPG", width: 260, height: 175, x: 870, y: 20 },
   { file: "BR0D4R.jpg", width: 195, height: 250, x: 880, y: 230 },
   { file: "drool.jpg", width: 175, height: 220, x: 1100, y: 60 },
-  { file: "resk12tag.png", width: 130, height: 100, x: 410, y: 270 },
+  { file: "resk12tag.png", width: 100, height: 100, x: 410, y: 270 },
   { file: "zephyr_tag.jpg", width: 200, height: 150, x: 680, y: 260 },
   { file: "annalauraart.PNG", width: 165, height: 215, x: 1110, y: 310 },
   { file: "beetlemoses.jpg", width: 215, height: 165, x: 50, y: 490 },
@@ -380,7 +386,7 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════ */
 const HANDLE_SIZE = 8;
-const HANDLE_DIRS: HandleDir[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+const HANDLE_DIRS: HandleDir[] = ["nw", "ne", "se", "sw"];
 
 /* ── Per-element intro tilt config (seeded once) ── */
 function randTilt(max: number) {
@@ -398,9 +404,72 @@ for (const el of INITIAL_ELEMENTS) {
   };
 }
 
-export default function ArtTab() {
+export interface ArtTabProps {
+  images?: {
+    file: string;
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+  }[];
+  imageFolder?: string;
+  defaultText?: {
+    content: string;
+    x: number;
+    y: number;
+    w: number;
+    fontSize: number;
+  };
+}
+
+export default function ArtTab({
+  images,
+  imageFolder = "/art",
+  defaultText,
+}: ArtTabProps = {}) {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const [elements, setElements] = useState<CanvasElement[]>(INITIAL_ELEMENTS);
+
+  const imgList = images ?? ART_IMAGES;
+  const txt = defaultText ?? {
+    content: "everything is a canvas",
+    x: 380,
+    y: 380,
+    w: 300,
+    fontSize: 26,
+  };
+
+  const initialElements: CanvasElement[] = [
+    ...imgList.map((img, i) => ({
+      id: i + 1,
+      type: "image" as const,
+      x: img.x,
+      y: img.y,
+      w: img.width,
+      h: img.height,
+      rotation:
+        [-3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2][
+          i
+        ] ?? 0,
+      zIndex: i + 1,
+      file: img.file,
+    })),
+    {
+      id: imgList.length + 1,
+      type: "text" as const,
+      x: txt.x,
+      y: txt.y,
+      w: txt.w,
+      h: 64,
+      rotation: -2,
+      zIndex: imgList.length + 1,
+      content: txt.content,
+      fontSize: txt.fontSize,
+      fontFamily: "'Playfair Display', Georgia, serif",
+      fontColor: "#1a1a1a",
+    },
+  ];
+
+  const [elements, setElements] = useState<CanvasElement[]>(initialElements);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [rotationTooltip, setRotationTooltip] = useState<{
@@ -408,8 +477,8 @@ export default function ArtTab() {
     x: number;
     y: number;
   } | null>(null);
-  const nextIdRef = useRef(INITIAL_ELEMENTS.length + 1);
-  const topZRef = useRef(INITIAL_ELEMENTS.length + 1);
+  const nextIdRef = useRef(initialElements.length + 1);
+  const topZRef = useRef(initialElements.length + 1);
 
   /* ── Per-element intro tilt: each triggers when it enters viewport ── */
   const [tiltingIds, setTiltingIds] = useState<Set<number>>(new Set());
@@ -440,13 +509,15 @@ export default function ArtTab() {
           for (const id of newIds) {
             const cfg = TILT_CONFIG[id];
             const dur = (cfg?.angles.length ?? TILT_STEPS) * 160 + 200;
-            timers.push(setTimeout(() => {
-              setTiltingIds((prev) => {
-                const next = new Set(prev);
-                next.delete(id);
-                return next;
-              });
-            }, dur));
+            timers.push(
+              setTimeout(() => {
+                setTiltingIds((prev) => {
+                  const next = new Set(prev);
+                  next.delete(id);
+                  return next;
+                });
+              }, dur),
+            );
           }
         }
       },
@@ -463,21 +534,26 @@ export default function ArtTab() {
     };
   }, []);
 
-  const registerElRef = useCallback((id: number, node: HTMLDivElement | null) => {
-    if (node) {
-      elRefsForObserver.current.set(id, node);
-      if (observerRef.current && !firedIds.current.has(id)) {
-        observerRef.current.observe(node);
+  const registerElRef = useCallback(
+    (id: number, node: HTMLDivElement | null) => {
+      if (node) {
+        elRefsForObserver.current.set(id, node);
+        if (observerRef.current && !firedIds.current.has(id)) {
+          observerRef.current.observe(node);
+        }
+      } else {
+        const prev = elRefsForObserver.current.get(id);
+        if (prev) observerRef.current?.unobserve(prev);
+        elRefsForObserver.current.delete(id);
       }
-    } else {
-      const prev = elRefsForObserver.current.get(id);
-      if (prev) observerRef.current?.unobserve(prev);
-      elRefsForObserver.current.delete(id);
-    }
-  }, []);
+    },
+    [],
+  );
 
   /* ── Step through tilt angles for each tilting element ── */
-  const tiltIntervalsRef = useRef<Map<number, ReturnType<typeof setInterval>>>(new Map());
+  const tiltIntervalsRef = useRef<Map<number, ReturnType<typeof setInterval>>>(
+    new Map(),
+  );
   useEffect(() => {
     const STEP_MS = 160; // choppy frame rate
 
@@ -568,14 +644,19 @@ export default function ArtTab() {
   } | null>(null);
 
   /* ── Helpers ── */
-  const bringToFront = useCallback((id: number) => {
-    const z = ++topZRef.current;
-    setElements((prev) => {
-      const next = prev.map((el) => (el.id === id ? { ...el, zIndex: z } : el));
-      syncHistoryHead(next);
-      return next;
-    });
-  }, [syncHistoryHead]);
+  const bringToFront = useCallback(
+    (id: number) => {
+      const z = ++topZRef.current;
+      setElements((prev) => {
+        const next = prev.map((el) =>
+          el.id === id ? { ...el, zIndex: z } : el,
+        );
+        syncHistoryHead(next);
+        return next;
+      });
+    },
+    [syncHistoryHead],
+  );
 
   const getElScreenCenter = useCallback((el: CanvasElement) => {
     const canvas = canvasRef.current;
@@ -609,7 +690,14 @@ export default function ArtTab() {
         rotation: 0,
         zIndex: z,
         ...(type === "shape" ? { shape } : {}),
-        ...(type === "text" ? { content: "Double-click to edit", fontSize: 22, fontFamily: "'Playfair Display', Georgia, serif", fontColor: "#1a1a1a" } : {}),
+        ...(type === "text"
+          ? {
+              content: "Double-click to edit",
+              fontSize: 22,
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontColor: "#1a1a1a",
+            }
+          : {}),
       };
       setElements((prev) => {
         const next = [...prev, newEl];
@@ -830,17 +918,35 @@ export default function ArtTab() {
 
           if (isText && isCorner) {
             // Corner drag on text: scale container and font proportionally
-            const scale = Math.max(0.3, 1 + (dir.includes("e") || dir.includes("s") ? 1 : -1) *
-              (Math.abs(localDx) > Math.abs(localDy) ? localDx / d.startNodeW : localDy / d.startNodeH));
+            const scale = Math.max(
+              0.3,
+              1 +
+                (dir.includes("e") || dir.includes("s") ? 1 : -1) *
+                  (Math.abs(localDx) > Math.abs(localDy)
+                    ? localDx / d.startNodeW
+                    : localDy / d.startNodeH),
+            );
             const newW = Math.max(40, d.startNodeW * scale);
             const newH = Math.max(20, d.startNodeH * scale);
             const newFontSize = Math.max(8, (d.startFontSize ?? 22) * scale);
             const pos = positionForFixedAnchor(
-              d.startNodeX, d.startNodeY,
-              d.startNodeW, d.startNodeH,
-              newW, newH, dir, d.startRotation,
+              d.startNodeX,
+              d.startNodeY,
+              d.startNodeW,
+              d.startNodeH,
+              newW,
+              newH,
+              dir,
+              d.startRotation,
             );
-            return { ...el, x: pos.x, y: pos.y, w: newW, h: newH, fontSize: newFontSize };
+            return {
+              ...el,
+              x: pos.x,
+              y: pos.y,
+              w: newW,
+              h: newH,
+              fontSize: newFontSize,
+            };
           }
 
           if (isText && isSideOnly) {
@@ -849,9 +955,14 @@ export default function ArtTab() {
             if (dir === "e") newW = Math.max(40, d.startNodeW + localDx);
             if (dir === "w") newW = Math.max(40, d.startNodeW - localDx);
             const pos = positionForFixedAnchor(
-              d.startNodeX, d.startNodeY,
-              d.startNodeW, d.startNodeH,
-              newW, d.startNodeH, dir, d.startRotation,
+              d.startNodeX,
+              d.startNodeY,
+              d.startNodeW,
+              d.startNodeH,
+              newW,
+              d.startNodeH,
+              dir,
+              d.startRotation,
             );
             return { ...el, x: pos.x, y: pos.y, w: newW };
           }
@@ -863,15 +974,20 @@ export default function ArtTab() {
           if (dir.includes("w")) newW = Math.max(40, d.startNodeW - localDx);
           if (dir.includes("s")) newH = Math.max(20, d.startNodeH + localDy);
           if (dir.includes("n")) newH = Math.max(20, d.startNodeH - localDy);
-          if (isCorner && e.shiftKey) {
+          if (isCorner && (el.type === "image" || e.shiftKey)) {
             const ar = d.aspectRatio;
             if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
             else newW = newH * ar;
           }
           const pos = positionForFixedAnchor(
-            d.startNodeX, d.startNodeY,
-            d.startNodeW, d.startNodeH,
-            newW, newH, dir, d.startRotation,
+            d.startNodeX,
+            d.startNodeY,
+            d.startNodeW,
+            d.startNodeH,
+            newW,
+            newH,
+            dir,
+            d.startRotation,
           );
           return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
         }),
@@ -929,8 +1045,8 @@ export default function ArtTab() {
         e.preventDefault();
         undo();
       } else if (
-        (e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey ||
-        (e.ctrlKey || e.metaKey) && e.key === "y"
+        ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) ||
+        ((e.ctrlKey || e.metaKey) && e.key === "y")
       ) {
         e.preventDefault();
         redo();
@@ -968,14 +1084,19 @@ export default function ArtTab() {
   );
 
   /* ── Save text on blur ── */
-  const onTextBlur = useCallback((id: number, text: string) => {
-    setElements((prev) => {
-      const next = prev.map((el) => (el.id === id ? { ...el, content: text } : el));
-      pushHistory(next);
-      return next;
-    });
-    setEditingId(null);
-  }, [pushHistory]);
+  const onTextBlur = useCallback(
+    (id: number, text: string) => {
+      setElements((prev) => {
+        const next = prev.map((el) =>
+          el.id === id ? { ...el, content: text } : el,
+        );
+        pushHistory(next);
+        return next;
+      });
+      setEditingId(null);
+    },
+    [pushHistory],
+  );
 
   /* ── Measure text element heights and sync back ── */
   const textElRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -1029,11 +1150,18 @@ export default function ArtTab() {
     <div className="art-container">
       {/* ── Text Toolbar ── */}
       {showTextToolbar && selectedEl && (
-        <div className="art-text-toolbar" onPointerDown={(e) => e.stopPropagation()}>
-          <div className={`art-toolbar-select-wrap${fontSelectOpen ? " art-toolbar-select-wrap--open" : ""}`}>
+        <div
+          className="art-text-toolbar"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div
+            className={`art-toolbar-select-wrap${fontSelectOpen ? " art-toolbar-select-wrap--open" : ""}`}
+          >
             <select
               className="art-toolbar-select"
-              value={selectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"}
+              value={
+                selectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"
+              }
               onChange={(e) => {
                 updateTextProp("fontFamily", e.target.value);
                 e.target.blur();
@@ -1042,7 +1170,11 @@ export default function ArtTab() {
               onBlur={() => setFontSelectOpen(false)}
             >
               {FONT_OPTIONS.map((f) => (
-                <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                <option
+                  key={f.value}
+                  value={f.value}
+                  style={{ fontFamily: f.value }}
+                >
                   {f.label}
                 </option>
               ))}
@@ -1053,7 +1185,10 @@ export default function ArtTab() {
             <button
               className="art-toolbar-btn"
               onClick={() =>
-                updateTextProp("fontSize", Math.max(8, (selectedEl.fontSize ?? 22) - 2))
+                updateTextProp(
+                  "fontSize",
+                  Math.max(8, (selectedEl.fontSize ?? 22) - 2),
+                )
               }
             >
               −
@@ -1071,7 +1206,10 @@ export default function ArtTab() {
             <button
               className="art-toolbar-btn"
               onClick={() =>
-                updateTextProp("fontSize", Math.min(200, (selectedEl.fontSize ?? 22) + 2))
+                updateTextProp(
+                  "fontSize",
+                  Math.min(200, (selectedEl.fontSize ?? 22) + 2),
+                )
               }
             >
               +
@@ -1116,112 +1254,129 @@ export default function ArtTab() {
           const cfg = TILT_CONFIG[el.id];
           const isTiltText = isTilting && cfg?.isText;
           return (
-          <div
-            key={el.id}
-            ref={(node) => registerElRef(el.id, node)}
-            className={`art-element${el.id === selectedId ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}`}
-            data-element-id={el.id}
-            style={{
-              left: el.x,
-              top: el.y,
-              width: el.w,
-              height: el.type === "text" ? "auto" : el.h,
-              minHeight: el.type === "text" ? el.h : undefined,
-              zIndex: el.zIndex,
-              transform: `rotate(${el.rotation}deg)`,
-            }}
-          >
-            {/* Image */}
-            {el.type === "image" && (
-              <img
-                src={`/art/${el.file}`}
-                alt=""
-                draggable={false}
-                className="art-element-img"
-              />
-            )}
-
-            {/* Shape */}
-            {el.type === "shape" && el.shape && (
-              <ShapeSvg shape={el.shape} w={el.w} h={el.h} />
-            )}
-
-            {/* Text */}
-            {el.type === "text" && (
-              <div
-                className="art-text-content"
-                ref={(node) => {
-                  if (node) textElRefs.current.set(el.id, node);
-                  else textElRefs.current.delete(el.id);
-                }}
-                contentEditable={editingId === el.id}
-                suppressContentEditableWarning
-                data-editing={editingId === el.id ? "true" : undefined}
-                onBlur={(e) =>
-                  onTextBlur(el.id, e.currentTarget.textContent ?? "")
-                }
-                onPointerDown={
-                  editingId === el.id
-                    ? (e: React.PointerEvent) => e.stopPropagation()
-                    : undefined
-                }
-                style={{
-                  fontSize: el.fontSize ?? 22,
-                  fontFamily: el.fontFamily ?? "'Playfair Display', Georgia, serif",
-                  color: el.fontColor ?? "#1a1a1a",
-                }}
-              >
-                {el.content}
-              </div>
-            )}
-
-            {/* Selection UI */}
-            {(el.id === selectedId || isTiltText) && (
-              <div className="art-selection" style={{ pointerEvents: "none" }}>
-                <div className="art-selection-box" />
-                {HANDLE_DIRS.map((dir) => {
-                  const pos = getHandlePosition(dir, el.w, el.h);
-                  return (
-                    <div
-                      key={dir}
-                      className="art-handle"
-                      data-handle-dir={dir}
-                      style={{
-                        left: pos.x - HANDLE_SIZE / 2,
-                        top: pos.y - HANDLE_SIZE / 2,
-                        width: HANDLE_SIZE,
-                        height: HANDLE_SIZE,
-                        cursor: HANDLE_CURSORS[dir],
-                        pointerEvents: "auto",
-                      }}
-                    />
-                  );
-                })}
-                <div
-                  className="art-rotate-line"
-                  style={{
-                    left: el.w / 2,
-                    top: -28,
-                    height: 28,
-                    pointerEvents: "none",
+            <div
+              key={el.id}
+              ref={(node) => registerElRef(el.id, node)}
+              className={`art-element${el.id === selectedId ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}`}
+              data-element-id={el.id}
+              style={{
+                left: el.x,
+                top: el.y,
+                width: el.w,
+                height: el.type === "text" ? "auto" : el.h,
+                minHeight: el.type === "text" ? el.h : undefined,
+                zIndex: el.zIndex,
+                transform: `rotate(${el.rotation}deg)`,
+              }}
+            >
+              {/* Image */}
+              {el.type === "image" && (
+                <img
+                  src={`${imageFolder}/${el.file}`}
+                  alt=""
+                  draggable={false}
+                  className="art-element-img"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    const natW = img.naturalWidth;
+                    const natH = img.naturalHeight;
+                    if (natW && natH) {
+                      const ar = natW / natH;
+                      setElements((prev) =>
+                        prev.map((p) =>
+                          p.id === el.id ? { ...p, h: p.w / ar } : p,
+                        ),
+                      );
+                    }
                   }}
                 />
+              )}
+
+              {/* Shape */}
+              {el.type === "shape" && el.shape && (
+                <ShapeSvg shape={el.shape} w={el.w} h={el.h} />
+              )}
+
+              {/* Text */}
+              {el.type === "text" && (
                 <div
-                  className="art-handle art-handle--rotate"
-                  data-handle-dir="rotate"
-                  style={{
-                    left: el.w / 2 - HANDLE_SIZE / 2,
-                    top: -28 - HANDLE_SIZE / 2,
-                    width: HANDLE_SIZE,
-                    height: HANDLE_SIZE,
-                    cursor: HANDLE_CURSORS.rotate,
-                    pointerEvents: "auto",
+                  className="art-text-content"
+                  ref={(node) => {
+                    if (node) textElRefs.current.set(el.id, node);
+                    else textElRefs.current.delete(el.id);
                   }}
-                />
-              </div>
-            )}
-          </div>
-        );
+                  contentEditable={editingId === el.id}
+                  suppressContentEditableWarning
+                  data-editing={editingId === el.id ? "true" : undefined}
+                  onBlur={(e) =>
+                    onTextBlur(el.id, e.currentTarget.textContent ?? "")
+                  }
+                  onPointerDown={
+                    editingId === el.id
+                      ? (e: React.PointerEvent) => e.stopPropagation()
+                      : undefined
+                  }
+                  style={{
+                    fontSize: el.fontSize ?? 22,
+                    fontFamily:
+                      el.fontFamily ?? "'Playfair Display', Georgia, serif",
+                    color: el.fontColor ?? "#1a1a1a",
+                  }}
+                >
+                  {el.content}
+                </div>
+              )}
+
+              {/* Selection UI */}
+              {(el.id === selectedId || isTiltText) && (
+                <div
+                  className="art-selection"
+                  style={{ pointerEvents: "none" }}
+                >
+                  <div className="art-selection-box" />
+                  {HANDLE_DIRS.map((dir) => {
+                    const pos = getHandlePosition(dir, el.w, el.h);
+                    return (
+                      <div
+                        key={dir}
+                        className="art-handle"
+                        data-handle-dir={dir}
+                        style={{
+                          left: pos.x - HANDLE_SIZE / 2,
+                          top: pos.y - HANDLE_SIZE / 2,
+                          width: HANDLE_SIZE,
+                          height: HANDLE_SIZE,
+                          cursor: HANDLE_CURSORS[dir],
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    );
+                  })}
+                  <div
+                    className="art-rotate-line"
+                    style={{
+                      left: el.w / 2,
+                      top: -28,
+                      height: 28,
+                      pointerEvents: "none",
+                    }}
+                  />
+                  <div
+                    className="art-handle art-handle--rotate"
+                    data-handle-dir="rotate"
+                    style={{
+                      left: el.w / 2 - HANDLE_SIZE / 2,
+                      top: -28 - HANDLE_SIZE / 2,
+                      width: HANDLE_SIZE,
+                      height: HANDLE_SIZE,
+                      cursor: HANDLE_CURSORS.rotate,
+                      pointerEvents: "auto",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          );
         })}
 
         {/* Rotation tooltip */}

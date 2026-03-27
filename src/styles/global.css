@@ -69,6 +69,11 @@ body::before {
   mix-blend-mode: multiply;
 }
 
+/* Subtle drop shadow on Win98 windows */
+.window {
+  filter: drop-shadow(3px 6px 12px rgba(0, 0, 0, 0.28));
+}
+
 /* Default cursor everywhere */
 *,
 html {
@@ -1770,7 +1775,7 @@ canvas,
 .art-element-img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   display: block;
   pointer-events: none;
 }
