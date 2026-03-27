@@ -420,20 +420,12 @@ export interface ArtTabProps {
     w: number;
     fontSize: number;
   };
-  extraTexts?: {
-    content: string;
-    x: number;
-    y: number;
-    w: number;
-    fontSize: number;
-  }[];
 }
 
 export default function ArtTab({
   images,
   imageFolder = "/art",
   defaultText,
-  extraTexts = [],
 }: ArtTabProps = {}) {
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -475,20 +467,6 @@ export default function ArtTab({
       fontFamily: "'Playfair Display', Georgia, serif",
       fontColor: "#1a1a1a",
     },
-    ...extraTexts.map((et, i) => ({
-      id: imgList.length + 2 + i,
-      type: "text" as const,
-      x: et.x,
-      y: et.y,
-      w: et.w,
-      h: 64,
-      rotation: 0,
-      zIndex: imgList.length + 2 + i,
-      content: et.content,
-      fontSize: et.fontSize,
-      fontFamily: "'Playfair Display', Georgia, serif",
-      fontColor: "#1a1a1a",
-    })),
   ];
 
   const [elements, setElements] = useState<CanvasElement[]>(initialElements);

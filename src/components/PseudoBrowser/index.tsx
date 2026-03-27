@@ -19,16 +19,16 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
   me: {
     imageFolder: "/me",
     images: [
-      { file: "mesmiling.jpeg", width: 400, height: 400, x: 530, y: 75 },
-      { file: "mustache.jpg", width: 160, height: 160, x: 650, y: 210 },
+      { file: "mesmiling.jpeg", width: 300, height: 300, x: 60, y: 75 },
+      { file: "mustache.jpg", width: 160, height: 160, x: 130, y: 210 },
       { file: "4guys.png", width: 300, height: 220, x: 700, y: 30 },
     ],
     defaultText: {
-      content: "designer, developer, builder of things 🥸",
-      x: 100,
-      y: 320,
+      content: "builder of things",
+      x: 20,
+      y: 50,
       w: 360,
-      fontSize: 24,
+      fontSize: 40,
     },
   },
   art: {},
