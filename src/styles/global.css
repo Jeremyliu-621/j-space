@@ -69,6 +69,11 @@ body::before {
   mix-blend-mode: multiply;
 }
 
+/* Subtle drop shadow on Win98 windows */
+.window {
+  filter: drop-shadow(3px 6px 12px rgba(0, 0, 0, 0.28));
+}
+
 /* Default cursor everywhere */
 *,
 html {
