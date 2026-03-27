@@ -386,7 +386,7 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════ */
 const HANDLE_SIZE = 8;
-const HANDLE_DIRS: HandleDir[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+const HANDLE_DIRS: HandleDir[] = ["nw", "ne", "se", "sw"];
 
 /* ── Per-element intro tilt config (seeded once) ── */
 function randTilt(max: number) {
@@ -996,7 +996,7 @@ export default function ArtTab({
           if (dir.includes("w")) newW = Math.max(40, d.startNodeW - localDx);
           if (dir.includes("s")) newH = Math.max(20, d.startNodeH + localDy);
           if (dir.includes("n")) newH = Math.max(20, d.startNodeH - localDy);
-          if (isCorner && e.shiftKey) {
+          if (isCorner && (el.type === "image" || e.shiftKey)) {
             const ar = d.aspectRatio;
             if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
             else newW = newH * ar;
@@ -1298,6 +1298,19 @@ export default function ArtTab({
                   alt=""
                   draggable={false}
                   className="art-element-img"
+                  onLoad={(e) => {
+                    const img = e.currentTarget;
+                    const natW = img.naturalWidth;
+                    const natH = img.naturalHeight;
+                    if (natW && natH) {
+                      const ar = natW / natH;
+                      setElements((prev) =>
+                        prev.map((p) =>
+                          p.id === el.id ? { ...p, h: p.w / ar } : p,
+                        ),
+                      );
+                    }
+                  }}
                 />
               )}
 
