@@ -55,7 +55,7 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
       },
     ],
     defaultText: {
-      content: "if it hurts the next day, i'm probably into it",
+      content: "I like sports that take me places",
       x: 800,
       y: 340,
       w: 380,

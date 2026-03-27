@@ -17,7 +17,7 @@ const ART_IMAGES = [
   { file: "spiderverse.JPG", width: 260, height: 175, x: 870, y: 20 },
   { file: "BR0D4R.jpg", width: 195, height: 250, x: 880, y: 230 },
   { file: "drool.jpg", width: 175, height: 220, x: 1100, y: 60 },
-  { file: "resk12tag.png", width: 130, height: 100, x: 410, y: 270 },
+  { file: "resk12tag.png", width: 100, height: 100, x: 410, y: 270 },
   { file: "zephyr_tag.jpg", width: 200, height: 150, x: 680, y: 260 },
   { file: "annalauraart.PNG", width: 165, height: 215, x: 1110, y: 310 },
   { file: "beetlemoses.jpg", width: 215, height: 165, x: 50, y: 490 },
