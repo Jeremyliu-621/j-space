@@ -388,21 +388,11 @@ function SidebarIcon({ tool }: { tool: SidebarTool }) {
 const HANDLE_SIZE = 8;
 const HANDLE_DIRS: HandleDir[] = ["nw", "ne", "se", "sw"];
 
-/* ── Per-element intro tilt config (seeded once) ── */
+/* ── Per-element intro tilt config (seeded once per mount) ── */
 function randTilt(max: number) {
   return ((Math.random() - 0.5) * 2 * max).toFixed(1) + "deg";
 }
 const TILT_STEPS = 7; // steps per element
-const TILT_CONFIG: Record<number, { angles: string[]; isText: boolean }> = {};
-for (const el of INITIAL_ELEMENTS) {
-  const isText = el.type === "text";
-  const mag = isText ? 2.5 : 1.8;
-  const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
-  TILT_CONFIG[el.id] = {
-    angles: Array.from({ length: steps }, () => randTilt(mag)),
-    isText,
-  };
-}
 
 export interface ArtTabProps {
   images?: {
@@ -420,12 +410,22 @@ export interface ArtTabProps {
     w: number;
     fontSize: number;
   };
+  extraTexts?: {
+    content: string;
+    x: number;
+    y: number;
+    w: number;
+    fontSize: number;
+  }[];
+  canvasHeight?: number;
 }
 
 export default function ArtTab({
   images,
   imageFolder = "/art",
   defaultText,
+  extraTexts,
+  canvasHeight,
 }: ArtTabProps = {}) {
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -467,7 +467,38 @@ export default function ArtTab({
       fontFamily: "'Playfair Display', Georgia, serif",
       fontColor: "#1a1a1a",
     },
+    ...(extraTexts ?? []).map((et, i) => ({
+      id: imgList.length + 2 + i,
+      type: "text" as const,
+      x: et.x,
+      y: et.y,
+      w: et.w,
+      h: 80,
+      rotation: 0,
+      zIndex: imgList.length + 2 + i,
+      content: et.content,
+      fontSize: et.fontSize,
+      fontFamily: "'Playfair Display', Georgia, serif",
+      fontColor: "#1a1a1a",
+    })),
   ];
+
+  const tiltConfigRef = useRef<Record<
+    number,
+    { angles: string[]; isText: boolean }
+  > | null>(null);
+  if (tiltConfigRef.current === null) {
+    tiltConfigRef.current = {};
+    for (const el of initialElements) {
+      const isText = el.type === "text";
+      const mag = isText ? 2.5 : 1.8;
+      const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
+      tiltConfigRef.current[el.id] = {
+        angles: Array.from({ length: steps }, () => randTilt(mag)),
+        isText,
+      };
+    }
+  }
 
   const [elements, setElements] = useState<CanvasElement[]>(initialElements);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -507,7 +538,7 @@ export default function ArtTab({
           });
           // Clear each element's tilt after its steps finish (steps * 80ms + buffer)
           for (const id of newIds) {
-            const cfg = TILT_CONFIG[id];
+            const cfg = tiltConfigRef.current?.[id];
             const dur = (cfg?.angles.length ?? TILT_STEPS) * 160 + 200;
             timers.push(
               setTimeout(() => {
@@ -559,7 +590,7 @@ export default function ArtTab({
 
     for (const id of tiltingIds) {
       if (tiltIntervalsRef.current.has(id)) continue; // already running
-      const cfg = TILT_CONFIG[id];
+      const cfg = tiltConfigRef.current?.[id];
       if (!cfg) continue;
       let step = 0;
       const iv = setInterval(() => {
@@ -1244,6 +1275,7 @@ export default function ArtTab({
       <div
         ref={canvasRef}
         className="art-canvas"
+        style={canvasHeight ? { minHeight: canvasHeight, flex: "none" } : undefined}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -1251,7 +1283,7 @@ export default function ArtTab({
       >
         {elements.map((el) => {
           const isTilting = tiltingIds.has(el.id);
-          const cfg = TILT_CONFIG[el.id];
+          const cfg = tiltConfigRef.current?.[el.id];
           const isTiltText = isTilting && cfg?.isText;
           return (
             <div

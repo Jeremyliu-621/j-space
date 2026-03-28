@@ -35,6 +35,12 @@ body {
   position: relative;
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 /* Very faint paper grain/pixel noise overlay */
@@ -1639,6 +1645,29 @@ canvas,
   display: block;
 }
 
+/* Minimalistic scrollbar for tab panels */
+.pb-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.pb-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pb-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+.pb-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.pb-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
 /* Per-tab background patterns */
 .pb-panel[data-tab="graffiti"] {
   background-color: var(--palette-color-3);
@@ -1710,8 +1739,8 @@ canvas,
 .art-container {
   display: flex;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow: visible;
 }
 
 /* ── Sidebar ── */
