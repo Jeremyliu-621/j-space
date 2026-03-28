@@ -1710,6 +1710,10 @@ canvas,
   );
 }
 
+.pb-panel[data-tab="projects"] {
+  background-color: #fafafa;
+}
+
 .pb-panel[data-tab="yohji"] {
   background: var(--palette-color-3);
 }
@@ -1746,6 +1750,11 @@ canvas,
 /* ── Sidebar ── */
 .art-sidebar {
   flex: 0 0 44px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: auto;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

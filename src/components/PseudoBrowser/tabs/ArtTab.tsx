@@ -1275,7 +1275,7 @@ export default function ArtTab({
       <div
         ref={canvasRef}
         className="art-canvas"
-        style={canvasHeight ? { minHeight: canvasHeight, flex: "none" } : undefined}
+        style={canvasHeight ? { minHeight: canvasHeight, height: canvasHeight } : undefined}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
