@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
 } from "react";
 import { projects } from "../../../lib/content";
 
@@ -16,6 +17,39 @@ const PROJECT_IMAGE_SRC: Record<string, string> = {
   stop_dont_go_on_grey: "/projects/stop_dont_go_on_grey.jpg",
   "j-gif-space": "/projects/j-gif-space.gif",
 };
+
+/** Projects tab canvas grid — cards, type scale (see V_GAP for vertical rhythm) */
+const PG = {
+  HEAD_Y: 20,
+  HEAD_FS: 48,
+  HEAD_H: 88,
+  HEAD_GAP_BELOW: 56,
+  CARD_W: 392,
+  /** Initial frame height before layout reflow fits to content */
+  CARD_H: 520,
+  GRID_GAP: 36,
+  GRID_COLS: 3,
+  GRID_PAD_X: 52,
+  PAD: 20,
+  IMG_H: 212,
+  /** Single spacing between image, title, desc, stacks, and link row */
+  V_GAP: 8,
+  /** Padding below the link row inside the card */
+  CARD_BOTTOM_PAD: 10,
+  TITLE_FS: 24,
+  TITLE_H: 28,
+  DESC_FS: 16,
+  DESC_H: 40,
+  META_FS: 14,
+  META_LINE_H: 24,
+  LINK_FS: 15,
+  LINK_H: 26,
+  LINK_W: 118,
+  LINK_GAP_X: 14,
+} as const;
+
+const PG_GRID_PAD_Y =
+  PG.HEAD_Y + PG.HEAD_H + PG.HEAD_GAP_BELOW;
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -500,33 +534,27 @@ export default function ArtTab({
 
   const rotScale = imageRotationScale ?? 1;
 
-  const CARD_W = 340;
-  const CARD_H = 400;
-  const GRID_GAP = 24;
-  const GRID_COLS = 3;
-  const GRID_PAD_X = 60;
-  const GRID_PAD_Y = 70;
-
   /* ── Build initial elements ── */
   const initialElements: CanvasElement[] = (() => {
     if (projectsGrid) {
       const els: CanvasElement[] = [];
       let id = 1;
       let nextGid = 1;
-      const PAD = 14;
-      const INNER_W = CARD_W - PAD * 2;
+      const INNER_W = PG.CARD_W - PG.PAD * 2;
+      const headingW =
+        PG.GRID_COLS * PG.CARD_W + (PG.GRID_COLS - 1) * PG.GRID_GAP;
 
       els.push({
         id: id++,
         type: "text",
-        x: GRID_PAD_X,
-        y: 10,
-        w: 360,
-        h: 54,
+        x: PG.GRID_PAD_X,
+        y: PG.HEAD_Y,
+        w: headingW,
+        h: PG.HEAD_H,
         rotation: 0,
         zIndex: 1,
         content: "My Projects",
-        fontSize: 42,
+        fontSize: PG.HEAD_FS,
         fontFamily: "'Playfair Display', Georgia, serif",
         fontColor: "#1a1a1a",
       });
@@ -534,9 +562,12 @@ export default function ArtTab({
       for (let pi = 0; pi < projects.length; pi++) {
         const p = projects[pi];
         const gid = nextGid++;
-        const cx = GRID_PAD_X + (pi % GRID_COLS) * (CARD_W + GRID_GAP);
+        const cx =
+          PG.GRID_PAD_X +
+          (pi % PG.GRID_COLS) * (PG.CARD_W + PG.GRID_GAP);
         const cy =
-          GRID_PAD_Y + Math.floor(pi / GRID_COLS) * (CARD_H + GRID_GAP);
+          PG_GRID_PAD_Y +
+          Math.floor(pi / PG.GRID_COLS) * (PG.CARD_H + PG.GRID_GAP);
         const baseZ = id;
 
         els.push({
@@ -545,8 +576,8 @@ export default function ArtTab({
           shape: "rect",
           x: cx,
           y: cy,
-          w: CARD_W,
-          h: CARD_H,
+          w: PG.CARD_W,
+          h: PG.CARD_H,
           rotation: 0,
           zIndex: baseZ,
           groupId: gid,
@@ -554,6 +585,9 @@ export default function ArtTab({
           strokeColor: "#a0a0a0",
           noTilt: true,
         });
+
+        const yTitle = cy + PG.IMG_H + PG.V_GAP;
+        const yDesc = yTitle + PG.TITLE_H + PG.V_GAP;
 
         const imgSlug = p.image;
         if (imgSlug) {
@@ -563,8 +597,8 @@ export default function ArtTab({
             type: "image",
             x: cx,
             y: cy,
-            w: CARD_W,
-            h: 160,
+            w: PG.CARD_W,
+            h: PG.IMG_H,
             rotation: 0,
             zIndex: baseZ,
             file: src,
@@ -576,14 +610,14 @@ export default function ArtTab({
         els.push({
           id: id++,
           type: "text",
-          x: cx + PAD,
-          y: cy + 170,
+          x: cx + PG.PAD,
+          y: yTitle,
           w: INNER_W,
-          h: 28,
+          h: PG.TITLE_H,
           rotation: 0,
           zIndex: baseZ,
           content: p.title,
-          fontSize: 20,
+          fontSize: PG.TITLE_FS,
           fontFamily: "'Playfair Display', Georgia, serif",
           fontColor: "#111",
           groupId: gid,
@@ -593,79 +627,80 @@ export default function ArtTab({
         els.push({
           id: id++,
           type: "text",
-          x: cx + PAD,
-          y: cy + 205,
+          x: cx + PG.PAD,
+          y: yDesc,
           w: INNER_W,
-          h: 50,
+          h: PG.DESC_H,
           rotation: 0,
           zIndex: baseZ,
           content: p.description,
-          fontSize: 13,
+          fontSize: PG.DESC_FS,
           fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
           fontColor: "#4a4a4a",
           groupId: gid,
           noTilt: true,
         });
 
-        let stackY = cy + 265;
+        let stackY = yDesc + PG.DESC_H + PG.V_GAP;
         if (p.front) {
           els.push({
             id: id++,
             type: "text",
-            x: cx + PAD,
+            x: cx + PG.PAD,
             y: stackY,
             w: INNER_W,
-            h: 32,
+            h: PG.META_LINE_H,
             rotation: 0,
             zIndex: baseZ,
             content: `Front: ${p.front}`,
-            fontSize: 11,
+            fontSize: PG.META_FS,
             fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
             fontColor: "#555",
             groupId: gid,
             noTilt: true,
           });
-          stackY += 36;
+          stackY += PG.META_LINE_H + PG.V_GAP;
         }
         if (p.back) {
           els.push({
             id: id++,
             type: "text",
-            x: cx + PAD,
+            x: cx + PG.PAD,
             y: stackY,
             w: INNER_W,
-            h: 32,
+            h: PG.META_LINE_H,
             rotation: 0,
             zIndex: baseZ,
             content: `Back: ${p.back}`,
-            fontSize: 11,
+            fontSize: PG.META_FS,
             fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
             fontColor: "#555",
             groupId: gid,
             noTilt: true,
           });
-          stackY += 36;
+          stackY += PG.META_LINE_H + PG.V_GAP;
         }
 
-        const linkY = Math.max(stackY + 4, cy + 360);
-        let linkX = cx + PAD;
+        const linkY = stackY + PG.V_GAP;
+        let linkX = cx + PG.PAD;
         if (p.website) {
           els.push({
             id: id++,
             type: "link",
             x: linkX,
             y: linkY,
-            w: 100,
-            h: 24,
+            w: PG.LINK_W,
+            h: PG.LINK_H,
             rotation: 0,
             zIndex: baseZ,
             content: "Website",
+            fontSize: PG.LINK_FS,
             href: p.website,
             linkIcon: "website",
             groupId: gid,
             noTilt: true,
           });
-          linkX += 110;
+          linkX += PG.LINK_W + PG.LINK_GAP_X;
         }
         if (p.github) {
           els.push({
@@ -673,11 +708,12 @@ export default function ArtTab({
             type: "link",
             x: linkX,
             y: linkY,
-            w: 100,
-            h: 24,
+            w: PG.LINK_W,
+            h: PG.LINK_H,
             rotation: 0,
             zIndex: baseZ,
             content: "GitHub",
+            fontSize: PG.LINK_FS,
             href: p.github,
             linkIcon: "github",
             groupId: gid,
@@ -755,18 +791,31 @@ export default function ArtTab({
   }
 
   const [elements, setElements] = useState<CanvasElement[]>(initialElements);
+
+  const projectsGridMinCanvasHeight = useMemo(() => {
+    if (!projectsGrid) return 0;
+    const frames = elements.filter(
+      (e) => e.type === "shape" && e.fill != null && e.groupId != null,
+    );
+    if (frames.length === 0) {
+      return (
+        PG_GRID_PAD_Y +
+        Math.ceil(projects.length / PG.GRID_COLS) *
+          (PG.CARD_H + PG.GRID_GAP) -
+        PG.GRID_GAP +
+        72
+      );
+    }
+    const bottom = Math.max(...frames.map((f) => f.y + f.h));
+    return bottom + 72;
+  }, [projectsGrid, elements, projects.length]);
+
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
   const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(
     null,
   );
-  const [groupBBoxOverride, setGroupBBoxOverride] = useState<{
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    rotation: number;
-  } | null>(null);
+  const [groupRotationOverride, setGroupRotationOverride] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [rotationTooltip, setRotationTooltip] = useState<{
     angle: number;
@@ -1210,20 +1259,7 @@ export default function ArtTab({
               baseGroupRotation: baseGRot,
               lastRotationDelta: 0,
             };
-            if (gd) {
-              const unrot = computeUnrotatedBBox(selectedEls, gd.rotation);
-              const cx = bbox.x + bbox.w / 2;
-              const cy = bbox.y + bbox.h / 2;
-              setGroupBBoxOverride({
-                x: cx - unrot.w / 2,
-                y: cy - unrot.h / 2,
-                w: unrot.w,
-                h: unrot.h,
-                rotation: baseGRot,
-              });
-            } else {
-              setGroupBBoxOverride({ ...bbox, rotation: 0 });
-            }
+            setGroupRotationOverride(baseGRot);
           } else {
             const startEls = new Map<
               number,
@@ -1620,9 +1656,7 @@ export default function ArtTab({
           x: e.clientX,
           y: e.clientY,
         });
-        setGroupBBoxOverride((prev) =>
-          prev ? { ...prev, rotation: baseGRot + newRot } : null,
-        );
+        setGroupRotationOverride(baseGRot + newRot);
       } else if (d.nodeId != null) {
         const currentAngle = Math.atan2(
           e.clientY - d.centerScreenY!,
@@ -1694,7 +1728,7 @@ export default function ArtTab({
       const moved = d.didMove;
       dragRef.current = null;
       setRotationTooltip(null);
-      setGroupBBoxOverride(null);
+      setGroupRotationOverride(null);
       if (moved) {
         setElements((cur) => {
           pushHistory(cur);
@@ -1784,25 +1818,132 @@ export default function ArtTab({
     [pushHistory],
   );
 
-  /* ── Measure text element heights and sync back ── */
+  /* ── Measure text, reflow project cards (tight stack), fit frames ── */
   const textElRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   useLayoutEffect(() => {
-    textElRefs.current.forEach((div, id) => {
-      const el = elements.find((e) => e.id === id);
-      if (!el || el.type !== "text") return;
-      const measuredH = div.offsetHeight;
-      if (measuredH > 0 && Math.abs(measuredH - el.h) > 2) {
+    if (!projectsGrid) {
+      setElements((prev) => {
+        const next = [...prev];
+        let changed = false;
+        textElRefs.current.forEach((div, id) => {
+          const idx = next.findIndex((e) => e.id === id);
+          if (idx < 0) return;
+          const el = next[idx];
+          if (el.type !== "text") return;
+          const measuredH = div.offsetHeight;
+          if (measuredH > 0 && Math.abs(measuredH - el.h) > 2) {
+            if (
+              dragRef.current?.startPositions?.has(id) ||
+              dragRef.current?.nodeId === id
+            )
+              return;
+            next[idx] = { ...el, h: measuredH };
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+      return;
+    }
+
+    const drag = dragRef.current;
+    if (
+      drag?.type === "move" ||
+      drag?.type === "resize" ||
+      drag?.type === "rotate"
+    )
+      return;
+    if (editingId != null) return;
+
+    setElements((prev) => {
+      let next = prev.map((e) => ({ ...e }));
+      let changed = false;
+
+      const setH = (id: number, h: number) => {
+        const idx = next.findIndex((e) => e.id === id);
+        if (idx < 0) return;
+        if (Math.abs(next[idx].h - h) > 1) {
+          next[idx] = { ...next[idx], h };
+          changed = true;
+        }
+      };
+
+      textElRefs.current.forEach((div, id) => {
+        const el = next.find((e) => e.id === id);
+        if (!el || el.type !== "text") return;
         if (
           dragRef.current?.startPositions?.has(id) ||
           dragRef.current?.nodeId === id
         )
           return;
-        setElements((prev) =>
-          prev.map((e) => (e.id === id ? { ...e, h: measuredH } : e)),
-        );
+        const measuredH = div.offsetHeight;
+        if (measuredH > 0) setH(id, measuredH);
+      });
+
+      const { V_GAP, IMG_H, LINK_H, CARD_BOTTOM_PAD } = PG;
+
+      const gids = new Set<number>();
+      for (const e of next) if (e.groupId != null) gids.add(e.groupId);
+
+      for (const gid of gids) {
+        const group = next.filter((e) => e.groupId === gid);
+        const frame = group.find((e) => e.type === "shape" && e.fill);
+        if (!frame) continue;
+
+        const cy = frame.y;
+        const mobile = group
+          .filter((e) => e.type !== "shape")
+          .sort((a, b) => a.y - b.y);
+
+        let cursorY = cy + IMG_H + V_GAP;
+        let i = 0;
+        while (i < mobile.length) {
+          const el = mobile[i];
+          if (el.type === "image") {
+            i++;
+            continue;
+          }
+          if (el.type === "link") {
+            let j = i;
+            while (j < mobile.length && mobile[j].type === "link") j++;
+            const links = mobile.slice(i, j);
+            const linkY = cursorY;
+            for (const link of links) {
+              const idx = next.findIndex((e) => e.id === link.id);
+              if (idx >= 0 && Math.abs(next[idx].y - linkY) > 0.5) {
+                next[idx] = { ...next[idx], y: linkY };
+                changed = true;
+              }
+            }
+            cursorY += LINK_H + CARD_BOTTOM_PAD;
+            i = j;
+            continue;
+          }
+          const idx = next.findIndex((e) => e.id === el.id);
+          if (idx >= 0) {
+            const h = next[idx].h;
+            if (Math.abs(next[idx].y - cursorY) > 0.5) {
+              next[idx] = { ...next[idx], y: cursorY };
+              changed = true;
+            }
+            cursorY += h + V_GAP;
+          }
+          i++;
+        }
+
+        const frameIdx = next.findIndex((e) => e.id === frame.id);
+        if (frameIdx >= 0) {
+          const newH = Math.max(PG.IMG_H + 100, cursorY - cy);
+          if (Math.abs(next[frameIdx].h - newH) > 1) {
+            next[frameIdx] = { ...next[frameIdx], h: newH };
+            changed = true;
+          }
+        }
       }
+
+      return changed ? next : prev;
     });
-  });
+  }, [elements, projectsGrid, editingId]);
 
   /* ── Text toolbar helpers ── */
   const singleSelectedEl =
@@ -1868,25 +2009,18 @@ export default function ArtTab({
     setActiveGroupId(null);
   }, [selectedIds, elements, pushHistory]);
 
-  /* ── Multi-selection bounding box (memoised inline) ── */
+  /* ── Multi-selection bounding box ── */
   const multiBBox = (() => {
     if (selectedIds.length <= 1) return null;
     const selectedEls = elements.filter((el) => selectedIds.includes(el.id));
     const aabb = computeBBox(selectedEls);
-    if (activeGroupId != null) {
-      const gd = groupDataRef.current.get(activeGroupId);
-      if (gd && gd.rotation !== 0) {
-        const unrot = computeUnrotatedBBox(selectedEls, gd.rotation);
-        const cx = aabb.x + aabb.w / 2;
-        const cy = aabb.y + aabb.h / 2;
-        return {
-          x: cx - unrot.w / 2,
-          y: cy - unrot.h / 2,
-          w: unrot.w,
-          h: unrot.h,
-          rotation: gd.rotation,
-        };
-      }
+    const gd = activeGroupId != null ? groupDataRef.current.get(activeGroupId) : null;
+    const rot = groupRotationOverride ?? gd?.rotation ?? 0;
+    if (rot !== 0) {
+      const unrot = computeUnrotatedBBox(selectedEls, rot);
+      const cx = aabb.x + aabb.w / 2;
+      const cy = aabb.y + aabb.h / 2;
+      return { x: cx - unrot.w / 2, y: cy - unrot.h / 2, w: unrot.w, h: unrot.h, rotation: rot };
     }
     return { ...aabb, rotation: 0 };
   })();
@@ -2006,9 +2140,20 @@ export default function ArtTab({
           ref={canvasRef}
           className="art-canvas"
           style={
-            canvasHeight
-              ? { minHeight: canvasHeight, height: canvasHeight }
-              : undefined
+            projectsGrid
+              ? {
+                  minHeight: Math.max(
+                    projectsGridMinCanvasHeight,
+                    canvasHeight ?? 0,
+                  ),
+                  height: Math.max(
+                    projectsGridMinCanvasHeight,
+                    canvasHeight ?? 0,
+                  ),
+                }
+              : canvasHeight
+                ? { minHeight: canvasHeight, height: canvasHeight }
+                : undefined
           }
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -2032,7 +2177,14 @@ export default function ArtTab({
                   top: el.y,
                   width: el.w,
                   height: el.type === "text" ? "auto" : el.h,
-                  minHeight: el.type === "text" ? el.h : undefined,
+                  minHeight:
+                    el.type === "text" &&
+                    projectsGrid &&
+                    el.groupId != null
+                      ? undefined
+                      : el.type === "text"
+                        ? el.h
+                        : undefined,
                   zIndex: el.zIndex,
                   transform: `rotate(${el.rotation}deg)`,
                 }}
@@ -2084,17 +2236,19 @@ export default function ArtTab({
                 {el.type === "text" && (
                   <div
                     className={
-                      projectsGrid && el.groupId != null
-                        ? [
-                            "art-text-content",
-                            "art-text-content--projects-grid",
-                            (el.fontSize ?? 22) <= 14
-                              ? "art-text-content--project-desc"
-                              : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ")
-                        : "art-text-content"
+                      projectsGrid && el.groupId == null
+                        ? "art-text-content art-text-content--projects-page-title"
+                        : projectsGrid && el.groupId != null
+                          ? [
+                              "art-text-content",
+                              "art-text-content--projects-grid",
+                              (el.fontSize ?? 22) <= 17
+                                ? "art-text-content--project-desc"
+                                : "",
+                            ]
+                              .filter(Boolean)
+                              .join(" ")
+                          : "art-text-content"
                     }
                     ref={(node) => {
                       if (node) textElRefs.current.set(el.id, node);
@@ -2241,18 +2395,17 @@ export default function ArtTab({
 
           {/* Multi-selection bounding box with handles */}
           {(() => {
-            const box = groupBBoxOverride ?? multiBBox;
-            if (!box || selectedIds.length <= 1) return null;
-            const bw = box.w + 2;
-            const bh = box.h + 2;
-            const rot = "rotation" in box ? box.rotation : 0;
+            if (!multiBBox || selectedIds.length <= 1) return null;
+            const bw = multiBBox.w + 2;
+            const bh = multiBBox.h + 2;
+            const rot = multiBBox.rotation;
             return (
               <div
                 data-multi-bbox
                 style={{
                   position: "absolute",
-                  left: box.x - 1,
-                  top: box.y - 1,
+                  left: multiBBox.x - 1,
+                  top: multiBBox.y - 1,
                   width: bw,
                   height: bh,
                   pointerEvents: "none",

@@ -8,16 +8,15 @@ import {
 import { useTheme } from "../win98/ThemeProvider";
 import ArtTab, { ArtTabProps } from "./tabs/ArtTab";
 const TABS = [
-  { id: "projects", label: "Projects", url: "C:\\Jeremy\\projects" },
   { id: "me", label: "Me", url: "C:\\Jeremy\\me" },
   { id: "art", label: "Art I Love", url: "C:\\Jeremy\\art" },
   { id: "sports", label: "Sports", url: "C:\\Jeremy\\sports" },
+  { id: "projects", label: "Projects", url: "C:\\Jeremy\\projects" },
 ];
 
 const TAB_PROPS: Record<string, ArtTabProps> = {
   projects: {
     imageFolder: "/projects",
-    canvasHeight: 1000,
     projectsGrid: true,
   },
   me: {

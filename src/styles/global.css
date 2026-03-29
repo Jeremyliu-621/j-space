@@ -1957,21 +1957,39 @@ canvas,
   outline: 1px solid #1a73e8;
 }
 
+/* Projects tab — page heading (above the grid) */
+.art-text-content--projects-page-title {
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  padding: 0 2px 4px;
+}
+
 /* Projects grid cards: left-aligned copy; title vs body */
 .art-text-content--projects-grid {
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-  line-height: 1.35;
+  line-height: 1.18;
   font-weight: 700;
+  padding: 2px 2px;
+}
+
+.art-text-content--projects-grid:not(.art-text-content--project-desc) {
+  line-height: 1.15;
 }
 
 .art-text-content--projects-grid.art-text-content--project-desc {
   font-weight: 400;
+  line-height: 1.35;
 }
 
 .art-link-content--projects-grid {
   justify-content: flex-start;
+  gap: 6px;
 }
 
 /* ── Text Toolbar ── */
