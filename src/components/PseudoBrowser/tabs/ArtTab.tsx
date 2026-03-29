@@ -57,6 +57,11 @@ interface CanvasElement {
   zIndex: number;
   file?: string;
   shape?: ShapeKind;
+  /** Filled rect (e.g. project card frame); omit for outline-only shapes */
+  fill?: string;
+  strokeColor?: string;
+  /** Skip intro tilt (card backgrounds) */
+  noTilt?: boolean;
   content?: string;
   fontSize?: number;
   fontFamily?: string;
@@ -166,8 +171,20 @@ function computeBBox(els: CanvasElement[]) {
 /* ══════════════════════════════════════════════════════════════
    SHAPE SVG RENDERER
    ══════════════════════════════════════════════════════════════ */
-function ShapeSvg({ shape, w, h }: { shape: ShapeKind; w: number; h: number }) {
-  const stroke = "#222";
+function ShapeSvg({
+  shape,
+  w,
+  h,
+  fill,
+  strokeColor,
+}: {
+  shape: ShapeKind;
+  w: number;
+  h: number;
+  fill?: string;
+  strokeColor?: string;
+}) {
+  const stroke = strokeColor ?? "#222";
   const sw = 2;
   const none = "none";
 
@@ -180,7 +197,7 @@ function ShapeSvg({ shape, w, h }: { shape: ShapeKind; w: number; h: number }) {
             y={sw}
             width={w - sw * 2}
             height={h - sw * 2}
-            fill={none}
+            fill={fill ?? none}
             stroke={stroke}
             strokeWidth={sw}
           />
@@ -497,6 +514,22 @@ export default function ArtTab({
         const cy = GRID_PAD_Y + Math.floor(pi / GRID_COLS) * (CARD_H + GRID_GAP);
         const baseZ = id;
 
+        els.push({
+          id: id++,
+          type: "shape",
+          shape: "rect",
+          x: cx,
+          y: cy,
+          w: CARD_W,
+          h: CARD_H,
+          rotation: 0,
+          zIndex: baseZ,
+          groupId: gid,
+          fill: "#f2f2f2",
+          strokeColor: "#a0a0a0",
+          noTilt: true,
+        });
+
         const imgSlug = p.image;
         if (imgSlug) {
           const src = PROJECT_IMAGE_SRC[imgSlug] ?? `/projects/${imgSlug}.png`;
@@ -607,6 +640,10 @@ export default function ArtTab({
   if (tiltConfigRef.current === null) {
     tiltConfigRef.current = {};
     for (const el of initialElements) {
+      if (el.noTilt) {
+        tiltConfigRef.current[el.id] = { angles: ["0deg"], isText: false };
+        continue;
+      }
       const isText = el.type === "text";
       const mag = tiltMagnitude ?? (isText ? 2.5 : 1.8);
       const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
@@ -619,6 +656,11 @@ export default function ArtTab({
 
   const [elements, setElements] = useState<CanvasElement[]>(initialElements);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
+  const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(null);
+  const [groupBBoxOverride, setGroupBBoxOverride] = useState<{
+    x: number; y: number; w: number; h: number; rotation: number;
+  } | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [rotationTooltip, setRotationTooltip] = useState<{
     angle: number;
@@ -759,6 +801,7 @@ export default function ArtTab({
     const snapshot = historyRef.current[historyIndexRef.current];
     setElements(snapshot);
     setSelectedIds([]);
+    setActiveGroupId(null);
     setEditingId(null);
   }, []);
 
@@ -768,6 +811,7 @@ export default function ArtTab({
     const snapshot = historyRef.current[historyIndexRef.current];
     setElements(snapshot);
     setSelectedIds([]);
+    setActiveGroupId(null);
     setEditingId(null);
   }, []);
 
@@ -883,6 +927,7 @@ export default function ArtTab({
         return next;
       });
       setSelectedIds([id]);
+      setActiveGroupId(null);
       setEditingId(null);
       return id;
     },
@@ -997,6 +1042,7 @@ export default function ArtTab({
               startAngle, centerScreenX: csx, centerScreenY: csy,
               startElements: startEls, groupBBox: bbox,
             };
+            setGroupBBoxOverride({ ...bbox, rotation: 0 });
           } else {
             const startEls = new Map<number, { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }>();
             for (const sel of selectedEls) startEls.set(sel.id, { x: sel.x, y: sel.y, w: sel.w, h: sel.h, rotation: sel.rotation, fontSize: sel.fontSize });
@@ -1041,17 +1087,33 @@ export default function ArtTab({
         if (!el) return;
 
         let idsToSelect: number[];
-        if (selectedIds.includes(id)) {
+        let newActiveGid: number | null;
+
+        if (el.groupId != null && activeGroupId === el.groupId) {
+          idsToSelect = [id];
+          newActiveGid = activeGroupId;
+        } else if (selectedIds.includes(id) && activeGroupId == null) {
           idsToSelect = selectedIds;
+          newActiveGid = null;
         } else if (el.groupId != null) {
           idsToSelect = elements.filter((e) => e.groupId === el.groupId).map((e) => e.id);
+          newActiveGid = el.groupId;
         } else {
           idsToSelect = [id];
+          newActiveGid = null;
         }
 
+        setActiveGroupId(newActiveGid);
         bringToFront(idsToSelect);
         setSelectedIds(idsToSelect);
         setEditingId(null);
+
+        if (newActiveGid != null && idsToSelect.length > 1) {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (rect) setPopupPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        } else {
+          setPopupPos(null);
+        }
 
         const startPositions = new Map<number, { x: number; y: number }>();
         for (const sid of idsToSelect) {
@@ -1069,6 +1131,8 @@ export default function ArtTab({
 
       /* ── Click on empty canvas — start marquee ── */
       setSelectedIds([]);
+      setActiveGroupId(null);
+      setPopupPos(null);
       setEditingId(null);
       setRotationTooltip(null);
       const rect = canvasRef.current?.getBoundingClientRect();
@@ -1081,7 +1145,7 @@ export default function ArtTab({
         setMarquee({ startX: sx, startY: sy, currentX: sx, currentY: sy });
       }
     },
-    [elements, selectedIds, editingId, bringToFront, getElScreenCenter],
+    [elements, selectedIds, editingId, activeGroupId, bringToFront, getElScreenCenter],
   );
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
@@ -1245,6 +1309,7 @@ export default function ArtTab({
           }),
         );
         setRotationTooltip({ angle: Math.round(newRot * 10) / 10, x: e.clientX, y: e.clientY });
+        setGroupBBoxOverride((prev) => prev ? { ...prev, rotation: newRot } : null);
       } else if (d.nodeId != null) {
         const currentAngle = Math.atan2(e.clientY - d.centerScreenY!, e.clientX - d.centerScreenX!);
         const angleDelta = (currentAngle - d.startAngle!) * (180 / Math.PI);
@@ -1275,16 +1340,21 @@ export default function ArtTab({
             const hit = cur.filter((el) => {
               return el.x < mx2 && el.x + el.w > mx1 && el.y < my2 && el.y + el.h > my1;
             });
-            if (hit.length > 0) setSelectedIds(hit.map((el) => el.id));
+            if (hit.length > 0) {
+              setSelectedIds(hit.map((el) => el.id));
+              setPopupPos({ x: m.currentX, y: m.currentY });
+            }
           }
           return null;
         });
         dragRef.current = null;
+        setActiveGroupId(null);
         return;
       }
       const moved = d.didMove;
       dragRef.current = null;
       setRotationTooltip(null);
+      setGroupBBoxOverride(null);
       if (moved) {
         setElements((cur) => {
           pushHistory(cur);
@@ -1320,6 +1390,7 @@ export default function ArtTab({
           pushHistory(next);
           setElements(next);
           setSelectedIds([]);
+          setActiveGroupId(null);
         }
       }
     };
@@ -1422,6 +1493,7 @@ export default function ArtTab({
       pushHistory(next);
       return next;
     });
+    setActiveGroupId(gid);
   }, [selectedIds, pushHistory]);
 
   const handleUngroup = useCallback(() => {
@@ -1433,6 +1505,7 @@ export default function ArtTab({
       pushHistory(next);
       return next;
     });
+    setActiveGroupId(null);
   }, [selectedIds, pushHistory]);
 
   /* ── Multi-selection bounding box (memoised inline) ── */
@@ -1566,7 +1639,7 @@ export default function ArtTab({
             <div
               key={el.id}
               ref={(node) => registerElRef(el.id, node)}
-              className={`art-element${isSelected ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}${selectedIds.length > 1 && isSelected ? " art-element--in-selection" : ""}`}
+              className={`art-element${isSelected ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}${selectedIds.length > 1 && isSelected && activeGroupId == null ? " art-element--in-selection" : ""}`}
               data-element-id={el.id}
               style={{
                 left: el.x,
@@ -1588,8 +1661,13 @@ export default function ArtTab({
                   }
                   alt=""
                   draggable={false}
-                  className="art-element-img"
+                  className={
+                    projectsGrid
+                      ? "art-element-img art-element-img--projects-grid"
+                      : "art-element-img"
+                  }
                   onLoad={(e) => {
+                    if (projectsGrid) return;
                     const img = e.currentTarget;
                     const natW = img.naturalWidth;
                     const natH = img.naturalHeight;
@@ -1607,13 +1685,31 @@ export default function ArtTab({
 
               {/* Shape */}
               {el.type === "shape" && el.shape && (
-                <ShapeSvg shape={el.shape} w={el.w} h={el.h} />
+                <ShapeSvg
+                  shape={el.shape}
+                  w={el.w}
+                  h={el.h}
+                  fill={el.fill}
+                  strokeColor={el.strokeColor}
+                />
               )}
 
               {/* Text */}
               {el.type === "text" && (
                 <div
-                  className="art-text-content"
+                  className={
+                    projectsGrid && el.groupId != null
+                      ? [
+                          "art-text-content",
+                          "art-text-content--projects-grid",
+                          (el.fontSize ?? 22) <= 14
+                            ? "art-text-content--project-desc"
+                            : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      : "art-text-content"
+                  }
                   ref={(node) => {
                     if (node) textElRefs.current.set(el.id, node);
                     else textElRefs.current.delete(el.id);
@@ -1643,7 +1739,11 @@ export default function ArtTab({
               {/* Link */}
               {el.type === "link" && (
                 <div
-                  className="art-link-content"
+                  className={
+                    projectsGrid && el.groupId != null
+                      ? "art-link-content art-link-content--projects-grid"
+                      : "art-link-content"
+                  }
                   onPointerDown={(e) => {
                     if (e.ctrlKey || e.metaKey) {
                       e.preventDefault();
@@ -1722,8 +1822,8 @@ export default function ArtTab({
                 </div>
               )}
 
-              {/* Selection UI — multi selection: highlight border only */}
-              {selectedIds.length > 1 && isSelected && !isTiltText && (
+              {/* Selection UI — multi selection: highlight border only (hidden in group-unit mode) */}
+              {selectedIds.length > 1 && isSelected && !isTiltText && activeGroupId == null && (
                 <div className="art-selection art-selection--multi" style={{ pointerEvents: "none" }}>
                   <div className="art-selection-box" />
                 </div>
@@ -1733,71 +1833,79 @@ export default function ArtTab({
         })}
 
         {/* Multi-selection bounding box with handles */}
-        {multiBBox && selectedIds.length > 1 && (
-          <div
-            data-multi-bbox
-            style={{
-              position: "absolute",
-              left: multiBBox.x - 1,
-              top: multiBBox.y - 1,
-              width: multiBBox.w + 2,
-              height: multiBBox.h + 2,
-              pointerEvents: "none",
-              zIndex: 99998,
-            }}
-          >
-            <div className="art-multi-bbox-border" />
-            {HANDLE_DIRS.map((dir) => {
-              const pos = getHandlePosition(dir, multiBBox.w + 2, multiBBox.h + 2);
-              return (
-                <div
-                  key={dir}
-                  className="art-handle"
-                  data-handle-dir={dir}
-                  style={{
-                    left: pos.x - HANDLE_SIZE / 2,
-                    top: pos.y - HANDLE_SIZE / 2,
-                    width: HANDLE_SIZE,
-                    height: HANDLE_SIZE,
-                    cursor: HANDLE_CURSORS[dir],
-                    pointerEvents: "auto",
-                  }}
-                />
-              );
-            })}
+        {(() => {
+          const box = groupBBoxOverride ?? multiBBox;
+          if (!box || selectedIds.length <= 1) return null;
+          const bw = box.w + 2;
+          const bh = box.h + 2;
+          const rot = groupBBoxOverride?.rotation ?? 0;
+          return (
             <div
-              className="art-rotate-line"
+              data-multi-bbox
               style={{
-                left: (multiBBox.w + 2) / 2,
-                top: -28,
-                height: 28,
+                position: "absolute",
+                left: box.x - 1,
+                top: box.y - 1,
+                width: bw,
+                height: bh,
                 pointerEvents: "none",
+                zIndex: 99998,
+                transform: rot !== 0 ? `rotate(${rot}deg)` : undefined,
+                transformOrigin: "center center",
               }}
-            />
-            <div
-              className="art-handle art-handle--rotate"
-              data-handle-dir="rotate"
-              style={{
-                left: (multiBBox.w + 2) / 2 - HANDLE_SIZE / 2,
-                top: -28 - HANDLE_SIZE / 2,
-                width: HANDLE_SIZE,
-                height: HANDLE_SIZE,
-                cursor: HANDLE_CURSORS.rotate,
-                pointerEvents: "auto",
-              }}
-            />
-          </div>
-        )}
+            >
+              <div className="art-multi-bbox-border" />
+              {HANDLE_DIRS.map((dir) => {
+                const pos = getHandlePosition(dir, bw, bh);
+                return (
+                  <div
+                    key={dir}
+                    className="art-handle"
+                    data-handle-dir={dir}
+                    style={{
+                      left: pos.x - HANDLE_SIZE / 2,
+                      top: pos.y - HANDLE_SIZE / 2,
+                      width: HANDLE_SIZE,
+                      height: HANDLE_SIZE,
+                      cursor: HANDLE_CURSORS[dir],
+                      pointerEvents: "auto",
+                    }}
+                  />
+                );
+              })}
+              <div
+                className="art-rotate-line"
+                style={{
+                  left: bw / 2,
+                  top: -28,
+                  height: 28,
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                className="art-handle art-handle--rotate"
+                data-handle-dir="rotate"
+                style={{
+                  left: bw / 2 - HANDLE_SIZE / 2,
+                  top: -28 - HANDLE_SIZE / 2,
+                  width: HANDLE_SIZE,
+                  height: HANDLE_SIZE,
+                  cursor: HANDLE_CURSORS.rotate,
+                  pointerEvents: "auto",
+                }}
+              />
+            </div>
+          );
+        })()}
 
         {/* Group / Ungroup popup */}
-        {selectedIds.length > 1 && multiBBox && !dragRef.current && (
+        {selectedIds.length > 1 && multiBBox && !dragRef.current && popupPos && (
           <div
             className="art-group-popup"
             style={{
               position: "absolute",
-              left: multiBBox.x + multiBBox.w / 2,
-              top: multiBBox.y - 44,
-              transform: "translateX(-50%)",
+              left: popupPos.x + 16,
+              top: popupPos.y - 40,
               zIndex: 99999,
             }}
             onPointerDown={(e) => e.stopPropagation()}

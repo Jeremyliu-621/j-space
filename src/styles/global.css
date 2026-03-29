@@ -1910,6 +1910,17 @@ canvas,
   pointer-events: none;
 }
 
+/* Projects tab grid: fixed preview height — no runaway aspect-ratio resize over text */
+.art-element:has(.art-element-img--projects-grid) {
+  overflow: hidden;
+  background: #e8e8e8;
+}
+
+.art-element-img--projects-grid {
+  object-fit: cover;
+  object-position: center;
+}
+
 /* Shape SVG */
 .art-shape-svg {
   display: block;
@@ -1939,6 +1950,23 @@ canvas,
   cursor: text;
   background: rgba(255, 255, 255, 0.8);
   outline: 1px solid #1a73e8;
+}
+
+/* Projects grid cards: left-aligned copy; title vs body */
+.art-text-content--projects-grid {
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.art-text-content--projects-grid.art-text-content--project-desc {
+  font-weight: 400;
+}
+
+.art-link-content--projects-grid {
+  justify-content: flex-start;
 }
 
 /* ── Text Toolbar ── */
