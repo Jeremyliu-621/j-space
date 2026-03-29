@@ -10,9 +10,8 @@ import ArtTab, { ArtTabProps } from "./tabs/ArtTab";
 const TABS = [
   { id: "projects", label: "Projects", url: "C:\\Jeremy\\projects" },
   { id: "me", label: "Me", url: "C:\\Jeremy\\me" },
-  { id: "art", label: "Art", url: "C:\\Jeremy\\art" },
+  { id: "art", label: "Art I Love", url: "C:\\Jeremy\\art" },
   { id: "sports", label: "Sports", url: "C:\\Jeremy\\sports" },
-  { id: "bjj", label: "BJJ", url: "C:\\Jeremy\\bjj" },
 ];
 
 const TAB_PROPS: Record<string, ArtTabProps> = {
@@ -41,11 +40,7 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
       fontSize: 40,
     },
   },
-  art: {
-    extraTexts: [
-      { content: "art I appreciate", x: 1205, y: 252, w: 220, fontSize: 16 },
-    ],
-  },
+  art: {},
   sports: {
     imageFolder: "/sports",
     images: [
@@ -114,7 +109,6 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
       },
     ],
   },
-  bjj: {},
 };
 
 export default function PseudoBrowser() {

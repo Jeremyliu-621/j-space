@@ -536,6 +536,7 @@ export default function ArtTab({
           els.push({
             id: id++, type: "image", x: cx, y: cy, w: CARD_W, h: 160,
             rotation: 0, zIndex: baseZ, file: src, groupId: gid,
+            noTilt: true,
           });
         }
 
@@ -543,12 +544,14 @@ export default function ArtTab({
           id: id++, type: "text", x: cx + PAD, y: cy + 170, w: INNER_W, h: 28,
           rotation: 0, zIndex: baseZ, content: p.title, fontSize: 20,
           fontFamily: "'Playfair Display', Georgia, serif", fontColor: "#111", groupId: gid,
+          noTilt: true,
         });
 
         els.push({
           id: id++, type: "text", x: cx + PAD, y: cy + 205, w: INNER_W, h: 50,
           rotation: 0, zIndex: baseZ, content: p.description, fontSize: 13,
           fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#4a4a4a", groupId: gid,
+          noTilt: true,
         });
 
         let stackY = cy + 265;
@@ -557,6 +560,7 @@ export default function ArtTab({
             id: id++, type: "text", x: cx + PAD, y: stackY, w: INNER_W, h: 32,
             rotation: 0, zIndex: baseZ, content: `Front: ${p.front}`, fontSize: 11,
             fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#555", groupId: gid,
+            noTilt: true,
           });
           stackY += 36;
         }
@@ -565,6 +569,7 @@ export default function ArtTab({
             id: id++, type: "text", x: cx + PAD, y: stackY, w: INNER_W, h: 32,
             rotation: 0, zIndex: baseZ, content: `Back: ${p.back}`, fontSize: 11,
             fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#555", groupId: gid,
+            noTilt: true,
           });
           stackY += 36;
         }
@@ -576,6 +581,7 @@ export default function ArtTab({
             id: id++, type: "link", x: linkX, y: linkY, w: 100, h: 24,
             rotation: 0, zIndex: baseZ, content: "Website",
             href: p.website, linkIcon: "website", groupId: gid,
+            noTilt: true,
           });
           linkX += 110;
         }
@@ -584,6 +590,7 @@ export default function ArtTab({
             id: id++, type: "link", x: linkX, y: linkY, w: 100, h: 24,
             rotation: 0, zIndex: baseZ, content: "GitHub",
             href: p.github, linkIcon: "github", groupId: gid,
+            noTilt: true,
           });
         }
       }
@@ -601,6 +608,7 @@ export default function ArtTab({
         rotation: (DEFAULT_IMAGE_ROTATIONS[i] ?? 0) * rotScale,
         zIndex: i + 1,
         file: img.file,
+        noTilt: true,
       })),
       {
         id: imgList.length + 1,
@@ -629,6 +637,7 @@ export default function ArtTab({
         fontSize: et.fontSize,
         fontFamily: "'Playfair Display', Georgia, serif",
         fontColor: "#1a1a1a",
+        noTilt: true,
       })),
     ];
   })();
@@ -677,6 +686,22 @@ export default function ArtTab({
   const topZRef = useRef(initialElements.length + 1);
   const maxInitGroup = Math.max(0, ...initialElements.map((el) => el.groupId ?? 0));
   const nextGroupIdRef = useRef(maxInitGroup + 1);
+  const groupDataRef = useRef<Map<number, { baseW: number; baseH: number; rotation: number }>>(null!);
+  if (groupDataRef.current === null) {
+    const m = new Map<number, { baseW: number; baseH: number; rotation: number }>();
+    const byGroup = new Map<number, CanvasElement[]>();
+    for (const el of initialElements) {
+      if (el.groupId != null) {
+        if (!byGroup.has(el.groupId)) byGroup.set(el.groupId, []);
+        byGroup.get(el.groupId)!.push(el);
+      }
+    }
+    for (const [gid, els] of byGroup) {
+      const bbox = computeBBox(els);
+      m.set(gid, { baseW: bbox.w, baseH: bbox.h, rotation: 0 });
+    }
+    groupDataRef.current = m;
+  }
   const elementsRef = useRef(elements);
   elementsRef.current = elements;
 
@@ -724,7 +749,11 @@ export default function ArtTab({
     );
     observerRef.current = observer;
 
-    elRefsForObserver.current.forEach((div) => observer.observe(div));
+    elRefsForObserver.current.forEach((div, id) => {
+      const el = elementsRef.current.find((e) => e.id === id);
+      if (el?.noTilt) return;
+      observer.observe(div);
+    });
 
     return () => {
       observer.disconnect();
@@ -736,7 +765,8 @@ export default function ArtTab({
     (id: number, node: HTMLDivElement | null) => {
       if (node) {
         elRefsForObserver.current.set(id, node);
-        if (observerRef.current && !firedIds.current.has(id)) {
+        const el = elementsRef.current.find((e) => e.id === id);
+        if (observerRef.current && !firedIds.current.has(id) && !el?.noTilt) {
           observerRef.current.observe(node);
         }
       } else {
@@ -843,6 +873,9 @@ export default function ArtTab({
       { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }
     >;
     groupBBox?: { x: number; y: number; w: number; h: number };
+    rotatingGroupId?: number | null;
+    baseGroupRotation?: number;
+    lastRotationDelta?: number;
   } | null>(null);
 
   /* ── Helpers ── */
@@ -1037,12 +1070,24 @@ export default function ArtTab({
             const startAngle = Math.atan2(e.clientY - csy, e.clientX - csx);
             const startEls = new Map<number, { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }>();
             for (const sel of selectedEls) startEls.set(sel.id, { x: sel.x, y: sel.y, w: sel.w, h: sel.h, rotation: sel.rotation, fontSize: sel.fontSize });
+            const gd = activeGroupId != null ? groupDataRef.current.get(activeGroupId) : null;
+            const baseGRot = gd?.rotation ?? 0;
             dragRef.current = {
               type: "rotate", startX: e.clientX, startY: e.clientY, didMove: false,
               startAngle, centerScreenX: csx, centerScreenY: csy,
               startElements: startEls, groupBBox: bbox,
+              rotatingGroupId: activeGroupId, baseGroupRotation: baseGRot, lastRotationDelta: 0,
             };
-            setGroupBBoxOverride({ ...bbox, rotation: 0 });
+            if (gd) {
+              const cx = bbox.x + bbox.w / 2;
+              const cy = bbox.y + bbox.h / 2;
+              setGroupBBoxOverride({
+                x: cx - gd.baseW / 2, y: cy - gd.baseH / 2,
+                w: gd.baseW, h: gd.baseH, rotation: baseGRot,
+              });
+            } else {
+              setGroupBBoxOverride({ ...bbox, rotation: 0 });
+            }
           } else {
             const startEls = new Map<number, { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }>();
             for (const sel of selectedEls) startEls.set(sel.id, { x: sel.x, y: sel.y, w: sel.w, h: sel.h, rotation: sel.rotation, fontSize: sel.fontSize });
@@ -1090,8 +1135,16 @@ export default function ArtTab({
         let newActiveGid: number | null;
 
         if (el.groupId != null && activeGroupId === el.groupId) {
-          idsToSelect = [id];
-          newActiveGid = activeGroupId;
+          const groupMembers = elements.filter((e) => e.groupId === el.groupId);
+          const isGroupUnit = selectedIds.length > 1 &&
+            groupMembers.every((m) => selectedIds.includes(m.id));
+          if (isGroupUnit) {
+            idsToSelect = selectedIds;
+            newActiveGid = activeGroupId;
+          } else {
+            idsToSelect = [id];
+            newActiveGid = activeGroupId;
+          }
         } else if (selectedIds.includes(id) && activeGroupId == null) {
           idsToSelect = selectedIds;
           newActiveGid = null;
@@ -1308,8 +1361,10 @@ export default function ArtTab({
             return { ...el, x: newCX - start.w / 2, y: newCY - start.h / 2, rotation: start.rotation + newRot };
           }),
         );
-        setRotationTooltip({ angle: Math.round(newRot * 10) / 10, x: e.clientX, y: e.clientY });
-        setGroupBBoxOverride((prev) => prev ? { ...prev, rotation: newRot } : null);
+        d.lastRotationDelta = newRot;
+        const baseGRot = d.baseGroupRotation ?? 0;
+        setRotationTooltip({ angle: Math.round((baseGRot + newRot) * 10) / 10, x: e.clientX, y: e.clientY });
+        setGroupBBoxOverride((prev) => prev ? { ...prev, rotation: baseGRot + newRot } : null);
       } else if (d.nodeId != null) {
         const currentAngle = Math.atan2(e.clientY - d.centerScreenY!, e.clientX - d.centerScreenX!);
         const angleDelta = (currentAngle - d.startAngle!) * (180 / Math.PI);
@@ -1350,6 +1405,12 @@ export default function ArtTab({
         dragRef.current = null;
         setActiveGroupId(null);
         return;
+      }
+      if (d.type === "rotate" && d.rotatingGroupId != null && d.lastRotationDelta != null) {
+        const gd = groupDataRef.current.get(d.rotatingGroupId);
+        if (gd) {
+          gd.rotation = (d.baseGroupRotation ?? 0) + d.lastRotationDelta;
+        }
       }
       const moved = d.didMove;
       dragRef.current = null;
@@ -1398,7 +1459,7 @@ export default function ArtTab({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [undo, redo, selectedIds, elements, pushHistory]);
 
-  /* ── Double-click to edit text / open link ── */
+  /* ── Double-click to enter group / edit text / open link ── */
   const onDoubleClick = useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -1406,6 +1467,13 @@ export default function ArtTab({
       if (!nodeEl) return;
       const id = Number(nodeEl.dataset.elementId);
       const el = elements.find((n) => n.id === id);
+
+      if (el?.groupId != null && activeGroupId === el.groupId && selectedIds.length > 1) {
+        setSelectedIds([id]);
+        e.stopPropagation();
+        return;
+      }
+
       if (el?.type === "text") {
         setEditingId(id);
         setSelectedIds([id]);
@@ -1415,7 +1483,7 @@ export default function ArtTab({
         e.stopPropagation();
       }
     },
-    [elements],
+    [elements, activeGroupId, selectedIds],
   );
 
   /* ── Save text on blur ── */
@@ -1485,6 +1553,9 @@ export default function ArtTab({
   /* ── Group / Ungroup ── */
   const handleGroup = useCallback(() => {
     const gid = nextGroupIdRef.current++;
+    const selectedEls = elements.filter((el) => selectedIds.includes(el.id));
+    const bbox = computeBBox(selectedEls);
+    groupDataRef.current.set(gid, { baseW: bbox.w, baseH: bbox.h, rotation: 0 });
     setElements((prev) => {
       const idSet = new Set(selectedIds);
       const next = prev.map((el) =>
@@ -1494,9 +1565,12 @@ export default function ArtTab({
       return next;
     });
     setActiveGroupId(gid);
-  }, [selectedIds, pushHistory]);
+  }, [selectedIds, elements, pushHistory]);
 
   const handleUngroup = useCallback(() => {
+    const sel = elements.filter((el) => selectedIds.includes(el.id));
+    const gid = sel[0]?.groupId;
+    if (gid != null) groupDataRef.current.delete(gid);
     setElements((prev) => {
       const idSet = new Set(selectedIds);
       const next = prev.map((el) =>
@@ -1506,13 +1580,29 @@ export default function ArtTab({
       return next;
     });
     setActiveGroupId(null);
-  }, [selectedIds, pushHistory]);
+  }, [selectedIds, elements, pushHistory]);
 
   /* ── Multi-selection bounding box (memoised inline) ── */
-  const multiBBox =
-    selectedIds.length > 1
-      ? computeBBox(elements.filter((el) => selectedIds.includes(el.id)))
-      : null;
+  const multiBBox = (() => {
+    if (selectedIds.length <= 1) return null;
+    const selectedEls = elements.filter((el) => selectedIds.includes(el.id));
+    const aabb = computeBBox(selectedEls);
+    if (activeGroupId != null) {
+      const gd = groupDataRef.current.get(activeGroupId);
+      if (gd && gd.rotation !== 0) {
+        const cx = aabb.x + aabb.w / 2;
+        const cy = aabb.y + aabb.h / 2;
+        return {
+          x: cx - gd.baseW / 2,
+          y: cy - gd.baseH / 2,
+          w: gd.baseW,
+          h: gd.baseH,
+          rotation: gd.rotation,
+        };
+      }
+    }
+    return { ...aabb, rotation: 0 };
+  })();
 
   const allSameGroup = (() => {
     if (selectedIds.length < 2) return false;
@@ -1838,7 +1928,7 @@ export default function ArtTab({
           if (!box || selectedIds.length <= 1) return null;
           const bw = box.w + 2;
           const bh = box.h + 2;
-          const rot = groupBBoxOverride?.rotation ?? 0;
+          const rot = "rotation" in box ? box.rotation : 0;
           return (
             <div
               data-multi-bbox

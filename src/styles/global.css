@@ -362,7 +362,6 @@ canvas,
 
 /* All non-Win98 stations use the same gray desktop bg */
 .station-graffiti,
-.station-bjj,
 .station-art,
 .station-fashion {
   background-color: var(--palette-color-3, #c0c0c0);
@@ -370,7 +369,6 @@ canvas,
 
 /* Title bar for station windows matches Win98 flat gray */
 .station-graffiti .title-bar,
-.station-bjj .title-bar,
 .station-art .title-bar,
 .station-fashion .title-bar {
   background: var(--palette-color-2, #808080) !important;
@@ -378,7 +376,6 @@ canvas,
 
 /* Station windows — flex column like Win98 windows */
 .station-graffiti .window,
-.station-bjj .window,
 .station-art .window,
 .station-fashion .window {
   display: flex;
@@ -1667,25 +1664,6 @@ canvas,
     transparent 1px,
     transparent 19px
   );
-}
-
-.pb-panel[data-tab="bjj"] {
-  background-color: var(--palette-color-3);
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      var(--palette-color-2) 0px,
-      var(--palette-color-2) 1px,
-      transparent 1px,
-      transparent 40px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      var(--palette-color-2) 0px,
-      var(--palette-color-2) 1px,
-      transparent 1px,
-      transparent 40px
-    );
 }
 
 .pb-panel[data-tab="art"] {

@@ -26,9 +26,7 @@ function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, tr
 }
 
 // Project card in list view
-function ProjectCard({ project, index, onSpecifics }: {
-  project: content.Project; index: number; onSpecifics: (i: number) => void;
-}) {
+function ProjectCard({ project }: { project: content.Project }) {
   const theme = useTheme();
   const btnStyle = theme.getButtonStyle();
   const imgUrl = project.image ? getImageUrl(project.image) : null;
@@ -273,7 +271,7 @@ export default function Win98Station() {
                   <TypewriterTitle text="My Projects" tag="h1" trigger={windowsVisible.projects} style={{ marginTop: 0, marginBottom: 5 }} />
                   <div className="projects-grid">
                     {content.projects.map((project, i) => (
-                      <ProjectCard key={i} project={project} index={i} onSpecifics={(idx) => setActiveProjectTab(String(idx))} />
+                      <ProjectCard key={i} project={project} />
                     ))}
                   </div>
                 </div>
