@@ -7,127 +7,19 @@ import {
 } from "react";
 import { useTheme } from "../win98/ThemeProvider";
 import ArtTab, { ArtTabProps } from "./tabs/ArtTab";
-
 const TABS = [
-  { id: "projects", label: "Projects.exe", url: "C:\\Jeremy\\projects" },
-  { id: "me", label: "Me.exe", url: "C:\\Jeremy\\me" },
-  { id: "art", label: "Art.exe", url: "C:\\Jeremy\\art" },
-  { id: "sports", label: "Sports.exe", url: "C:\\Jeremy\\sports" },
-  { id: "bjj", label: "BJJ.exe", url: "C:\\Jeremy\\bjj" },
+  { id: "projects", label: "Projects", url: "C:\\Jeremy\\projects" },
+  { id: "me", label: "Me", url: "C:\\Jeremy\\me" },
+  { id: "art", label: "Art", url: "C:\\Jeremy\\art" },
+  { id: "sports", label: "Sports", url: "C:\\Jeremy\\sports" },
+  { id: "bjj", label: "BJJ", url: "C:\\Jeremy\\bjj" },
 ];
 
 const TAB_PROPS: Record<string, ArtTabProps> = {
   projects: {
     imageFolder: "/projects",
-    canvasHeight: 2400,
-    images: [
-      { file: "sinatrademo.gif", width: 380, height: 240, x: 60, y: 40 },
-      { file: "lockblock.png", width: 340, height: 220, x: 700, y: 30 },
-      { file: "ufc_elo.png", width: 360, height: 230, x: 100, y: 440 },
-      { file: "binder_action.gif", width: 340, height: 240, x: 680, y: 420 },
-      { file: "stop_dont_go_on_grey.jpg", width: 340, height: 220, x: 60, y: 860 },
-      { file: "j-gif-space.gif", width: 360, height: 240, x: 680, y: 840 },
-    ],
-    defaultText: {
-      content: "My Projects",
-      x: 500,
-      y: 5,
-      w: 200,
-      fontSize: 28,
-    },
-    extraTexts: [
-      {
-        content: "Sinatra — a DAW that turns your voice into any instrument.",
-        x: 60,
-        y: 290,
-        w: 380,
-        fontSize: 13,
-      },
-      {
-        content: "LockBlock — smart security with Arduino and computer vision.",
-        x: 700,
-        y: 260,
-        w: 340,
-        fontSize: 13,
-      },
-      {
-        content: "Front: React, TS, Vite, Tailwind, Three.js",
-        x: 60,
-        y: 320,
-        w: 380,
-        fontSize: 11,
-      },
-      {
-        content: "Front: JS, Phantom Wallet  •  Back: Python, Flask, OpenCV, Solana",
-        x: 700,
-        y: 290,
-        w: 340,
-        fontSize: 11,
-      },
-      {
-        content: "Back: Python, FastAPI, Supabase, Spotify Basic Pitch",
-        x: 60,
-        y: 345,
-        w: 380,
-        fontSize: 11,
-      },
-      {
-        content: "UFC Index — scraped stats for UFC fighters.",
-        x: 100,
-        y: 680,
-        w: 360,
-        fontSize: 13,
-      },
-      {
-        content: "Front: Next.js, React, TS, Tailwind  •  Back: Python, Pandas, BeautifulSoup",
-        x: 100,
-        y: 710,
-        w: 360,
-        fontSize: 11,
-      },
-      {
-        content: "Binder — a swipe-based interface for thrifting.",
-        x: 680,
-        y: 670,
-        w: 340,
-        fontSize: 13,
-      },
-      {
-        content: "Front: Next.js, TS, Tailwind  •  Back: Python, BeautifulSoup, Selenium",
-        x: 680,
-        y: 700,
-        w: 340,
-        fontSize: 11,
-      },
-      {
-        content: "stop! don't go on. — water sprayer that stops bad habits.",
-        x: 60,
-        y: 1090,
-        w: 340,
-        fontSize: 13,
-      },
-      {
-        content: "Front: React, Vite, TS  •  Back: Python, Flask, OpenCV, Arduino",
-        x: 60,
-        y: 1120,
-        w: 340,
-        fontSize: 11,
-      },
-      {
-        content: "j-space — a space for my creativity and ideas.",
-        x: 680,
-        y: 1090,
-        w: 360,
-        fontSize: 13,
-      },
-      {
-        content: "Front: HTML, CSS, JavaScript, Vite",
-        x: 680,
-        y: 1120,
-        w: 360,
-        fontSize: 11,
-      },
-    ],
+    canvasHeight: 1000,
+    projectsGrid: true,
   },
   me: {
     imageFolder: "/me",

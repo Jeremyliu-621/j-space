@@ -5,6 +5,17 @@ import {
   useEffect,
   useLayoutEffect,
 } from "react";
+import { projects } from "../../../lib/content";
+
+/** Project slug → public asset (matches Win98 / ProjectsTab) */
+const PROJECT_IMAGE_SRC: Record<string, string> = {
+  sinatra: "/projects/sinatrademo.gif",
+  lockblock: "/projects/lockblock.png",
+  "ufc-search": "/projects/ufc_elo.png",
+  binder_action: "/projects/binder_action.gif",
+  stop_dont_go_on_grey: "/projects/stop_dont_go_on_grey.jpg",
+  "j-gif-space": "/projects/j-gif-space.gif",
+};
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -31,7 +42,7 @@ const ART_IMAGES = [
 /* ══════════════════════════════════════════════════════════════
    TYPES
    ══════════════════════════════════════════════════════════════ */
-type ElementType = "image" | "shape" | "text";
+type ElementType = "image" | "shape" | "text" | "group";
 type ShapeKind = "rect" | "circle" | "triangle" | "line" | "arrow" | "star";
 type HandleDir = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "rotate";
 
@@ -50,38 +61,8 @@ interface CanvasElement {
   fontSize?: number;
   fontFamily?: string;
   fontColor?: string;
+  projectIndex?: number;
 }
-
-/* ── Build initial elements from image config + a default text ── */
-const INITIAL_ELEMENTS: CanvasElement[] = [
-  ...ART_IMAGES.map((img, i) => ({
-    id: i + 1,
-    type: "image" as const,
-    x: img.x,
-    y: img.y,
-    w: img.width,
-    h: img.height,
-    rotation:
-      [-3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2][i] ??
-      0,
-    zIndex: i + 1,
-    file: img.file,
-  })),
-  {
-    id: ART_IMAGES.length + 1,
-    type: "text" as const,
-    x: 380,
-    y: 380,
-    w: 300,
-    h: 64,
-    rotation: -2,
-    zIndex: ART_IMAGES.length + 1,
-    content: "everything is a canvas",
-    fontSize: 26,
-    fontFamily: "'Playfair Display', Georgia, serif",
-    fontColor: "#1a1a1a",
-  },
-];
 
 /* ══════════════════════════════════════════════════════════════
    SIDEBAR TOOL DEFINITIONS
@@ -394,6 +375,10 @@ function randTilt(max: number) {
 }
 const TILT_STEPS = 7; // steps per element
 
+const DEFAULT_IMAGE_ROTATIONS = [
+  -3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2,
+];
+
 export interface ArtTabProps {
   images?: {
     file: string;
@@ -418,6 +403,19 @@ export interface ArtTabProps {
     fontSize: number;
   }[];
   canvasHeight?: number;
+  tiltMagnitude?: number;
+  /** Multiplies default per-image rotations (0 = level, 1 = full tilt). */
+  imageRotationScale?: number;
+  /** 3-column project cards from site content; canvas + sidebar unchanged. */
+  projectsGrid?: boolean;
+  links?: {
+    label: string;
+    href: string;
+    icon?: "website" | "github";
+    x: number;
+    y: number;
+    fontSize?: number;
+  }[];
 }
 
 export default function ArtTab({
@@ -426,10 +424,14 @@ export default function ArtTab({
   defaultText,
   extraTexts,
   canvasHeight,
+  tiltMagnitude,
+  imageRotationScale,
+  projectsGrid,
+  links,
 }: ArtTabProps = {}) {
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const imgList = images ?? ART_IMAGES;
+  const imgList = projectsGrid ? [] : (images ?? ART_IMAGES);
   const txt = defaultText ?? {
     content: "everything is a canvas",
     x: 380,
@@ -438,50 +440,84 @@ export default function ArtTab({
     fontSize: 26,
   };
 
-  const initialElements: CanvasElement[] = [
-    ...imgList.map((img, i) => ({
-      id: i + 1,
-      type: "image" as const,
-      x: img.x,
-      y: img.y,
-      w: img.width,
-      h: img.height,
-      rotation:
-        [-3, 2, -1.5, 4, -2, 1.5, -4, 3, -1, 2.5, -3.5, 1, -2.5, 3.5, -1, 2][
-          i
-        ] ?? 0,
-      zIndex: i + 1,
-      file: img.file,
-    })),
-    {
-      id: imgList.length + 1,
-      type: "text" as const,
-      x: txt.x,
-      y: txt.y,
-      w: txt.w,
-      h: 64,
-      rotation: -2,
-      zIndex: imgList.length + 1,
-      content: txt.content,
-      fontSize: txt.fontSize,
-      fontFamily: "'Playfair Display', Georgia, serif",
-      fontColor: "#1a1a1a",
-    },
-    ...(extraTexts ?? []).map((et, i) => ({
-      id: imgList.length + 2 + i,
-      type: "text" as const,
-      x: et.x,
-      y: et.y,
-      w: et.w,
-      h: 80,
-      rotation: 0,
-      zIndex: imgList.length + 2 + i,
-      content: et.content,
-      fontSize: et.fontSize,
-      fontFamily: "'Playfair Display', Georgia, serif",
-      fontColor: "#1a1a1a",
-    })),
-  ];
+  const rotScale = imageRotationScale ?? 1;
+
+  const CARD_W = 340;
+  const CARD_H = 400;
+  const GRID_GAP = 24;
+  const GRID_COLS = 3;
+  const GRID_PAD_X = 60;
+  const GRID_PAD_Y = 70;
+
+  const initialElements: CanvasElement[] = projectsGrid
+    ? [
+        {
+          id: 1,
+          type: "text" as const,
+          x: GRID_PAD_X,
+          y: 10,
+          w: 360,
+          h: 54,
+          rotation: 0,
+          zIndex: 1,
+          content: "My Projects",
+          fontSize: 42,
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontColor: "#1a1a1a",
+        },
+        ...projects.map((_, i) => ({
+          id: i + 2,
+          type: "group" as const,
+          x: GRID_PAD_X + (i % GRID_COLS) * (CARD_W + GRID_GAP),
+          y: GRID_PAD_Y + Math.floor(i / GRID_COLS) * (CARD_H + GRID_GAP),
+          w: CARD_W,
+          h: CARD_H,
+          rotation: 0,
+          zIndex: i + 2,
+          projectIndex: i,
+        })),
+      ]
+    : [
+        ...imgList.map((img, i) => ({
+          id: i + 1,
+          type: "image" as const,
+          x: img.x,
+          y: img.y,
+          w: img.width,
+          h: img.height,
+          rotation: (DEFAULT_IMAGE_ROTATIONS[i] ?? 0) * rotScale,
+          zIndex: i + 1,
+          file: img.file,
+        })),
+        {
+          id: imgList.length + 1,
+          type: "text" as const,
+          x: txt.x,
+          y: txt.y,
+          w: txt.w,
+          h: 64,
+          rotation: -2,
+          zIndex: imgList.length + 1,
+          content: txt.content,
+          fontSize: txt.fontSize,
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontColor: "#1a1a1a",
+        },
+        ...(extraTexts ?? []).map((et, i) => ({
+          id: imgList.length + 2 + i,
+          type: "text" as const,
+          x: et.x,
+          y: et.y,
+          w: et.w,
+          h: 80,
+          rotation: 0,
+          zIndex: imgList.length + 2 + i,
+          content: et.content,
+          fontSize: et.fontSize,
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontColor: "#1a1a1a",
+        })),
+      ];
 
   const tiltConfigRef = useRef<Record<
     number,
@@ -491,7 +527,7 @@ export default function ArtTab({
     tiltConfigRef.current = {};
     for (const el of initialElements) {
       const isText = el.type === "text";
-      const mag = isText ? 2.5 : 1.8;
+      const mag = tiltMagnitude ?? (isText ? 2.5 : 1.8);
       const steps = isText ? TILT_STEPS * 2 : TILT_STEPS;
       tiltConfigRef.current[el.id] = {
         angles: Array.from({ length: steps }, () => randTilt(mag)),
@@ -619,7 +655,7 @@ export default function ArtTab({
   }, [tiltingIds]);
 
   /* ── Undo / Redo history ── */
-  const historyRef = useRef<CanvasElement[][]>([INITIAL_ELEMENTS]);
+  const historyRef = useRef<CanvasElement[][]>([initialElements]);
   const historyIndexRef = useRef(0);
 
   const pushHistory = useCallback((snapshot: CanvasElement[]) => {
@@ -1275,7 +1311,11 @@ export default function ArtTab({
       <div
         ref={canvasRef}
         className="art-canvas"
-        style={canvasHeight ? { minHeight: canvasHeight, height: canvasHeight } : undefined}
+        style={
+          canvasHeight
+            ? { minHeight: canvasHeight, height: canvasHeight }
+            : undefined
+        }
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -1359,6 +1399,101 @@ export default function ArtTab({
                 </div>
               )}
 
+              {/* Group (project card) */}
+              {el.type === "group" &&
+                el.projectIndex != null &&
+                (() => {
+                  const project = projects[el.projectIndex];
+                  if (!project) return null;
+                  const imgSrc =
+                    project.image &&
+                    (PROJECT_IMAGE_SRC[project.image] ??
+                      `/projects/${project.image}.png`);
+                  return (
+                    <div className="pb-project-card pb-project-card--canvas">
+                      <div className="pb-project-card-image">
+                        {imgSrc ? (
+                          <img src={imgSrc} alt="" draggable={false} />
+                        ) : null}
+                      </div>
+                      <div className="pb-project-card-body">
+                        <h3 className="pb-project-card-title">
+                          {project.title}
+                        </h3>
+                        <p className="pb-project-card-desc">
+                          {project.description}
+                        </p>
+                        {(project.front || project.back) && (
+                          <div className="pb-project-card-stack">
+                            {project.front && (
+                              <>
+                                <span className="pb-project-stack-label">
+                                  Front
+                                </span>
+                                <p>{project.front}</p>
+                              </>
+                            )}
+                            {project.back && (
+                              <>
+                                <span className="pb-project-stack-label">
+                                  Back
+                                </span>
+                                <p>{project.back}</p>
+                              </>
+                            )}
+                          </div>
+                        )}
+                        <div
+                          className="pb-project-card-links"
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          {project.website && (
+                            <a
+                              href={project.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="art-link"
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                width="16"
+                                height="16"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                aria-hidden
+                              >
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                              </svg>
+                              Website
+                            </a>
+                          )}
+                          {project.github && (
+                            <a
+                              href={project.github}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="art-link"
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                aria-hidden
+                              >
+                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                              </svg>
+                              GitHub
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
               {/* Selection UI */}
               {(el.id === selectedId || isTiltText) && (
                 <div
@@ -1410,6 +1545,50 @@ export default function ArtTab({
             </div>
           );
         })}
+
+        {/* Clickable links (absolute-positioned tabs only; projects grid uses in-card links) */}
+        {!projectsGrid &&
+          links?.map((link, i) => (
+            <a
+              key={i}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="art-link"
+              style={{
+                position: "absolute",
+                left: link.x,
+                top: link.y,
+                fontSize: link.fontSize ?? 15,
+                zIndex: 9999,
+              }}
+            >
+              {link.icon === "website" && (
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              )}
+              {link.icon === "github" && (
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                >
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+              )}
+              {link.label}
+            </a>
+          ))}
 
         {/* Rotation tooltip */}
         {rotationTooltip && (
