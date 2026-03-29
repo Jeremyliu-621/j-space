@@ -1791,12 +1791,36 @@ canvas,
    ART.EXE — Freeform Canvas
    ============================================================ */
 
-/* Container: sidebar + canvas side by side */
+/* Container: optional sticky toolbar row, then sidebar + canvas */
 .art-container {
   display: flex;
+  flex-direction: column;
   width: 100%;
   min-height: 100%;
   overflow: visible;
+}
+
+.art-text-toolbar-sticky {
+  position: sticky;
+  top: 10px;
+  z-index: 10001;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0 8px 8px;
+  pointer-events: none;
+}
+
+.art-text-toolbar-sticky .art-text-toolbar {
+  pointer-events: auto;
+}
+
+.art-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
 }
 
 /* ── Sidebar (floating pill: hugs tools, no full-height rail) ── */
@@ -1893,6 +1917,9 @@ canvas,
   overflow: hidden;
   background: #e8e8e8;
 }
+.art-element--selected:has(.art-element-img--projects-grid) {
+  overflow: visible;
+}
 
 .art-element-img--projects-grid {
   object-fit: cover;
@@ -1949,11 +1976,7 @@ canvas,
 
 /* ── Text Toolbar ── */
 .art-text-toolbar {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10001;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;

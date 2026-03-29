@@ -1613,8 +1613,9 @@ export default function ArtTab({
   /* ── Render ── */
   return (
     <div className="art-container">
-      {/* ── Text Toolbar ── */}
+      {/* ── Text Toolbar (sticky within panel scroll so it stays visible) ── */}
       {showTextToolbar && singleSelectedEl && (
+        <div className="art-text-toolbar-sticky">
         <div
           className="art-text-toolbar"
           onPointerDown={(e) => e.stopPropagation()}
@@ -1690,7 +1691,9 @@ export default function ArtTab({
             />
           </div>
         </div>
+        </div>
       )}
+      <div className="art-body">
       {/* ── Sidebar ── */}
       <div className="art-sidebar">
         {SIDEBAR_TOOLS.map((tool) => (
@@ -2081,6 +2084,7 @@ export default function ArtTab({
             {rotationTooltip.angle}°
           </div>
         )}
+      </div>
       </div>
     </div>
   );
