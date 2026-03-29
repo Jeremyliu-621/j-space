@@ -1721,116 +1721,71 @@ canvas,
   flex-shrink: 0;
 }
 
-.pb-project-card {
-  display: flex;
-  flex-direction: column;
+/* ── Marquee selection rectangle ── */
+.art-marquee {
+  position: absolute;
+  border: 1px dashed #4a90d9;
+  background: rgba(74, 144, 217, 0.08);
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* ── Multi-selection bounding box ── */
+.art-multi-bbox-border {
+  position: absolute;
+  inset: 0;
+  border: 2px dashed #1a73e8;
+  pointer-events: none;
+}
+
+/* ── Per-element highlight in multi-selection ── */
+.art-element--in-selection {
+  outline: 1px solid rgba(26, 115, 232, 0.45);
+}
+
+/* ── Group / Ungroup popup ── */
+.art-group-popup {
+  pointer-events: auto;
+}
+
+.art-group-popup-btn {
   background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  border: 1px solid #dadce0;
+  border-radius: 16px;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 500;
+  color: #1a73e8;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s;
 }
 
-.pb-project-card-image {
-  aspect-ratio: 16 / 10;
-  background: #ececec;
-  overflow: hidden;
+.art-group-popup-btn:hover {
+  background: #e8f0fe;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
 }
 
-.pb-project-card-image img {
+/* ── Link element content ── */
+.art-link-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
-.pb-project-card-body {
-  padding: 14px 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-  min-height: 0;
-}
-
-.pb-project-card-title {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0;
-  color: #111;
-  line-height: 1.25;
-}
-
-.pb-project-card-desc {
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: #4a4a4a;
-  margin: 0;
-}
-
-.pb-project-card-stack {
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: #555;
-}
-
-.pb-project-stack-label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #888;
-  margin-top: 8px;
-  margin-bottom: 3px;
-}
-
-.pb-project-card-stack p {
-  margin: 0;
-  font-size: 0.7rem;
-}
-
-.pb-project-card-stack .pb-project-stack-label:first-child {
-  margin-top: 0;
-}
-
-.pb-project-card-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-top: auto;
-  padding-top: 10px;
-}
-
-.pb-project-card-links .art-link {
-  font-size: 0.875rem;
-}
-
-/* Group canvas elements: card fills its art-element container */
-.pb-project-card--canvas {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.pb-project-card--canvas .pb-project-card-image {
-  flex: 0 0 auto;
-  max-height: 45%;
-}
-
-.pb-project-card--canvas .pb-project-card-body {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+.art-link-content svg {
+  flex-shrink: 0;
 }
 
 .pb-panel[data-tab="yohji"] {

@@ -42,7 +42,7 @@ const ART_IMAGES = [
 /* ══════════════════════════════════════════════════════════════
    TYPES
    ══════════════════════════════════════════════════════════════ */
-type ElementType = "image" | "shape" | "text" | "group";
+type ElementType = "image" | "shape" | "text" | "link";
 type ShapeKind = "rect" | "circle" | "triangle" | "line" | "arrow" | "star";
 type HandleDir = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "rotate";
 
@@ -61,7 +61,9 @@ interface CanvasElement {
   fontSize?: number;
   fontFamily?: string;
   fontColor?: string;
-  projectIndex?: number;
+  groupId?: number;
+  href?: string;
+  linkIcon?: "website" | "github";
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -144,6 +146,21 @@ function positionForFixedAnchor(
     x: oldX + (oldW - newW) / 2 + ddx * c - ddy * s,
     y: oldY + (oldH - newH) / 2 + ddx * s + ddy * c,
   };
+}
+
+function computeBBox(els: CanvasElement[]) {
+  if (els.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+  for (const el of els) {
+    minX = Math.min(minX, el.x);
+    minY = Math.min(minY, el.y);
+    maxX = Math.max(maxX, el.x + el.w);
+    maxY = Math.max(maxY, el.y + el.h);
+  }
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -449,75 +466,139 @@ export default function ArtTab({
   const GRID_PAD_X = 60;
   const GRID_PAD_Y = 70;
 
-  const initialElements: CanvasElement[] = projectsGrid
-    ? [
-        {
-          id: 1,
-          type: "text" as const,
-          x: GRID_PAD_X,
-          y: 10,
-          w: 360,
-          h: 54,
-          rotation: 0,
-          zIndex: 1,
-          content: "My Projects",
-          fontSize: 42,
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontColor: "#1a1a1a",
-        },
-        ...projects.map((_, i) => ({
-          id: i + 2,
-          type: "group" as const,
-          x: GRID_PAD_X + (i % GRID_COLS) * (CARD_W + GRID_GAP),
-          y: GRID_PAD_Y + Math.floor(i / GRID_COLS) * (CARD_H + GRID_GAP),
-          w: CARD_W,
-          h: CARD_H,
-          rotation: 0,
-          zIndex: i + 2,
-          projectIndex: i,
-        })),
-      ]
-    : [
-        ...imgList.map((img, i) => ({
-          id: i + 1,
-          type: "image" as const,
-          x: img.x,
-          y: img.y,
-          w: img.width,
-          h: img.height,
-          rotation: (DEFAULT_IMAGE_ROTATIONS[i] ?? 0) * rotScale,
-          zIndex: i + 1,
-          file: img.file,
-        })),
-        {
-          id: imgList.length + 1,
-          type: "text" as const,
-          x: txt.x,
-          y: txt.y,
-          w: txt.w,
-          h: 64,
-          rotation: -2,
-          zIndex: imgList.length + 1,
-          content: txt.content,
-          fontSize: txt.fontSize,
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontColor: "#1a1a1a",
-        },
-        ...(extraTexts ?? []).map((et, i) => ({
-          id: imgList.length + 2 + i,
-          type: "text" as const,
-          x: et.x,
-          y: et.y,
-          w: et.w,
-          h: 80,
-          rotation: 0,
-          zIndex: imgList.length + 2 + i,
-          content: et.content,
-          fontSize: et.fontSize,
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontColor: "#1a1a1a",
-        })),
-      ];
+  /* ── Build initial elements ── */
+  const initialElements: CanvasElement[] = (() => {
+    if (projectsGrid) {
+      const els: CanvasElement[] = [];
+      let id = 1;
+      let nextGid = 1;
+      const PAD = 14;
+      const INNER_W = CARD_W - PAD * 2;
+
+      els.push({
+        id: id++,
+        type: "text",
+        x: GRID_PAD_X,
+        y: 10,
+        w: 360,
+        h: 54,
+        rotation: 0,
+        zIndex: 1,
+        content: "My Projects",
+        fontSize: 42,
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontColor: "#1a1a1a",
+      });
+
+      for (let pi = 0; pi < projects.length; pi++) {
+        const p = projects[pi];
+        const gid = nextGid++;
+        const cx = GRID_PAD_X + (pi % GRID_COLS) * (CARD_W + GRID_GAP);
+        const cy = GRID_PAD_Y + Math.floor(pi / GRID_COLS) * (CARD_H + GRID_GAP);
+        const baseZ = id;
+
+        const imgSlug = p.image;
+        if (imgSlug) {
+          const src = PROJECT_IMAGE_SRC[imgSlug] ?? `/projects/${imgSlug}.png`;
+          els.push({
+            id: id++, type: "image", x: cx, y: cy, w: CARD_W, h: 160,
+            rotation: 0, zIndex: baseZ, file: src, groupId: gid,
+          });
+        }
+
+        els.push({
+          id: id++, type: "text", x: cx + PAD, y: cy + 170, w: INNER_W, h: 28,
+          rotation: 0, zIndex: baseZ, content: p.title, fontSize: 20,
+          fontFamily: "'Playfair Display', Georgia, serif", fontColor: "#111", groupId: gid,
+        });
+
+        els.push({
+          id: id++, type: "text", x: cx + PAD, y: cy + 205, w: INNER_W, h: 50,
+          rotation: 0, zIndex: baseZ, content: p.description, fontSize: 13,
+          fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#4a4a4a", groupId: gid,
+        });
+
+        let stackY = cy + 265;
+        if (p.front) {
+          els.push({
+            id: id++, type: "text", x: cx + PAD, y: stackY, w: INNER_W, h: 32,
+            rotation: 0, zIndex: baseZ, content: `Front: ${p.front}`, fontSize: 11,
+            fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#555", groupId: gid,
+          });
+          stackY += 36;
+        }
+        if (p.back) {
+          els.push({
+            id: id++, type: "text", x: cx + PAD, y: stackY, w: INNER_W, h: 32,
+            rotation: 0, zIndex: baseZ, content: `Back: ${p.back}`, fontSize: 11,
+            fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", fontColor: "#555", groupId: gid,
+          });
+          stackY += 36;
+        }
+
+        const linkY = Math.max(stackY + 4, cy + 360);
+        let linkX = cx + PAD;
+        if (p.website) {
+          els.push({
+            id: id++, type: "link", x: linkX, y: linkY, w: 100, h: 24,
+            rotation: 0, zIndex: baseZ, content: "Website",
+            href: p.website, linkIcon: "website", groupId: gid,
+          });
+          linkX += 110;
+        }
+        if (p.github) {
+          els.push({
+            id: id++, type: "link", x: linkX, y: linkY, w: 100, h: 24,
+            rotation: 0, zIndex: baseZ, content: "GitHub",
+            href: p.github, linkIcon: "github", groupId: gid,
+          });
+        }
+      }
+      return els;
+    }
+
+    return [
+      ...imgList.map((img, i) => ({
+        id: i + 1,
+        type: "image" as const,
+        x: img.x,
+        y: img.y,
+        w: img.width,
+        h: img.height,
+        rotation: (DEFAULT_IMAGE_ROTATIONS[i] ?? 0) * rotScale,
+        zIndex: i + 1,
+        file: img.file,
+      })),
+      {
+        id: imgList.length + 1,
+        type: "text" as const,
+        x: txt.x,
+        y: txt.y,
+        w: txt.w,
+        h: 64,
+        rotation: -2,
+        zIndex: imgList.length + 1,
+        content: txt.content,
+        fontSize: txt.fontSize,
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontColor: "#1a1a1a",
+      },
+      ...(extraTexts ?? []).map((et, i) => ({
+        id: imgList.length + 2 + i,
+        type: "text" as const,
+        x: et.x,
+        y: et.y,
+        w: et.w,
+        h: 80,
+        rotation: 0,
+        zIndex: imgList.length + 2 + i,
+        content: et.content,
+        fontSize: et.fontSize,
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontColor: "#1a1a1a",
+      })),
+    ];
+  })();
 
   const tiltConfigRef = useRef<Record<
     number,
@@ -537,15 +618,25 @@ export default function ArtTab({
   }
 
   const [elements, setElements] = useState<CanvasElement[]>(initialElements);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [rotationTooltip, setRotationTooltip] = useState<{
     angle: number;
     x: number;
     y: number;
   } | null>(null);
+  const [marquee, setMarquee] = useState<{
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+  } | null>(null);
   const nextIdRef = useRef(initialElements.length + 1);
   const topZRef = useRef(initialElements.length + 1);
+  const maxInitGroup = Math.max(0, ...initialElements.map((el) => el.groupId ?? 0));
+  const nextGroupIdRef = useRef(maxInitGroup + 1);
+  const elementsRef = useRef(elements);
+  elementsRef.current = elements;
 
   /* ── Per-element intro tilt: each triggers when it enters viewport ── */
   const [tiltingIds, setTiltingIds] = useState<Set<number>>(new Set());
@@ -572,7 +663,6 @@ export default function ArtTab({
             for (const id of newIds) next.add(id);
             return next;
           });
-          // Clear each element's tilt after its steps finish (steps * 80ms + buffer)
           for (const id of newIds) {
             const cfg = tiltConfigRef.current?.[id];
             const dur = (cfg?.angles.length ?? TILT_STEPS) * 160 + 200;
@@ -592,7 +682,6 @@ export default function ArtTab({
     );
     observerRef.current = observer;
 
-    // Observe any already-registered elements
     elRefsForObserver.current.forEach((div) => observer.observe(div));
 
     return () => {
@@ -622,10 +711,10 @@ export default function ArtTab({
     new Map(),
   );
   useEffect(() => {
-    const STEP_MS = 160; // choppy frame rate
+    const STEP_MS = 160;
 
     for (const id of tiltingIds) {
-      if (tiltIntervalsRef.current.has(id)) continue; // already running
+      if (tiltIntervalsRef.current.has(id)) continue;
       const cfg = tiltConfigRef.current?.[id];
       if (!cfg) continue;
       let step = 0;
@@ -643,7 +732,6 @@ export default function ArtTab({
       tiltIntervalsRef.current.set(id, iv);
     }
 
-    // Clean up intervals for elements no longer tilting
     for (const [id, iv] of tiltIntervalsRef.current) {
       if (!tiltingIds.has(id)) {
         clearInterval(iv);
@@ -660,7 +748,6 @@ export default function ArtTab({
 
   const pushHistory = useCallback((snapshot: CanvasElement[]) => {
     const idx = historyIndexRef.current;
-    // Discard any redo states beyond current position
     historyRef.current = historyRef.current.slice(0, idx + 1);
     historyRef.current.push(snapshot);
     historyIndexRef.current = historyRef.current.length - 1;
@@ -671,7 +758,7 @@ export default function ArtTab({
     historyIndexRef.current--;
     const snapshot = historyRef.current[historyIndexRef.current];
     setElements(snapshot);
-    setSelectedId(null);
+    setSelectedIds([]);
     setEditingId(null);
   }, []);
 
@@ -680,44 +767,57 @@ export default function ArtTab({
     historyIndexRef.current++;
     const snapshot = historyRef.current[historyIndexRef.current];
     setElements(snapshot);
-    setSelectedId(null);
+    setSelectedIds([]);
     setEditingId(null);
   }, []);
 
-  /* Sync history head with current elements so cosmetic changes
-     (like bringToFront zIndex bumps) don't cause phantom undo steps */
   const syncHistoryHead = useCallback((current: CanvasElement[]) => {
     historyRef.current[historyIndexRef.current] = current;
   }, []);
 
   /* ── Drag state ── */
   const dragRef = useRef<{
-    type: "move" | "resize" | "rotate";
-    nodeId: number;
-    handleDir?: HandleDir;
+    type: "move" | "resize" | "rotate" | "marquee";
     startX: number;
     startY: number;
-    startNodeX: number;
-    startNodeY: number;
-    startNodeW: number;
-    startNodeH: number;
-    startRotation: number;
-    startAngle: number;
-    aspectRatio: number;
-    centerScreenX: number;
-    centerScreenY: number;
     didMove: boolean;
+    startPositions?: Map<number, { x: number; y: number }>;
+    handleDir?: HandleDir;
+    nodeId?: number;
+    startNodeX?: number;
+    startNodeY?: number;
+    startNodeW?: number;
+    startNodeH?: number;
+    startRotation?: number;
+    startAngle?: number;
+    aspectRatio?: number;
+    centerScreenX?: number;
+    centerScreenY?: number;
     startFontSize?: number;
+    startElements?: Map<
+      number,
+      { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }
+    >;
+    groupBBox?: { x: number; y: number; w: number; h: number };
   } | null>(null);
 
   /* ── Helpers ── */
   const bringToFront = useCallback(
-    (id: number) => {
-      const z = ++topZRef.current;
+    (idOrIds: number | number[]) => {
+      const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
       setElements((prev) => {
-        const next = prev.map((el) =>
-          el.id === id ? { ...el, zIndex: z } : el,
-        );
+        const sorted = [...ids].sort((a, b) => {
+          const za = prev.find((e) => e.id === a)?.zIndex ?? 0;
+          const zb = prev.find((e) => e.id === b)?.zIndex ?? 0;
+          return za - zb;
+        });
+        const baseZ = topZRef.current + 1;
+        topZRef.current += ids.length;
+        const zMap = new Map(sorted.map((sid, i) => [sid, baseZ + i]));
+        const next = prev.map((el) => {
+          const newZ = zMap.get(el.id);
+          return newZ != null ? { ...el, zIndex: newZ } : el;
+        });
         syncHistoryHead(next);
         return next;
       });
@@ -745,6 +845,7 @@ export default function ArtTab({
         arrow: { w: 180, h: 24 },
         star: { w: 100, h: 100 },
         text: { w: 240, h: 56 },
+        link: { w: 120, h: 28 },
       };
       const size = defaults[shape ?? type] ?? { w: 100, h: 100 };
       const newEl: CanvasElement = {
@@ -765,13 +866,23 @@ export default function ArtTab({
               fontColor: "#1a1a1a",
             }
           : {}),
+        ...(type === "link"
+          ? {
+              content: "Link",
+              fontSize: 14,
+              fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+              fontColor: "#0b57d0",
+              href: "#",
+              linkIcon: "website" as const,
+            }
+          : {}),
       };
       setElements((prev) => {
         const next = [...prev, newEl];
         pushHistory(next);
         return next;
       });
-      setSelectedId(id);
+      setSelectedIds([id]);
       setEditingId(null);
       return id;
     },
@@ -803,6 +914,7 @@ export default function ArtTab({
             arrow: { w: 180, h: 24 },
             star: { w: 100, h: 100 },
             text: { w: 240, h: 56 },
+            link: { w: 120, h: 28 },
           };
           const size = defaults[tool.shape ?? tool.type] ?? { w: 100, h: 100 };
           elId = addElement(
@@ -852,105 +964,124 @@ export default function ArtTab({
     [addElement],
   );
 
-  /* ── Canvas pointer handlers (move / resize / rotate) ── */
+  /* ── Canvas pointer handlers (move / resize / rotate / marquee) ── */
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       const target = e.target as HTMLElement;
 
-      // If editing text, let the contenteditable handle clicks
       if (editingId != null && target.closest("[data-editing]")) return;
 
-      const handleEl = target.closest(
-        "[data-handle-dir]",
-      ) as HTMLElement | null;
+      const handleEl = target.closest("[data-handle-dir]") as HTMLElement | null;
+      const isMultiHandle = !!handleEl?.closest("[data-multi-bbox]");
       const nodeEl = target.closest("[data-element-id]") as HTMLElement | null;
 
-      if (handleEl && selectedId != null) {
+      /* ── Handle drag (resize / rotate) ── */
+      if (handleEl && selectedIds.length > 0) {
         const dir = handleEl.dataset.handleDir as HandleDir;
-        const el = elements.find((n) => n.id === selectedId);
-        if (!el) return;
 
-        if (dir === "rotate") {
-          const center = getElScreenCenter(el);
-          const startAngle = Math.atan2(
-            e.clientY - center.y,
-            e.clientX - center.x,
-          );
-          dragRef.current = {
-            type: "rotate",
-            nodeId: selectedId,
-            handleDir: dir,
-            startX: e.clientX,
-            startY: e.clientY,
-            startNodeX: el.x,
-            startNodeY: el.y,
-            startNodeW: el.w,
-            startNodeH: el.h,
-            startRotation: el.rotation,
-            startAngle,
-            aspectRatio: el.w / el.h,
-            centerScreenX: center.x,
-            centerScreenY: center.y,
-            didMove: false,
-          };
+        if (isMultiHandle || selectedIds.length > 1) {
+          const selectedEls = elements.filter((n) => selectedIds.includes(n.id));
+          const bbox = computeBBox(selectedEls);
+
+          if (dir === "rotate") {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+            const cr = canvas.getBoundingClientRect();
+            const csx = cr.left + bbox.x + bbox.w / 2;
+            const csy = cr.top + bbox.y + bbox.h / 2;
+            const startAngle = Math.atan2(e.clientY - csy, e.clientX - csx);
+            const startEls = new Map<number, { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }>();
+            for (const sel of selectedEls) startEls.set(sel.id, { x: sel.x, y: sel.y, w: sel.w, h: sel.h, rotation: sel.rotation, fontSize: sel.fontSize });
+            dragRef.current = {
+              type: "rotate", startX: e.clientX, startY: e.clientY, didMove: false,
+              startAngle, centerScreenX: csx, centerScreenY: csy,
+              startElements: startEls, groupBBox: bbox,
+            };
+          } else {
+            const startEls = new Map<number, { x: number; y: number; w: number; h: number; rotation: number; fontSize?: number }>();
+            for (const sel of selectedEls) startEls.set(sel.id, { x: sel.x, y: sel.y, w: sel.w, h: sel.h, rotation: sel.rotation, fontSize: sel.fontSize });
+            dragRef.current = {
+              type: "resize", startX: e.clientX, startY: e.clientY, didMove: false,
+              handleDir: dir, startElements: startEls, groupBBox: bbox,
+              aspectRatio: bbox.w / bbox.h,
+            };
+          }
         } else {
-          dragRef.current = {
-            type: "resize",
-            nodeId: selectedId,
-            handleDir: dir,
-            startX: e.clientX,
-            startY: e.clientY,
-            startNodeX: el.x,
-            startNodeY: el.y,
-            startNodeW: el.w,
-            startNodeH: el.h,
-            startRotation: el.rotation,
-            startAngle: 0,
-            aspectRatio: el.w / el.h,
-            centerScreenX: 0,
-            centerScreenY: 0,
-            didMove: false,
-            startFontSize: el.fontSize,
-          };
+          const el = elements.find((n) => n.id === selectedIds[0]);
+          if (!el) return;
+
+          if (dir === "rotate") {
+            const center = getElScreenCenter(el);
+            const startAngle = Math.atan2(e.clientY - center.y, e.clientX - center.x);
+            dragRef.current = {
+              type: "rotate", nodeId: el.id,
+              startX: e.clientX, startY: e.clientY, didMove: false,
+              startNodeX: el.x, startNodeY: el.y, startNodeW: el.w, startNodeH: el.h,
+              startRotation: el.rotation, startAngle,
+              aspectRatio: el.w / el.h, centerScreenX: center.x, centerScreenY: center.y,
+            };
+          } else {
+            dragRef.current = {
+              type: "resize", nodeId: el.id, handleDir: dir,
+              startX: e.clientX, startY: e.clientY, didMove: false,
+              startNodeX: el.x, startNodeY: el.y, startNodeW: el.w, startNodeH: el.h,
+              startRotation: el.rotation, aspectRatio: el.w / el.h, startFontSize: el.fontSize,
+            };
+          }
         }
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
         e.stopPropagation();
         return;
       }
 
+      /* ── Click on element (select + start move) ── */
       if (nodeEl) {
         const id = Number(nodeEl.dataset.elementId);
         const el = elements.find((n) => n.id === id);
         if (!el) return;
-        bringToFront(id);
-        setSelectedId(id);
+
+        let idsToSelect: number[];
+        if (selectedIds.includes(id)) {
+          idsToSelect = selectedIds;
+        } else if (el.groupId != null) {
+          idsToSelect = elements.filter((e) => e.groupId === el.groupId).map((e) => e.id);
+        } else {
+          idsToSelect = [id];
+        }
+
+        bringToFront(idsToSelect);
+        setSelectedIds(idsToSelect);
         setEditingId(null);
+
+        const startPositions = new Map<number, { x: number; y: number }>();
+        for (const sid of idsToSelect) {
+          const sel = elements.find((e) => e.id === sid);
+          if (sel) startPositions.set(sid, { x: sel.x, y: sel.y });
+        }
+
         dragRef.current = {
-          type: "move",
-          nodeId: id,
-          startX: e.clientX,
-          startY: e.clientY,
-          startNodeX: el.x,
-          startNodeY: el.y,
-          startNodeW: el.w,
-          startNodeH: el.h,
-          startRotation: el.rotation,
-          startAngle: 0,
-          aspectRatio: el.w / el.h,
-          centerScreenX: 0,
-          centerScreenY: 0,
-          didMove: false,
+          type: "move", startX: e.clientX, startY: e.clientY, didMove: false,
+          startPositions,
         };
         (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
         return;
       }
 
-      // Click on empty canvas — deselect
-      setSelectedId(null);
+      /* ── Click on empty canvas — start marquee ── */
+      setSelectedIds([]);
       setEditingId(null);
       setRotationTooltip(null);
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        dragRef.current = {
+          type: "marquee", startX: e.clientX, startY: e.clientY, didMove: false,
+        };
+        setMarquee({ startX: sx, startY: sy, currentX: sx, currentY: sy });
+      }
     },
-    [elements, selectedId, editingId, bringToFront, getElScreenCenter],
+    [elements, selectedIds, editingId, bringToFront, getElScreenCenter],
   );
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
@@ -960,134 +1091,197 @@ export default function ArtTab({
     const dy = e.clientY - d.startY;
     if (dx !== 0 || dy !== 0) d.didMove = true;
 
-    if (d.type === "move") {
-      setElements((prev) =>
-        prev.map((el) =>
-          el.id === d.nodeId
-            ? { ...el, x: d.startNodeX + dx, y: d.startNodeY + dy }
-            : el,
-        ),
-      );
-    } else if (d.type === "resize" && d.handleDir) {
-      const dir = d.handleDir;
-      const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
-      const isSideOnly = dir === "e" || dir === "w";
-      const rad = (d.startRotation * Math.PI) / 180;
-      const cosR = Math.cos(rad),
-        sinR = Math.sin(rad);
-      const localDx = dx * cosR + dy * sinR;
-      const localDy = -dx * sinR + dy * cosR;
+    /* ── Marquee ── */
+    if (d.type === "marquee") {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        setMarquee((prev) =>
+          prev ? { ...prev, currentX: e.clientX - rect.left, currentY: e.clientY - rect.top } : null,
+        );
+      }
+      return;
+    }
 
+    /* ── Move ── */
+    if (d.type === "move" && d.startPositions) {
       setElements((prev) =>
         prev.map((el) => {
-          if (el.id !== d.nodeId) return el;
-          const isText = el.type === "text";
-
-          if (isText && isCorner) {
-            // Corner drag on text: scale container and font proportionally
-            const scale = Math.max(
-              0.3,
-              1 +
-                (dir.includes("e") || dir.includes("s") ? 1 : -1) *
-                  (Math.abs(localDx) > Math.abs(localDy)
-                    ? localDx / d.startNodeW
-                    : localDy / d.startNodeH),
-            );
-            const newW = Math.max(40, d.startNodeW * scale);
-            const newH = Math.max(20, d.startNodeH * scale);
-            const newFontSize = Math.max(8, (d.startFontSize ?? 22) * scale);
-            const pos = positionForFixedAnchor(
-              d.startNodeX,
-              d.startNodeY,
-              d.startNodeW,
-              d.startNodeH,
-              newW,
-              newH,
-              dir,
-              d.startRotation,
-            );
-            return {
-              ...el,
-              x: pos.x,
-              y: pos.y,
-              w: newW,
-              h: newH,
-              fontSize: newFontSize,
-            };
-          }
-
-          if (isText && isSideOnly) {
-            // Side drag on text: change width only, height auto-adjusts via CSS
-            let newW = d.startNodeW;
-            if (dir === "e") newW = Math.max(40, d.startNodeW + localDx);
-            if (dir === "w") newW = Math.max(40, d.startNodeW - localDx);
-            const pos = positionForFixedAnchor(
-              d.startNodeX,
-              d.startNodeY,
-              d.startNodeW,
-              d.startNodeH,
-              newW,
-              d.startNodeH,
-              dir,
-              d.startRotation,
-            );
-            return { ...el, x: pos.x, y: pos.y, w: newW };
-          }
-
-          // Non-text elements: original behavior
-          let newW = d.startNodeW,
-            newH = d.startNodeH;
-          if (dir.includes("e")) newW = Math.max(40, d.startNodeW + localDx);
-          if (dir.includes("w")) newW = Math.max(40, d.startNodeW - localDx);
-          if (dir.includes("s")) newH = Math.max(20, d.startNodeH + localDy);
-          if (dir.includes("n")) newH = Math.max(20, d.startNodeH - localDy);
-          if (isCorner && (el.type === "image" || e.shiftKey)) {
-            const ar = d.aspectRatio;
-            if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
-            else newW = newH * ar;
-          }
-          const pos = positionForFixedAnchor(
-            d.startNodeX,
-            d.startNodeY,
-            d.startNodeW,
-            d.startNodeH,
-            newW,
-            newH,
-            dir,
-            d.startRotation,
-          );
-          return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
+          const start = d.startPositions!.get(el.id);
+          if (!start) return el;
+          return { ...el, x: start.x + dx, y: start.y + dy };
         }),
       );
-    } else if (d.type === "rotate") {
-      const currentAngle = Math.atan2(
-        e.clientY - d.centerScreenY,
-        e.clientX - d.centerScreenX,
-      );
-      const angleDelta = (currentAngle - d.startAngle) * (180 / Math.PI);
-      let newRot = d.startRotation + angleDelta;
-      for (const snap of [0, 90, 180, 270, -90, -180, -270]) {
-        if (Math.abs(newRot - snap) < 3) {
-          newRot = snap;
-          break;
+      return;
+    }
+
+    /* ── Resize ── */
+    if (d.type === "resize") {
+      if (d.startElements && d.groupBBox) {
+        const dir = d.handleDir!;
+        const ob = d.groupBBox;
+        let newBX = ob.x, newBY = ob.y, newBW = ob.w, newBH = ob.h;
+        if (dir.includes("e")) newBW = Math.max(40, ob.w + dx);
+        if (dir.includes("w")) { newBW = Math.max(40, ob.w - dx); newBX = ob.x + ob.w - newBW; }
+        if (dir.includes("s")) newBH = Math.max(20, ob.h + dy);
+        if (dir.includes("n")) { newBH = Math.max(20, ob.h - dy); newBY = ob.y + ob.h - newBH; }
+        if (["nw", "ne", "se", "sw"].includes(dir)) {
+          const ar = d.aspectRatio ?? ob.w / ob.h;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            newBH = newBW / ar;
+            if (dir.includes("n")) newBY = ob.y + ob.h - newBH;
+          } else {
+            newBW = newBH * ar;
+            if (dir.includes("w")) newBX = ob.x + ob.w - newBW;
+          }
         }
+        const scaleX = newBW / ob.w;
+        const scaleY = newBH / ob.h;
+        setElements((prev) =>
+          prev.map((el) => {
+            const start = d.startElements!.get(el.id);
+            if (!start) return el;
+            return {
+              ...el,
+              x: newBX + (start.x - ob.x) * scaleX,
+              y: newBY + (start.y - ob.y) * scaleY,
+              w: Math.max(10, start.w * scaleX),
+              h: Math.max(10, start.h * scaleY),
+              ...(start.fontSize != null
+                ? { fontSize: Math.max(6, start.fontSize * Math.min(scaleX, scaleY)) }
+                : {}),
+            };
+          }),
+        );
+      } else if (d.handleDir && d.nodeId != null) {
+        const dir = d.handleDir;
+        const isCorner = ["nw", "ne", "se", "sw"].includes(dir);
+        const isSideOnly = dir === "e" || dir === "w";
+        const rad = ((d.startRotation ?? 0) * Math.PI) / 180;
+        const cosR = Math.cos(rad), sinR = Math.sin(rad);
+        const localDx = dx * cosR + dy * sinR;
+        const localDy = -dx * sinR + dy * cosR;
+
+        setElements((prev) =>
+          prev.map((el) => {
+            if (el.id !== d.nodeId) return el;
+            const isText = el.type === "text";
+
+            if (isText && isCorner) {
+              const scale = Math.max(
+                0.3,
+                1 +
+                  (dir.includes("e") || dir.includes("s") ? 1 : -1) *
+                    (Math.abs(localDx) > Math.abs(localDy)
+                      ? localDx / d.startNodeW!
+                      : localDy / d.startNodeH!),
+              );
+              const newW = Math.max(40, d.startNodeW! * scale);
+              const newH = Math.max(20, d.startNodeH! * scale);
+              const newFontSize = Math.max(8, (d.startFontSize ?? 22) * scale);
+              const pos = positionForFixedAnchor(
+                d.startNodeX!, d.startNodeY!, d.startNodeW!, d.startNodeH!,
+                newW, newH, dir, d.startRotation ?? 0,
+              );
+              return { ...el, x: pos.x, y: pos.y, w: newW, h: newH, fontSize: newFontSize };
+            }
+
+            if (isText && isSideOnly) {
+              let newW = d.startNodeW!;
+              if (dir === "e") newW = Math.max(40, d.startNodeW! + localDx);
+              if (dir === "w") newW = Math.max(40, d.startNodeW! - localDx);
+              const pos = positionForFixedAnchor(
+                d.startNodeX!, d.startNodeY!, d.startNodeW!, d.startNodeH!,
+                newW, d.startNodeH!, dir, d.startRotation ?? 0,
+              );
+              return { ...el, x: pos.x, y: pos.y, w: newW };
+            }
+
+            let newW = d.startNodeW!, newH = d.startNodeH!;
+            if (dir.includes("e")) newW = Math.max(40, d.startNodeW! + localDx);
+            if (dir.includes("w")) newW = Math.max(40, d.startNodeW! - localDx);
+            if (dir.includes("s")) newH = Math.max(20, d.startNodeH! + localDy);
+            if (dir.includes("n")) newH = Math.max(20, d.startNodeH! - localDy);
+            if (isCorner && (el.type === "image" || e.shiftKey)) {
+              const ar = d.aspectRatio ?? el.w / el.h;
+              if (Math.abs(localDx) > Math.abs(localDy)) newH = newW / ar;
+              else newW = newH * ar;
+            }
+            const pos = positionForFixedAnchor(
+              d.startNodeX!, d.startNodeY!, d.startNodeW!, d.startNodeH!,
+              newW, newH, dir, d.startRotation ?? 0,
+            );
+            return { ...el, x: pos.x, y: pos.y, w: newW, h: newH };
+          }),
+        );
       }
-      setElements((prev) =>
-        prev.map((el) =>
-          el.id === d.nodeId ? { ...el, rotation: newRot } : el,
-        ),
-      );
-      setRotationTooltip({
-        angle: Math.round(newRot * 10) / 10,
-        x: e.clientX,
-        y: e.clientY,
-      });
+      return;
+    }
+
+    /* ── Rotate ── */
+    if (d.type === "rotate") {
+      if (d.startElements && d.groupBBox) {
+        const csx = d.centerScreenX!;
+        const csy = d.centerScreenY!;
+        const currentAngle = Math.atan2(e.clientY - csy, e.clientX - csx);
+        const angleDelta = (currentAngle - d.startAngle!) * (180 / Math.PI);
+        let newRot = angleDelta;
+        for (const snap of [0, 90, 180, 270, -90, -180, -270]) {
+          if (Math.abs(newRot - snap) < 3) { newRot = snap; break; }
+        }
+        const rad = (newRot * Math.PI) / 180;
+        const gcx = d.groupBBox.x + d.groupBBox.w / 2;
+        const gcy = d.groupBBox.y + d.groupBBox.h / 2;
+        setElements((prev) =>
+          prev.map((el) => {
+            const start = d.startElements!.get(el.id);
+            if (!start) return el;
+            const elCX = start.x + start.w / 2;
+            const elCY = start.y + start.h / 2;
+            const dxr = elCX - gcx;
+            const dyr = elCY - gcy;
+            const newCX = gcx + dxr * Math.cos(rad) - dyr * Math.sin(rad);
+            const newCY = gcy + dxr * Math.sin(rad) + dyr * Math.cos(rad);
+            return { ...el, x: newCX - start.w / 2, y: newCY - start.h / 2, rotation: start.rotation + newRot };
+          }),
+        );
+        setRotationTooltip({ angle: Math.round(newRot * 10) / 10, x: e.clientX, y: e.clientY });
+      } else if (d.nodeId != null) {
+        const currentAngle = Math.atan2(e.clientY - d.centerScreenY!, e.clientX - d.centerScreenX!);
+        const angleDelta = (currentAngle - d.startAngle!) * (180 / Math.PI);
+        let newRot = (d.startRotation ?? 0) + angleDelta;
+        for (const snap of [0, 90, 180, 270, -90, -180, -270]) {
+          if (Math.abs(newRot - snap) < 3) { newRot = snap; break; }
+        }
+        setElements((prev) =>
+          prev.map((el) => (el.id === d.nodeId ? { ...el, rotation: newRot } : el)),
+        );
+        setRotationTooltip({ angle: Math.round(newRot * 10) / 10, x: e.clientX, y: e.clientY });
+      }
     }
   }, []);
 
   const onPointerUp = useCallback(() => {
     const d = dragRef.current;
     if (d) {
+      if (d.type === "marquee") {
+        setMarquee((m) => {
+          if (!m) return null;
+          const mx1 = Math.min(m.startX, m.currentX);
+          const my1 = Math.min(m.startY, m.currentY);
+          const mx2 = Math.max(m.startX, m.currentX);
+          const my2 = Math.max(m.startY, m.currentY);
+          if (mx2 - mx1 > 5 || my2 - my1 > 5) {
+            const cur = elementsRef.current;
+            const hit = cur.filter((el) => {
+              return el.x < mx2 && el.x + el.w > mx1 && el.y < my2 && el.y + el.h > my1;
+            });
+            if (hit.length > 0) setSelectedIds(hit.map((el) => el.id));
+          }
+          return null;
+        });
+        dragRef.current = null;
+        return;
+      }
       const moved = d.didMove;
       dragRef.current = null;
       setRotationTooltip(null);
@@ -1105,7 +1299,6 @@ export default function ArtTab({
   /* ── Keyboard shortcuts (undo/redo + delete) ── */
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Only handle when this tab's canvas is in focus area
       if ((e.target as HTMLElement).closest?.("[contenteditable=true]")) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
@@ -1120,20 +1313,21 @@ export default function ArtTab({
       } else if (e.key === "Backspace" || e.key === "Delete") {
         const tag = (e.target as HTMLElement).tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-        if (selectedId != null) {
+        if (selectedIds.length > 0) {
           e.preventDefault();
-          const next = elements.filter((el) => el.id !== selectedId);
+          const idSet = new Set(selectedIds);
+          const next = elements.filter((el) => !idSet.has(el.id));
           pushHistory(next);
           setElements(next);
-          setSelectedId(null);
+          setSelectedIds([]);
         }
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [undo, redo, selectedId, elements, pushHistory]);
+  }, [undo, redo, selectedIds, elements, pushHistory]);
 
-  /* ── Double-click to edit text ── */
+  /* ── Double-click to edit text / open link ── */
   const onDoubleClick = useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -1143,7 +1337,10 @@ export default function ArtTab({
       const el = elements.find((n) => n.id === id);
       if (el?.type === "text") {
         setEditingId(id);
-        setSelectedId(id);
+        setSelectedIds([id]);
+        e.stopPropagation();
+      } else if (el?.type === "link" && el.href) {
+        window.open(el.href, "_blank");
         e.stopPropagation();
       }
     },
@@ -1173,8 +1370,7 @@ export default function ArtTab({
       if (!el || el.type !== "text") return;
       const measuredH = div.offsetHeight;
       if (measuredH > 0 && Math.abs(measuredH - el.h) > 2) {
-        // Only update h if not currently dragging this element
-        if (dragRef.current?.nodeId === id) return;
+        if (dragRef.current?.startPositions?.has(id) || dragRef.current?.nodeId === id) return;
         setElements((prev) =>
           prev.map((e) => (e.id === id ? { ...e, h: measuredH } : e)),
         );
@@ -1183,22 +1379,25 @@ export default function ArtTab({
   });
 
   /* ── Text toolbar helpers ── */
-  const selectedEl = elements.find((el) => el.id === selectedId);
-  const showTextToolbar = selectedEl?.type === "text";
+  const singleSelectedEl = selectedIds.length === 1
+    ? elements.find((el) => el.id === selectedIds[0])
+    : undefined;
+  const showTextToolbar = singleSelectedEl?.type === "text";
   const [fontSelectOpen, setFontSelectOpen] = useState(false);
 
   const updateTextProp = useCallback(
     (prop: "fontSize" | "fontFamily" | "fontColor", value: string | number) => {
-      if (selectedId == null) return;
+      if (selectedIds.length !== 1) return;
+      const sid = selectedIds[0];
       setElements((prev) => {
         const next = prev.map((el) =>
-          el.id === selectedId ? { ...el, [prop]: value } : el,
+          el.id === sid ? { ...el, [prop]: value } : el,
         );
         pushHistory(next);
         return next;
       });
     },
-    [selectedId, pushHistory],
+    [selectedIds, pushHistory],
   );
 
   const FONT_OPTIONS = [
@@ -1212,11 +1411,47 @@ export default function ArtTab({
     { label: "Comic Sans MS", value: "'Comic Sans MS', cursive" },
   ];
 
+  /* ── Group / Ungroup ── */
+  const handleGroup = useCallback(() => {
+    const gid = nextGroupIdRef.current++;
+    setElements((prev) => {
+      const idSet = new Set(selectedIds);
+      const next = prev.map((el) =>
+        idSet.has(el.id) ? { ...el, groupId: gid } : el,
+      );
+      pushHistory(next);
+      return next;
+    });
+  }, [selectedIds, pushHistory]);
+
+  const handleUngroup = useCallback(() => {
+    setElements((prev) => {
+      const idSet = new Set(selectedIds);
+      const next = prev.map((el) =>
+        idSet.has(el.id) ? { ...el, groupId: undefined } : el,
+      );
+      pushHistory(next);
+      return next;
+    });
+  }, [selectedIds, pushHistory]);
+
+  /* ── Multi-selection bounding box (memoised inline) ── */
+  const multiBBox =
+    selectedIds.length > 1
+      ? computeBBox(elements.filter((el) => selectedIds.includes(el.id)))
+      : null;
+
+  const allSameGroup = (() => {
+    if (selectedIds.length < 2) return false;
+    const sel = elements.filter((el) => selectedIds.includes(el.id));
+    return sel.every((el) => el.groupId != null && el.groupId === sel[0].groupId);
+  })();
+
   /* ── Render ── */
   return (
     <div className="art-container">
       {/* ── Text Toolbar ── */}
-      {showTextToolbar && selectedEl && (
+      {showTextToolbar && singleSelectedEl && (
         <div
           className="art-text-toolbar"
           onPointerDown={(e) => e.stopPropagation()}
@@ -1227,7 +1462,7 @@ export default function ArtTab({
             <select
               className="art-toolbar-select"
               value={
-                selectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"
+                singleSelectedEl.fontFamily ?? "'Playfair Display', Georgia, serif"
               }
               onChange={(e) => {
                 updateTextProp("fontFamily", e.target.value);
@@ -1254,7 +1489,7 @@ export default function ArtTab({
               onClick={() =>
                 updateTextProp(
                   "fontSize",
-                  Math.max(8, (selectedEl.fontSize ?? 22) - 2),
+                  Math.max(8, (singleSelectedEl.fontSize ?? 22) - 2),
                 )
               }
             >
@@ -1265,7 +1500,7 @@ export default function ArtTab({
               type="number"
               min={8}
               max={200}
-              value={Math.round(selectedEl.fontSize ?? 22)}
+              value={Math.round(singleSelectedEl.fontSize ?? 22)}
               onChange={(e) =>
                 updateTextProp("fontSize", Math.max(8, Number(e.target.value)))
               }
@@ -1275,7 +1510,7 @@ export default function ArtTab({
               onClick={() =>
                 updateTextProp(
                   "fontSize",
-                  Math.min(200, (selectedEl.fontSize ?? 22) + 2),
+                  Math.min(200, (singleSelectedEl.fontSize ?? 22) + 2),
                 )
               }
             >
@@ -1287,7 +1522,7 @@ export default function ArtTab({
             <input
               className="art-toolbar-color"
               type="color"
-              value={selectedEl.fontColor ?? "#1a1a1a"}
+              value={singleSelectedEl.fontColor ?? "#1a1a1a"}
               onChange={(e) => updateTextProp("fontColor", e.target.value)}
             />
           </div>
@@ -1325,11 +1560,13 @@ export default function ArtTab({
           const isTilting = tiltingIds.has(el.id);
           const cfg = tiltConfigRef.current?.[el.id];
           const isTiltText = isTilting && cfg?.isText;
+          const isSelected = selectedIds.includes(el.id);
+          const isSingleSelected = selectedIds.length === 1 && isSelected;
           return (
             <div
               key={el.id}
               ref={(node) => registerElRef(el.id, node)}
-              className={`art-element${el.id === selectedId ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}`}
+              className={`art-element${isSelected ? " art-element--selected" : ""}${isTilting ? " art-element--tilting" : ""}${isTiltText ? " art-element--tilt-selected" : ""}${selectedIds.length > 1 && isSelected ? " art-element--in-selection" : ""}`}
               data-element-id={el.id}
               style={{
                 left: el.x,
@@ -1344,7 +1581,11 @@ export default function ArtTab({
               {/* Image */}
               {el.type === "image" && (
                 <img
-                  src={`${imageFolder}/${el.file}`}
+                  src={
+                    el.file?.startsWith("/") || el.file?.startsWith("http")
+                      ? el.file
+                      : `${imageFolder}/${el.file}`
+                  }
                   alt=""
                   draggable={false}
                   className="art-element-img"
@@ -1399,103 +1640,41 @@ export default function ArtTab({
                 </div>
               )}
 
-              {/* Group (project card) */}
-              {el.type === "group" &&
-                el.projectIndex != null &&
-                (() => {
-                  const project = projects[el.projectIndex];
-                  if (!project) return null;
-                  const imgSrc =
-                    project.image &&
-                    (PROJECT_IMAGE_SRC[project.image] ??
-                      `/projects/${project.image}.png`);
-                  return (
-                    <div className="pb-project-card pb-project-card--canvas">
-                      <div className="pb-project-card-image">
-                        {imgSrc ? (
-                          <img src={imgSrc} alt="" draggable={false} />
-                        ) : null}
-                      </div>
-                      <div className="pb-project-card-body">
-                        <h3 className="pb-project-card-title">
-                          {project.title}
-                        </h3>
-                        <p className="pb-project-card-desc">
-                          {project.description}
-                        </p>
-                        {(project.front || project.back) && (
-                          <div className="pb-project-card-stack">
-                            {project.front && (
-                              <>
-                                <span className="pb-project-stack-label">
-                                  Front
-                                </span>
-                                <p>{project.front}</p>
-                              </>
-                            )}
-                            {project.back && (
-                              <>
-                                <span className="pb-project-stack-label">
-                                  Back
-                                </span>
-                                <p>{project.back}</p>
-                              </>
-                            )}
-                          </div>
-                        )}
-                        <div
-                          className="pb-project-card-links"
-                          onPointerDown={(e) => e.stopPropagation()}
-                        >
-                          {project.website && (
-                            <a
-                              href={project.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="art-link"
-                            >
-                              <svg
-                                viewBox="0 0 24 24"
-                                width="16"
-                                height="16"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                aria-hidden
-                              >
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                              </svg>
-                              Website
-                            </a>
-                          )}
-                          {project.github && (
-                            <a
-                              href={project.github}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="art-link"
-                            >
-                              <svg
-                                viewBox="0 0 24 24"
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                aria-hidden
-                              >
-                                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-                              </svg>
-                              GitHub
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
+              {/* Link */}
+              {el.type === "link" && (
+                <div
+                  className="art-link-content"
+                  onPointerDown={(e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (el.href) window.open(el.href, "_blank");
+                    }
+                  }}
+                  style={{
+                    fontSize: el.fontSize ?? 14,
+                    fontFamily:
+                      el.fontFamily ?? "system-ui, -apple-system, 'Segoe UI', sans-serif",
+                    color: el.fontColor ?? "#0b57d0",
+                  }}
+                >
+                  {el.linkIcon === "website" && (
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  )}
+                  {el.linkIcon === "github" && (
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden>
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                  )}
+                  {el.content}
+                </div>
+              )}
 
-              {/* Selection UI */}
-              {(el.id === selectedId || isTiltText) && (
+              {/* Selection UI — single selection: full handles */}
+              {(isSingleSelected || isTiltText) && (
                 <div
                   className="art-selection"
                   style={{ pointerEvents: "none" }}
@@ -1542,11 +1721,100 @@ export default function ArtTab({
                   />
                 </div>
               )}
+
+              {/* Selection UI — multi selection: highlight border only */}
+              {selectedIds.length > 1 && isSelected && !isTiltText && (
+                <div className="art-selection art-selection--multi" style={{ pointerEvents: "none" }}>
+                  <div className="art-selection-box" />
+                </div>
+              )}
             </div>
           );
         })}
 
-        {/* Clickable links (absolute-positioned tabs only; projects grid uses in-card links) */}
+        {/* Multi-selection bounding box with handles */}
+        {multiBBox && selectedIds.length > 1 && (
+          <div
+            data-multi-bbox
+            style={{
+              position: "absolute",
+              left: multiBBox.x - 1,
+              top: multiBBox.y - 1,
+              width: multiBBox.w + 2,
+              height: multiBBox.h + 2,
+              pointerEvents: "none",
+              zIndex: 99998,
+            }}
+          >
+            <div className="art-multi-bbox-border" />
+            {HANDLE_DIRS.map((dir) => {
+              const pos = getHandlePosition(dir, multiBBox.w + 2, multiBBox.h + 2);
+              return (
+                <div
+                  key={dir}
+                  className="art-handle"
+                  data-handle-dir={dir}
+                  style={{
+                    left: pos.x - HANDLE_SIZE / 2,
+                    top: pos.y - HANDLE_SIZE / 2,
+                    width: HANDLE_SIZE,
+                    height: HANDLE_SIZE,
+                    cursor: HANDLE_CURSORS[dir],
+                    pointerEvents: "auto",
+                  }}
+                />
+              );
+            })}
+            <div
+              className="art-rotate-line"
+              style={{
+                left: (multiBBox.w + 2) / 2,
+                top: -28,
+                height: 28,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              className="art-handle art-handle--rotate"
+              data-handle-dir="rotate"
+              style={{
+                left: (multiBBox.w + 2) / 2 - HANDLE_SIZE / 2,
+                top: -28 - HANDLE_SIZE / 2,
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
+                cursor: HANDLE_CURSORS.rotate,
+                pointerEvents: "auto",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Group / Ungroup popup */}
+        {selectedIds.length > 1 && multiBBox && !dragRef.current && (
+          <div
+            className="art-group-popup"
+            style={{
+              position: "absolute",
+              left: multiBBox.x + multiBBox.w / 2,
+              top: multiBBox.y - 44,
+              transform: "translateX(-50%)",
+              zIndex: 99999,
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            {allSameGroup ? (
+              <button className="art-group-popup-btn" onClick={handleUngroup}>
+                Ungroup
+              </button>
+            ) : (
+              <button className="art-group-popup-btn" onClick={handleGroup}>
+                Group
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Clickable links (absolute-positioned tabs only) */}
         {!projectsGrid &&
           links?.map((link, i) => (
             <a
@@ -1589,6 +1857,19 @@ export default function ArtTab({
               {link.label}
             </a>
           ))}
+
+        {/* Marquee selection rectangle */}
+        {marquee && (
+          <div
+            className="art-marquee"
+            style={{
+              left: Math.min(marquee.startX, marquee.currentX),
+              top: Math.min(marquee.startY, marquee.currentY),
+              width: Math.abs(marquee.currentX - marquee.startX),
+              height: Math.abs(marquee.currentY - marquee.startY),
+            }}
+          />
+        )}
 
         {/* Rotation tooltip */}
         {rotationTooltip && (
