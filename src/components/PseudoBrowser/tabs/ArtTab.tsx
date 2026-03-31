@@ -202,28 +202,40 @@ function computeBBox(els: CanvasElement[]) {
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
-function computeUnrotatedBBox(els: CanvasElement[], groupRotation: number) {
-  const aabb = computeBBox(els);
-  if (els.length === 0 || groupRotation === 0) return aabb;
-  const cx = aabb.x + aabb.w / 2;
-  const cy = aabb.y + aabb.h / 2;
-  const rad = (-groupRotation * Math.PI) / 180;
-  const cosR = Math.cos(rad);
-  const sinR = Math.sin(rad);
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+/** Compute the tightest bounding box aligned at angle `bboxAngle` that wraps all elements.
+ *  Projects element corners onto rotated axes — no stored center needed. */
+function computeAlignedBBox(els: CanvasElement[], bboxAngle: number) {
+  if (els.length === 0) return { x: 0, y: 0, w: 0, h: 0, cx: 0, cy: 0 };
+  const rad = (bboxAngle * Math.PI) / 180;
+  const cosT = Math.cos(rad);
+  const sinT = Math.sin(rad);
+  let uMin = Infinity, uMax = -Infinity, vMin = Infinity, vMax = -Infinity;
   for (const el of els) {
     const ecx = el.x + el.w / 2;
     const ecy = el.y + el.h / 2;
-    const dx = ecx - cx;
-    const dy = ecy - cy;
-    const ux = cx + dx * cosR - dy * sinR;
-    const uy = cy + dx * sinR + dy * cosR;
-    minX = Math.min(minX, ux - el.w / 2);
-    minY = Math.min(minY, uy - el.h / 2);
-    maxX = Math.max(maxX, ux + el.w / 2);
-    maxY = Math.max(maxY, uy + el.h / 2);
+    // Project element center onto rotated axes
+    const cu = ecx * cosT + ecy * sinT;
+    const cv = -ecx * sinT + ecy * cosT;
+    // Element's own rotation relative to bbox angle
+    const dRad = (bboxAngle - (el.rotation ?? 0)) * Math.PI / 180;
+    const cosD = Math.abs(Math.cos(dRad));
+    const sinD = Math.abs(Math.sin(dRad));
+    // Half-extents in rotated frame accounting for element's own rotation
+    const halfU = el.w / 2 * cosD + el.h / 2 * sinD;
+    const halfV = el.w / 2 * sinD + el.h / 2 * cosD;
+    uMin = Math.min(uMin, cu - halfU);
+    uMax = Math.max(uMax, cu + halfU);
+    vMin = Math.min(vMin, cv - halfV);
+    vMax = Math.max(vMax, cv + halfV);
   }
-  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  const w = uMax - uMin;
+  const h = vMax - vMin;
+  const uCenter = (uMin + uMax) / 2;
+  const vCenter = (vMin + vMax) / 2;
+  // Convert center back to canvas coordinates
+  const cx = uCenter * cosT - vCenter * sinT;
+  const cy = uCenter * sinT + vCenter * cosT;
+  return { x: cx - w / 2, y: cy - h / 2, w, h, cx, cy };
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -835,12 +847,16 @@ export default function ArtTab({
     ...initialElements.map((el) => el.groupId ?? 0),
   );
   const nextGroupIdRef = useRef(maxInitGroup + 1);
-  const groupDataRef = useRef<Map<number, { rotation: number }>>(null!);
+  const groupDataRef = useRef<Map<number, { rotation: number; cx: number; cy: number }>>(null!);
   if (groupDataRef.current === null) {
-    const m = new Map<number, { rotation: number }>();
+    const m = new Map<number, { rotation: number; cx: number; cy: number }>();
     const gids = new Set<number>();
     for (const el of initialElements) if (el.groupId != null) gids.add(el.groupId);
-    for (const gid of gids) m.set(gid, { rotation: 0 });
+    for (const gid of gids) {
+      const groupEls = initialElements.filter((el) => el.groupId === gid);
+      const bbox = computeBBox(groupEls);
+      m.set(gid, { rotation: 0, cx: bbox.x + bbox.w / 2, cy: bbox.y + bbox.h / 2 });
+    }
     groupDataRef.current = m;
   }
   const elementsRef = useRef(elements);
@@ -1217,8 +1233,17 @@ export default function ArtTab({
             const canvas = canvasRef.current;
             if (!canvas) return;
             const cr = canvas.getBoundingClientRect();
-            const csx = cr.left + bbox.x + bbox.w / 2;
-            const csy = cr.top + bbox.y + bbox.h / 2;
+            const gd =
+              activeGroupId != null
+                ? groupDataRef.current.get(activeGroupId)
+                : null;
+            const baseGRot = gd?.rotation ?? 0;
+            // Compute rotation pivot from aligned bbox
+            const aligned = computeAlignedBBox(selectedEls, baseGRot);
+            const pivotX = aligned.cx;
+            const pivotY = aligned.cy;
+            const csx = cr.left + pivotX;
+            const csy = cr.top + pivotY;
             const startAngle = Math.atan2(e.clientY - csy, e.clientX - csx);
             const startEls = new Map<
               number,
@@ -1240,11 +1265,6 @@ export default function ArtTab({
                 rotation: sel.rotation,
                 fontSize: sel.fontSize,
               });
-            const gd =
-              activeGroupId != null
-                ? groupDataRef.current.get(activeGroupId)
-                : null;
-            const baseGRot = gd?.rotation ?? 0;
             dragRef.current = {
               type: "rotate",
               startX: e.clientX,
@@ -1254,7 +1274,7 @@ export default function ArtTab({
               centerScreenX: csx,
               centerScreenY: csy,
               startElements: startEls,
-              groupBBox: bbox,
+              groupBBox: { x: pivotX - aligned.w / 2, y: pivotY - aligned.h / 2, w: aligned.w, h: aligned.h },
               rotatingGroupId: activeGroupId,
               baseGroupRotation: baseGRot,
               lastRotationDelta: 0,
@@ -1723,6 +1743,33 @@ export default function ArtTab({
         const gd = groupDataRef.current.get(d.rotatingGroupId);
         if (gd) {
           gd.rotation = (d.baseGroupRotation ?? 0) + d.lastRotationDelta;
+          // Sync stored center from current element positions
+          const cur = elementsRef.current;
+          const groupEls = cur.filter((el) => el.groupId === d.rotatingGroupId);
+          if (groupEls.length > 0) {
+            const aligned = computeAlignedBBox(groupEls, gd.rotation);
+            gd.cx = aligned.cx;
+            gd.cy = aligned.cy;
+          }
+        }
+      }
+      // Update stored group center after move/resize
+      if ((d.type === "move" || d.type === "resize") && d.didMove) {
+        const ids = d.type === "move" && d.startPositions
+          ? [...d.startPositions.keys()]
+          : d.startElements ? [...d.startElements.keys()] : [];
+        if (ids.length > 0) {
+          const cur = elementsRef.current;
+          const firstEl = cur.find((el) => ids.includes(el.id));
+          if (firstEl?.groupId != null) {
+            const gd = groupDataRef.current.get(firstEl.groupId);
+            if (gd) {
+              const groupEls = cur.filter((el) => ids.includes(el.id));
+              const aligned = computeAlignedBBox(groupEls, gd.rotation);
+              gd.cx = aligned.cx;
+              gd.cy = aligned.cy;
+            }
+          }
         }
       }
       const moved = d.didMove;
@@ -1982,7 +2029,9 @@ export default function ArtTab({
   /* ── Group / Ungroup ── */
   const handleGroup = useCallback(() => {
     const gid = nextGroupIdRef.current++;
-    groupDataRef.current.set(gid, { rotation: 0 });
+    const groupEls = elements.filter((el) => selectedIds.includes(el.id));
+    const bbox = computeBBox(groupEls);
+    groupDataRef.current.set(gid, { rotation: 0, cx: bbox.x + bbox.w / 2, cy: bbox.y + bbox.h / 2 });
     setElements((prev) => {
       const idSet = new Set(selectedIds);
       const next = prev.map((el) =>
@@ -2013,15 +2062,13 @@ export default function ArtTab({
   const multiBBox = (() => {
     if (selectedIds.length <= 1) return null;
     const selectedEls = elements.filter((el) => selectedIds.includes(el.id));
-    const aabb = computeBBox(selectedEls);
     const gd = activeGroupId != null ? groupDataRef.current.get(activeGroupId) : null;
     const rot = groupRotationOverride ?? gd?.rotation ?? 0;
     if (rot !== 0) {
-      const unrot = computeUnrotatedBBox(selectedEls, rot);
-      const cx = aabb.x + aabb.w / 2;
-      const cy = aabb.y + aabb.h / 2;
-      return { x: cx - unrot.w / 2, y: cy - unrot.h / 2, w: unrot.w, h: unrot.h, rotation: rot };
+      const aligned = computeAlignedBBox(selectedEls, rot);
+      return { ...aligned, rotation: rot };
     }
+    const aabb = computeBBox(selectedEls);
     return { ...aabb, rotation: 0 };
   })();
 
