@@ -1742,7 +1742,7 @@ export default function ArtTab({
     }
   }, []);
 
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e: React.PointerEvent) => {
     const d = dragRef.current;
     if (d) {
       if (d.type === "marquee") {
@@ -1817,6 +1817,8 @@ export default function ArtTab({
       setRotationTooltip(null);
       setGroupRotationOverride(null);
       if (moved) {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) setPopupPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
         setElements((cur) => {
           pushHistory(cur);
           return cur;
