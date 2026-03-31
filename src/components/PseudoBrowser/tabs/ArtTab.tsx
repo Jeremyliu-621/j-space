@@ -824,6 +824,7 @@ export default function ArtTab({
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(
     null,
   );
@@ -1213,6 +1214,8 @@ export default function ArtTab({
 
       if (editingId != null && target.closest("[data-editing]")) return;
 
+      setIsDragging(true);
+
       const handleEl = target.closest(
         "[data-handle-dir]",
       ) as HTMLElement | null;
@@ -1425,13 +1428,48 @@ export default function ArtTab({
         return;
       }
 
-      /* ── Click on empty canvas — start marquee ── */
+      /* ── Click on empty canvas — check if inside a group bbox first ── */
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+
+        // Collect all group IDs from elements
+        const groupIds = [...new Set(elements.filter((el) => el.groupId != null).map((el) => el.groupId as number))];
+        for (const gid of groupIds) {
+          const groupEls = elements.filter((el) => el.groupId === gid);
+          const bbox = computeBBox(groupEls);
+          if (sx >= bbox.x && sx <= bbox.x + bbox.w && sy >= bbox.y && sy <= bbox.y + bbox.h) {
+            const idsToSelect = groupEls.map((el) => el.id);
+            setActiveGroupId(gid);
+            bringToFront(idsToSelect);
+            setSelectedIds(idsToSelect);
+            setEditingId(null);
+            setPopupPos({ x: sx, y: sy });
+            const startPositions = new Map<number, { x: number; y: number }>();
+            for (const sid of idsToSelect) {
+              const sel = elements.find((el) => el.id === sid);
+              if (sel) startPositions.set(sid, { x: sel.x, y: sel.y });
+            }
+            dragRef.current = {
+              type: "move",
+              startX: e.clientX,
+              startY: e.clientY,
+              didMove: false,
+              startPositions,
+            };
+            (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+            return;
+          }
+        }
+      }
+
+      /* ── Click on truly empty canvas — start marquee ── */
       setSelectedIds([]);
       setActiveGroupId(null);
       setPopupPos(null);
       setEditingId(null);
       setRotationTooltip(null);
-      const rect = canvasRef.current?.getBoundingClientRect();
       if (rect) {
         const sx = e.clientX - rect.left;
         const sy = e.clientY - rect.top;
@@ -1732,6 +1770,7 @@ export default function ArtTab({
           return null;
         });
         dragRef.current = null;
+        setIsDragging(false);
         setActiveGroupId(null);
         return;
       }
@@ -1774,6 +1813,7 @@ export default function ArtTab({
       }
       const moved = d.didMove;
       dragRef.current = null;
+      setIsDragging(false);
       setRotationTooltip(null);
       setGroupRotationOverride(null);
       if (moved) {
@@ -2508,7 +2548,7 @@ export default function ArtTab({
           {/* Group / Ungroup popup */}
           {selectedIds.length > 1 &&
             multiBBox &&
-            !dragRef.current &&
+            !isDragging &&
             popupPos && (
               <div
                 className="art-group-popup"
