@@ -11,7 +11,7 @@ const TABS = [
   { id: "me", label: "Me", url: "C:\\Jeremy\\me" },
   { id: "art", label: "Art I Love", url: "C:\\Jeremy\\art" },
   { id: "sports", label: "Sports", url: "C:\\Jeremy\\sports" },
-  { id: "projects", label: "Projects", url: "C:\\Jeremy\\projects" },
+  { id: "projects", label: "Builds", url: "C:\\Jeremy\\projects" },
 ];
 
 const TAB_PROPS: Record<string, ArtTabProps> = {
