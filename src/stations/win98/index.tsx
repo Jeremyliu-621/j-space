@@ -26,41 +26,28 @@ function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, tr
 }
 
 // Project card in list view
-function ProjectCard({ project, index, onSpecifics }: {
-  project: content.Project; index: number; onSpecifics: (i: number) => void;
-}) {
+function ProjectCard({ project }: { project: content.Project }) {
   const theme = useTheme();
   const btnStyle = theme.getButtonStyle();
   const imgUrl = project.image ? getImageUrl(project.image) : null;
 
   return (
     <div className="project-card">
-      <div className="project-card-text">
-        <h3 className="project-card-title">{project.title}</h3>
-        <p className="project-card-description">{project.description}</p>
-        {(project.front || project.back) && (
-          <p className="project-card-stack">
-            {project.front && <><strong>Front:</strong> {project.front}<br /></>}
-            {project.back && <><strong>Back: </strong> {project.back}</>}
-          </p>
-        )}
-        <div className="project-card-buttons">
-          {project.website && (
-            <a href={project.website} target="_blank" rel="noopener noreferrer" className="social-btn" style={{ width: 120, ...btnStyle }}>
-              <img src={getImageUrl('website-icon') || ''} alt="Website" /> Website
-            </a>
-          )}
-          {project.github && (
-            <a href={project.github} target="_blank" rel="noopener noreferrer" className="social-btn" style={{ width: 120, ...btnStyle }}>
-              <img src={getImageUrl('github-icon') || ''} alt="GitHub" /> GitHub
-            </a>
-          )}
-          <a href="#" className="social-btn" style={{ width: 120, ...btnStyle }} onClick={(e) => { e.preventDefault(); onSpecifics(index); }}>
-            <img src={getImageUrl('specifics-icon') || ''} alt="Specifics" /> Specifics
-          </a>
-        </div>
-      </div>
       {imgUrl && <img src={imgUrl} className="project-card-image" alt={project.title} />}
+      <h3 className="project-card-title">{project.title}</h3>
+      <p className="project-card-description">{project.description}</p>
+      <div className="project-card-buttons">
+        {project.website && (
+          <a href={project.website} target="_blank" rel="noopener noreferrer" className="social-btn" style={btnStyle}>
+            <img src={getImageUrl('website-icon') || ''} alt="web" /> web
+          </a>
+        )}
+        {project.github && (
+          <a href={project.github} target="_blank" rel="noopener noreferrer" className="social-btn" style={btnStyle}>
+            <img src={getImageUrl('github-icon') || ''} alt="git" /> git
+          </a>
+        )}
+      </div>
     </div>
   );
 }
@@ -282,9 +269,11 @@ export default function Win98Station() {
               {activeProjectTab === 'all' ? (
                 <div>
                   <TypewriterTitle text="My Projects" tag="h1" trigger={windowsVisible.projects} style={{ marginTop: 0, marginBottom: 5 }} />
-                  {content.projects.map((project, i) => (
-                    <ProjectCard key={i} project={project} index={i} onSpecifics={(idx) => setActiveProjectTab(String(idx))} />
-                  ))}
+                  <div className="projects-grid">
+                    {content.projects.map((project, i) => (
+                      <ProjectCard key={i} project={project} />
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <ProjectSingle project={content.projects[parseInt(activeProjectTab)]} onAll={() => setActiveProjectTab('all')} />

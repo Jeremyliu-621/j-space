@@ -17,6 +17,7 @@ The browser should look **modern** — like Chrome, Arc, or Brave. Clean, flat, 
 ## Visual reference
 
 Think Chrome or Arc circa 2023-2024:
+
 - Thin, tight chrome — the browser UI takes up as little vertical space as possible
 - Tabs are rounded at the top, flat-bottomed, merge into the toolbar
 - Active tab is clearly distinct — lighter background, no bottom border connecting to content
@@ -48,6 +49,7 @@ No title bar. No menu bar. No status bar. Just tab strip + toolbar + content. Th
 ## Spec
 
 ### Tab strip
+
 - Sits at the very top of the browser
 - Background: slightly darker than the toolbar — the "inactive zone"
 - Tabs: rounded top corners (`border-radius` on top corners only), flat bottom
@@ -55,10 +57,11 @@ No title bar. No menu bar. No status bar. Just tab strip + toolbar + content. Th
 - Inactive tabs: slightly transparent or muted background, visible on hover
 - Each tab has a small `×` close button on the right (decorative)
 - Tabs have a favicon placeholder (small square or icon, 16×16) on the left
-- Tab text: `Graffiti.exe`, `BJJ.exe`, `Art.exe`, `Yohji.exe` — regular weight, small, truncated with ellipsis if needed
+- Tab text: `Graffiti`, `BJJ`, `Art`, `Yohji` — regular weight, small, truncated with ellipsis if needed
 - New tab `+` button at the end of the tab row (decorative)
 
 ### Toolbar
+
 - Single row below tab strip
 - Background: slightly lighter than tab strip background
 - Left: back `←` and forward `→` icon buttons — circular hover state, flat otherwise. Refresh `↻` button next to them
@@ -67,6 +70,7 @@ No title bar. No menu bar. No status bar. Just tab strip + toolbar + content. Th
 - 1px bottom border separating toolbar from content
 
 ### Content area
+
 - Full remaining height, full width
 - White or near-white background — no inset border, no frame, just a clean page canvas
 - Its own scroll context — scrolling here does NOT scroll the outer page
