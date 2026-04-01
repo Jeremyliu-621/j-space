@@ -20,32 +20,34 @@ const PROJECT_IMAGE_SRC: Record<string, string> = {
 
 /** Projects tab canvas grid — cards, type scale (see V_GAP for vertical rhythm) */
 const PG = {
-  HEAD_Y: 20,
-  HEAD_FS: 48,
-  HEAD_H: 88,
-  HEAD_GAP_BELOW: 56,
-  CARD_W: 392,
+  HEAD_Y: 32,
+  HEAD_FS: 42,
+  HEAD_H: 56,
+  HEAD_GAP_BELOW: 32,
+  CARD_W: 380,
   /** Initial frame height before layout reflow fits to content */
   CARD_H: 520,
-  GRID_GAP: 36,
+  GRID_GAP: 28,
   GRID_COLS: 3,
   GRID_PAD_X: 52,
   PAD: 20,
-  IMG_H: 212,
-  /** Single spacing between image, title, desc, stacks, and link row */
-  V_GAP: 8,
+  IMG_H: 200,
+  /** Spacing between image bottom and title */
+  IMG_PAD_BELOW: 16,
+  /** Single spacing between title, desc, stacks, and link row */
+  V_GAP: 10,
   /** Padding below the link row inside the card */
-  CARD_BOTTOM_PAD: 10,
-  TITLE_FS: 24,
+  CARD_BOTTOM_PAD: 16,
+  TITLE_FS: 22,
   TITLE_H: 28,
-  DESC_FS: 16,
-  DESC_H: 40,
-  META_FS: 14,
-  META_LINE_H: 24,
-  LINK_FS: 15,
+  DESC_FS: 14,
+  DESC_H: 54,
+  META_FS: 13,
+  META_LINE_H: 22,
+  LINK_FS: 14,
   LINK_H: 26,
-  LINK_W: 118,
-  LINK_GAP_X: 14,
+  LINK_W: 110,
+  LINK_GAP_X: 12,
 } as const;
 
 const PG_GRID_PAD_Y =
@@ -267,6 +269,8 @@ function ShapeSvg({
             y={sw}
             width={w - sw * 2}
             height={h - sw * 2}
+            rx={fill ? 10 : 0}
+            ry={fill ? 10 : 0}
             fill={fill ?? none}
             stroke={stroke}
             strokeWidth={sw}
@@ -593,12 +597,12 @@ export default function ArtTab({
           rotation: 0,
           zIndex: baseZ,
           groupId: gid,
-          fill: "#f2f2f2",
-          strokeColor: "#a0a0a0",
+          fill: "#ffffff",
+          strokeColor: "#d4d4d4",
           noTilt: true,
         });
 
-        const yTitle = cy + PG.IMG_H + PG.V_GAP;
+        const yTitle = cy + PG.IMG_H + PG.IMG_PAD_BELOW;
         const yDesc = yTitle + PG.TITLE_H + PG.V_GAP;
 
         const imgSlug = p.image;
@@ -747,7 +751,6 @@ export default function ArtTab({
         rotation: (DEFAULT_IMAGE_ROTATIONS[i] ?? 0) * rotScale,
         zIndex: i + 1,
         file: img.file,
-        noTilt: true,
       })),
       {
         id: imgList.length + 1,
@@ -1969,7 +1972,7 @@ export default function ArtTab({
         if (measuredH > 0) setH(id, measuredH);
       });
 
-      const { V_GAP, IMG_H, LINK_H, CARD_BOTTOM_PAD } = PG;
+      const { V_GAP, IMG_H, IMG_PAD_BELOW, LINK_H, CARD_BOTTOM_PAD } = PG;
 
       const gids = new Set<number>();
       for (const e of next) if (e.groupId != null) gids.add(e.groupId);
@@ -1984,7 +1987,7 @@ export default function ArtTab({
           .filter((e) => e.type !== "shape")
           .sort((a, b) => a.y - b.y);
 
-        let cursorY = cy + IMG_H + V_GAP;
+        let cursorY = cy + IMG_H + IMG_PAD_BELOW;
         let i = 0;
         while (i < mobile.length) {
           const el = mobile[i];

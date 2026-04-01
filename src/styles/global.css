@@ -1678,7 +1678,7 @@ canvas,
 }
 
 .pb-panel[data-tab="projects"] {
-  background-color: #fafafa;
+  background-color: #f0f0f0;
 }
 
 /* Projects tab: larger link text, classic blue links with icons */
@@ -1916,6 +1916,7 @@ canvas,
 .art-element:has(.art-element-img--projects-grid) {
   overflow: hidden;
   background: #e8e8e8;
+  border-radius: 10px 10px 0 0;
 }
 .art-element--selected:has(.art-element-img--projects-grid) {
   overflow: visible;
@@ -1959,8 +1960,8 @@ canvas,
 
 /* Projects tab — page heading (above the grid) */
 .art-text-content--projects-page-title {
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: flex-end;
   text-align: left;
   line-height: 1.08;
   letter-spacing: -0.03em;
