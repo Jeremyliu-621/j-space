@@ -50,8 +50,7 @@ const PG = {
   LINK_GAP_X: 12,
 } as const;
 
-const PG_GRID_PAD_Y =
-  PG.HEAD_Y + PG.HEAD_H + PG.HEAD_GAP_BELOW;
+const PG_GRID_PAD_Y = PG.HEAD_Y + PG.HEAD_H + PG.HEAD_GAP_BELOW;
 
 /* ══════════════════════════════════════════════════════════════
    IMAGE CONFIG — edit positions / sizes here
@@ -211,7 +210,10 @@ function computeAlignedBBox(els: CanvasElement[], bboxAngle: number) {
   const rad = (bboxAngle * Math.PI) / 180;
   const cosT = Math.cos(rad);
   const sinT = Math.sin(rad);
-  let uMin = Infinity, uMax = -Infinity, vMin = Infinity, vMax = -Infinity;
+  let uMin = Infinity,
+    uMax = -Infinity,
+    vMin = Infinity,
+    vMax = -Infinity;
   for (const el of els) {
     const ecx = el.x + el.w / 2;
     const ecy = el.y + el.h / 2;
@@ -219,12 +221,12 @@ function computeAlignedBBox(els: CanvasElement[], bboxAngle: number) {
     const cu = ecx * cosT + ecy * sinT;
     const cv = -ecx * sinT + ecy * cosT;
     // Element's own rotation relative to bbox angle
-    const dRad = (bboxAngle - (el.rotation ?? 0)) * Math.PI / 180;
+    const dRad = ((bboxAngle - (el.rotation ?? 0)) * Math.PI) / 180;
     const cosD = Math.abs(Math.cos(dRad));
     const sinD = Math.abs(Math.sin(dRad));
     // Half-extents in rotated frame accounting for element's own rotation
-    const halfU = el.w / 2 * cosD + el.h / 2 * sinD;
-    const halfV = el.w / 2 * sinD + el.h / 2 * cosD;
+    const halfU = (el.w / 2) * cosD + (el.h / 2) * sinD;
+    const halfV = (el.w / 2) * sinD + (el.h / 2) * cosD;
     uMin = Math.min(uMin, cu - halfU);
     uMax = Math.max(uMax, cu + halfU);
     vMin = Math.min(vMin, cv - halfV);
@@ -557,19 +559,17 @@ export default function ArtTab({
       let id = 1;
       let nextGid = 1;
       const INNER_W = PG.CARD_W - PG.PAD * 2;
-      const headingW =
-        PG.GRID_COLS * PG.CARD_W + (PG.GRID_COLS - 1) * PG.GRID_GAP;
 
       els.push({
         id: id++,
         type: "text",
         x: PG.GRID_PAD_X,
         y: PG.HEAD_Y,
-        w: headingW,
+        w: 300,
         h: PG.HEAD_H,
         rotation: 0,
         zIndex: 1,
-        content: "My Projects",
+        content: "My Builds",
         fontSize: PG.HEAD_FS,
         fontFamily: "'Playfair Display', Georgia, serif",
         fontColor: "#1a1a1a",
@@ -579,8 +579,7 @@ export default function ArtTab({
         const p = projects[pi];
         const gid = nextGid++;
         const cx =
-          PG.GRID_PAD_X +
-          (pi % PG.GRID_COLS) * (PG.CARD_W + PG.GRID_GAP);
+          PG.GRID_PAD_X + (pi % PG.GRID_COLS) * (PG.CARD_W + PG.GRID_GAP);
         const cy =
           PG_GRID_PAD_Y +
           Math.floor(pi / PG.GRID_COLS) * (PG.CARD_H + PG.GRID_GAP);
@@ -815,8 +814,7 @@ export default function ArtTab({
     if (frames.length === 0) {
       return (
         PG_GRID_PAD_Y +
-        Math.ceil(projects.length / PG.GRID_COLS) *
-          (PG.CARD_H + PG.GRID_GAP) -
+        Math.ceil(projects.length / PG.GRID_COLS) * (PG.CARD_H + PG.GRID_GAP) -
         PG.GRID_GAP +
         72
       );
@@ -831,7 +829,9 @@ export default function ArtTab({
   const [popupPos, setPopupPos] = useState<{ x: number; y: number } | null>(
     null,
   );
-  const [groupRotationOverride, setGroupRotationOverride] = useState<number | null>(null);
+  const [groupRotationOverride, setGroupRotationOverride] = useState<
+    number | null
+  >(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [rotationTooltip, setRotationTooltip] = useState<{
     angle: number;
@@ -851,15 +851,22 @@ export default function ArtTab({
     ...initialElements.map((el) => el.groupId ?? 0),
   );
   const nextGroupIdRef = useRef(maxInitGroup + 1);
-  const groupDataRef = useRef<Map<number, { rotation: number; cx: number; cy: number }>>(null!);
+  const groupDataRef = useRef<
+    Map<number, { rotation: number; cx: number; cy: number }>
+  >(null!);
   if (groupDataRef.current === null) {
     const m = new Map<number, { rotation: number; cx: number; cy: number }>();
     const gids = new Set<number>();
-    for (const el of initialElements) if (el.groupId != null) gids.add(el.groupId);
+    for (const el of initialElements)
+      if (el.groupId != null) gids.add(el.groupId);
     for (const gid of gids) {
       const groupEls = initialElements.filter((el) => el.groupId === gid);
       const bbox = computeBBox(groupEls);
-      m.set(gid, { rotation: 0, cx: bbox.x + bbox.w / 2, cy: bbox.y + bbox.h / 2 });
+      m.set(gid, {
+        rotation: 0,
+        cx: bbox.x + bbox.w / 2,
+        cy: bbox.y + bbox.h / 2,
+      });
     }
     groupDataRef.current = m;
   }
@@ -1280,7 +1287,12 @@ export default function ArtTab({
               centerScreenX: csx,
               centerScreenY: csy,
               startElements: startEls,
-              groupBBox: { x: pivotX - aligned.w / 2, y: pivotY - aligned.h / 2, w: aligned.w, h: aligned.h },
+              groupBBox: {
+                x: pivotX - aligned.w / 2,
+                y: pivotY - aligned.h / 2,
+                w: aligned.w,
+                h: aligned.h,
+              },
               rotatingGroupId: activeGroupId,
               baseGroupRotation: baseGRot,
               lastRotationDelta: 0,
@@ -1438,11 +1450,22 @@ export default function ArtTab({
         const sy = e.clientY - rect.top;
 
         // Collect all group IDs from elements
-        const groupIds = [...new Set(elements.filter((el) => el.groupId != null).map((el) => el.groupId as number))];
+        const groupIds = [
+          ...new Set(
+            elements
+              .filter((el) => el.groupId != null)
+              .map((el) => el.groupId as number),
+          ),
+        ];
         for (const gid of groupIds) {
           const groupEls = elements.filter((el) => el.groupId === gid);
           const bbox = computeBBox(groupEls);
-          if (sx >= bbox.x && sx <= bbox.x + bbox.w && sy >= bbox.y && sy <= bbox.y + bbox.h) {
+          if (
+            sx >= bbox.x &&
+            sx <= bbox.x + bbox.w &&
+            sy >= bbox.y &&
+            sy <= bbox.y + bbox.h
+          ) {
             const idsToSelect = groupEls.map((el) => el.id);
             setActiveGroupId(gid);
             bringToFront(idsToSelect);
@@ -1745,92 +1768,101 @@ export default function ArtTab({
     }
   }, []);
 
-  const onPointerUp = useCallback((e: React.PointerEvent) => {
-    const d = dragRef.current;
-    if (d) {
-      if (d.type === "marquee") {
-        setMarquee((m) => {
-          if (!m) return null;
-          const mx1 = Math.min(m.startX, m.currentX);
-          const my1 = Math.min(m.startY, m.currentY);
-          const mx2 = Math.max(m.startX, m.currentX);
-          const my2 = Math.max(m.startY, m.currentY);
-          if (mx2 - mx1 > 5 || my2 - my1 > 5) {
-            const cur = elementsRef.current;
-            const hit = cur.filter((el) => {
-              return (
-                el.x < mx2 &&
-                el.x + el.w > mx1 &&
-                el.y < my2 &&
-                el.y + el.h > my1
-              );
-            });
-            if (hit.length > 0) {
-              setSelectedIds(hit.map((el) => el.id));
-              setPopupPos({ x: m.currentX, y: m.currentY });
+  const onPointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      const d = dragRef.current;
+      if (d) {
+        if (d.type === "marquee") {
+          setMarquee((m) => {
+            if (!m) return null;
+            const mx1 = Math.min(m.startX, m.currentX);
+            const my1 = Math.min(m.startY, m.currentY);
+            const mx2 = Math.max(m.startX, m.currentX);
+            const my2 = Math.max(m.startY, m.currentY);
+            if (mx2 - mx1 > 5 || my2 - my1 > 5) {
+              const cur = elementsRef.current;
+              const hit = cur.filter((el) => {
+                return (
+                  el.x < mx2 &&
+                  el.x + el.w > mx1 &&
+                  el.y < my2 &&
+                  el.y + el.h > my1
+                );
+              });
+              if (hit.length > 0) {
+                setSelectedIds(hit.map((el) => el.id));
+                setPopupPos({ x: m.currentX, y: m.currentY });
+              }
             }
-          }
-          return null;
-        });
-        dragRef.current = null;
-        setIsDragging(false);
-        setActiveGroupId(null);
-        return;
-      }
-      if (
-        d.type === "rotate" &&
-        d.rotatingGroupId != null &&
-        d.lastRotationDelta != null
-      ) {
-        const gd = groupDataRef.current.get(d.rotatingGroupId);
-        if (gd) {
-          gd.rotation = (d.baseGroupRotation ?? 0) + d.lastRotationDelta;
-          // Sync stored center from current element positions
-          const cur = elementsRef.current;
-          const groupEls = cur.filter((el) => el.groupId === d.rotatingGroupId);
-          if (groupEls.length > 0) {
-            const aligned = computeAlignedBBox(groupEls, gd.rotation);
-            gd.cx = aligned.cx;
-            gd.cy = aligned.cy;
-          }
+            return null;
+          });
+          dragRef.current = null;
+          setIsDragging(false);
+          setActiveGroupId(null);
+          return;
         }
-      }
-      // Update stored group center after move/resize
-      if ((d.type === "move" || d.type === "resize") && d.didMove) {
-        const ids = d.type === "move" && d.startPositions
-          ? [...d.startPositions.keys()]
-          : d.startElements ? [...d.startElements.keys()] : [];
-        if (ids.length > 0) {
-          const cur = elementsRef.current;
-          const firstEl = cur.find((el) => ids.includes(el.id));
-          if (firstEl?.groupId != null) {
-            const gd = groupDataRef.current.get(firstEl.groupId);
-            if (gd) {
-              const groupEls = cur.filter((el) => ids.includes(el.id));
+        if (
+          d.type === "rotate" &&
+          d.rotatingGroupId != null &&
+          d.lastRotationDelta != null
+        ) {
+          const gd = groupDataRef.current.get(d.rotatingGroupId);
+          if (gd) {
+            gd.rotation = (d.baseGroupRotation ?? 0) + d.lastRotationDelta;
+            // Sync stored center from current element positions
+            const cur = elementsRef.current;
+            const groupEls = cur.filter(
+              (el) => el.groupId === d.rotatingGroupId,
+            );
+            if (groupEls.length > 0) {
               const aligned = computeAlignedBBox(groupEls, gd.rotation);
               gd.cx = aligned.cx;
               gd.cy = aligned.cy;
             }
           }
         }
+        // Update stored group center after move/resize
+        if ((d.type === "move" || d.type === "resize") && d.didMove) {
+          const ids =
+            d.type === "move" && d.startPositions
+              ? [...d.startPositions.keys()]
+              : d.startElements
+                ? [...d.startElements.keys()]
+                : [];
+          if (ids.length > 0) {
+            const cur = elementsRef.current;
+            const firstEl = cur.find((el) => ids.includes(el.id));
+            if (firstEl?.groupId != null) {
+              const gd = groupDataRef.current.get(firstEl.groupId);
+              if (gd) {
+                const groupEls = cur.filter((el) => ids.includes(el.id));
+                const aligned = computeAlignedBBox(groupEls, gd.rotation);
+                gd.cx = aligned.cx;
+                gd.cy = aligned.cy;
+              }
+            }
+          }
+        }
+        const moved = d.didMove;
+        dragRef.current = null;
+        setIsDragging(false);
+        setRotationTooltip(null);
+        setGroupRotationOverride(null);
+        if (moved) {
+          const rect = canvasRef.current?.getBoundingClientRect();
+          if (rect)
+            setPopupPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+          setElements((cur) => {
+            pushHistory(cur);
+            return cur;
+          });
+        }
+      } else {
+        setRotationTooltip(null);
       }
-      const moved = d.didMove;
-      dragRef.current = null;
-      setIsDragging(false);
-      setRotationTooltip(null);
-      setGroupRotationOverride(null);
-      if (moved) {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (rect) setPopupPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-        setElements((cur) => {
-          pushHistory(cur);
-          return cur;
-        });
-      }
-    } else {
-      setRotationTooltip(null);
-    }
-  }, [pushHistory]);
+    },
+    [pushHistory],
+  );
 
   /* ── Keyboard shortcuts (undo/redo + delete) ── */
   useEffect(() => {
@@ -2076,7 +2108,11 @@ export default function ArtTab({
     const gid = nextGroupIdRef.current++;
     const groupEls = elements.filter((el) => selectedIds.includes(el.id));
     const bbox = computeBBox(groupEls);
-    groupDataRef.current.set(gid, { rotation: 0, cx: bbox.x + bbox.w / 2, cy: bbox.y + bbox.h / 2 });
+    groupDataRef.current.set(gid, {
+      rotation: 0,
+      cx: bbox.x + bbox.w / 2,
+      cy: bbox.y + bbox.h / 2,
+    });
     setElements((prev) => {
       const idSet = new Set(selectedIds);
       const next = prev.map((el) =>
@@ -2107,7 +2143,8 @@ export default function ArtTab({
   const multiBBox = (() => {
     if (selectedIds.length <= 1) return null;
     const selectedEls = elements.filter((el) => selectedIds.includes(el.id));
-    const gd = activeGroupId != null ? groupDataRef.current.get(activeGroupId) : null;
+    const gd =
+      activeGroupId != null ? groupDataRef.current.get(activeGroupId) : null;
     const rot = groupRotationOverride ?? gd?.rotation ?? 0;
     if (rot !== 0) {
       const aligned = computeAlignedBBox(selectedEls, rot);
@@ -2270,9 +2307,7 @@ export default function ArtTab({
                   width: el.w,
                   height: el.type === "text" ? "auto" : el.h,
                   minHeight:
-                    el.type === "text" &&
-                    projectsGrid &&
-                    el.groupId != null
+                    el.type === "text" && projectsGrid && el.groupId != null
                       ? undefined
                       : el.type === "text"
                         ? el.h
@@ -2551,34 +2586,28 @@ export default function ArtTab({
           })()}
 
           {/* Group / Ungroup popup */}
-          {selectedIds.length > 1 &&
-            multiBBox &&
-            !isDragging &&
-            popupPos && (
-              <div
-                className="art-group-popup"
-                style={{
-                  position: "absolute",
-                  left: popupPos.x + 16,
-                  top: popupPos.y - 40,
-                  zIndex: 99999,
-                }}
-                onPointerDown={(e) => e.stopPropagation()}
-              >
-                {allSameGroup ? (
-                  <button
-                    className="art-group-popup-btn"
-                    onClick={handleUngroup}
-                  >
-                    Ungroup
-                  </button>
-                ) : (
-                  <button className="art-group-popup-btn" onClick={handleGroup}>
-                    Group
-                  </button>
-                )}
-              </div>
-            )}
+          {selectedIds.length > 1 && multiBBox && !isDragging && popupPos && (
+            <div
+              className="art-group-popup"
+              style={{
+                position: "absolute",
+                left: popupPos.x + 16,
+                top: popupPos.y - 40,
+                zIndex: 99999,
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {allSameGroup ? (
+                <button className="art-group-popup-btn" onClick={handleUngroup}>
+                  Ungroup
+                </button>
+              ) : (
+                <button className="art-group-popup-btn" onClick={handleGroup}>
+                  Group
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Clickable links (absolute-positioned tabs only) */}
           {!projectsGrid &&
