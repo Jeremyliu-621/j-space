@@ -2,8 +2,8 @@
 
 export const aboutMe = {
   name: "Jeremy Liu",
-  title: "Computer Engineer Undergrad @ UofT",
-  bio: "I am dedicated to inspiring people and creating positive spaces around the world.",
+  title: "",
+  bio: "Building Straw. Hackathons for Agents",
   currentActivities: [
     "Building personal tools & student projects",
     "Expanding my knowledge in object-oriented programming",
@@ -16,8 +16,10 @@ export const skills = {
   programmingLanguages: "Python, C, JavaScript, TypeScript, MATLAB, SQL",
   webUI: "React, Next.js, HTML, CSS, Bootstrap, Tailwind, Vite",
   roboticsSystems: "ROS2, Linux (Ubuntu), Arduino, OpenCV",
-  dataML: "Pytorch, Scikit-learn, Matplotlib, Pandas, NumPy, OpenCV, BeautifulSoup, Selenium",
-  developerTools: "Git, Node.js, AWS, PostgreSQL, Postman, VS Code, Claude, Cursor.ai",
+  dataML:
+    "Pytorch, Scikit-learn, Matplotlib, Pandas, NumPy, OpenCV, BeautifulSoup, Selenium",
+  developerTools:
+    "Git, Node.js, AWS, PostgreSQL, Postman, VS Code, Claude, Cursor.ai",
   improvingBy: [
     "Applying knowledge to create useful projects",
     "Learning more back-end frameworks",
@@ -38,8 +40,27 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    title: "Opticat",
+    description: "Turn any repo into an AI-narrated onboarding tour.",
+    front: "Next.js 15, TypeScript, Tailwind CSS",
+    back: "Supabase, NextAuth, Octokit, Google Gemini",
+    image: "opticat",
+    github: "https://github.com/Jeremyliu-621/opticat",
+    website: "https://opticat-teal.vercel.app",
+  },
+  {
+    title: "BeaverTrail",
+    description: "AI travel itinerary planner for exploring Canada.",
+    front: "Next.js, TypeScript, Tailwind CSS",
+    back: "Vercel AI SDK, Google Gemini",
+    image: "beavertrail",
+    github: "https://github.com/Jeremyliu-621/beavertrail",
+    website: "https://beavertrail.vercel.app",
+  },
+  {
     title: "Sinatra",
-    description: "A DAW that turns your voice into any instrument of your choice.",
+    description:
+      "A DAW that turns your voice into any instrument of your choice.",
     front: "React, TypeScript, Vite, Tailwind CSS, Three.js",
     back: "Python, FastAPI, Supabase (PostgreSQL, Auth), Spotify Basic Pitch, Gradium",
     image: "sinatra",
@@ -52,7 +73,8 @@ export const projects: Project[] = [
   },
   {
     title: "LockBlock",
-    description: "A smart security system using Arduino and computer vision to block deadbolts when unknown faces are detected.",
+    description:
+      "A smart security system using Arduino and computer vision to block deadbolts when unknown faces are detected.",
     front: "JavaScript, Phantom Wallet",
     back: "Python, Flask, OpenCV, Solana, SQLite, Arduino",
     image: "lockblock",
@@ -76,43 +98,6 @@ export const projects: Project[] = [
       " Organized Pandas dataframes with information scraped from the UFC website by Beautifulsoup." +
       " Used React, Javascript, and TailwindCSS to build an aesthetic UI that interacts with user's cursors.",
   },
-  {
-    title: "Binder",
-    description: "A swipe-based interface for thrifting.",
-    front: "Next.js, Typescript, Tailwind, Vite",
-    back: "Python, Beautifulsoup, Selenium",
-    image: "binder_action",
-    github: "https://github.com/Jeremyliu-621/binder",
-    additionalInfo:
-      "Created a swipe-based website that browses second-hand marketplaces in a more intuitive and engaging way." +
-      " Used Beautiful Soup to scrape for data collection in real-time and leveraged the Gemini AI API for price evaluation." +
-      " Built responsive UI components using React, TypeScript and TailwindCSS.",
-  },
-  {
-    title: "stop! don't go on.",
-    description: "Water Sprayer that stops bad habits.",
-    front: "React, Vite, TypeScript",
-    back: "Python + Flask, OpenCV, PySerial, Pygame",
-    image: "stop_dont_go_on_grey",
-    website: "https://stop-dont-go-on.vercel.app/",
-    github: "https://github.com/Jeremyliu-621/stop-dont-go-on",
-    additionalInfo:
-      "Used Arduino to spray water and email.js to email friends and family to incentivize users away from continuing bad habits." +
-      " Integrated OpenCV with a python backend to the arduino so users could be tracked with precision." +
-      " Created a dynamic UI that allowed user input and real-time computer feedback using React, Vite, and Typescript.",
-  },
-  {
-    title: "j-space",
-    description: "A space that focuses on my creativity and ideas.",
-    front: "HTML, CSS, JavaScript, Vite",
-    image: "j-gif-space",
-    website: "https://j-space.vercel.app/",
-    github: "https://github.com/Jeremyliu-621/j-space",
-    additionalInfo:
-      "Used HTML, CSS, JavaScript, and Vite to build an interactive space that gets my creativity into the computer." +
-      " Experimented with the lengths that different AIs can go to to help with coding projects." +
-      " Used the open-source98-components library and cursor.ai to try and replicate that nostalgic feel to old websites.",
-  },
 ];
 
 export const hobbies =
@@ -127,12 +112,14 @@ export interface ThanksItem {
 export const thanks: ThanksItem[] = [
   {
     name: "98-components",
-    description: "For providing the amazing Windows 98 UI components that make this website possible.",
+    description:
+      "For providing the amazing Windows 98 UI components that make this website possible.",
     link: "https://github.com/jdan/98.css",
   },
   {
     name: "Cursor.ai",
-    description: "For helping me build and iterate on this website with AI assistance.",
+    description:
+      "For helping me build and iterate on this website with AI assistance.",
     link: "https://www.cursor.com/",
   },
   {
@@ -144,11 +131,6 @@ export const thanks: ThanksItem[] = [
     name: "lunospace",
     description: "For giving me inspiration for featuresfor this project.",
     link: "https://lostlove.neocities.org/",
-  },
-  {
-    name: "Ethan Yang",
-    description: "For the Binder and Stop! Don't Go On! gifs.",
-    link: "https://github.com/e-yang6",
   },
   {
     name: "colorhunt.co",
@@ -168,23 +150,26 @@ export const thanks: ThanksItem[] = [
 ];
 
 export const ASSET_IMAGES = [
-  "bear.gif",
-  "binder_action.gif",
+  "bear.mp4",
   "cruisesunset.JPG",
-  "do you even lift like a boss GIF.gif",
+  "do you even lift like a boss GIF.mp4",
   "directory_computer.png",
   "portfolio-website-cover.png",
   "rref_calculator.PNG",
   "slot-machine.PNG",
-  "stop_dont_go_on_grey.jpg",
-  "ufc_elo.png",
+  "ufc_elo.webp",
 ];
 
 export const socialLinks = [
-  { href: "https://www.linkedin.com/in/jmyl", icon: "linkedin-icon", label: "LinkedIn" },
+  {
+    href: "https://www.linkedin.com/in/jmyl",
+    icon: "linkedin-icon",
+    label: "LinkedIn",
+  },
   { href: "mailto:jeremyliu621@gmail.com", icon: "email-icon", label: "Email" },
-  { href: "https://github.com/Jeremyliu-621", icon: "github-icon", label: "Github" },
-  { href: "https://github.com/Jeremyliu-621/Jeremy-Liu-Resume", icon: "resume-icon", label: "Resume" },
-  { href: "https://instagram.com/jeremyliu.621", icon: "instagram-icon", label: "Instagram" },
-  { href: "https://devpost.com/jeremyliu621", icon: "devpost-icon", label: "Devpost" },
+  {
+    href: "https://github.com/Jeremyliu-621",
+    icon: "github-icon",
+    label: "Github",
+  },
 ];

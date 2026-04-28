@@ -75,9 +75,13 @@ body::before {
   mix-blend-mode: multiply;
 }
 
-/* Subtle drop shadow on Win98 windows */
+/* Subtle drop shadow on Win98 windows.
+   will-change + contain isolate each window onto its own GPU layer so
+   transform-based dragging never repaints sibling windows or the noise overlay. */
 .window {
   filter: drop-shadow(3px 6px 12px rgba(0, 0, 0, 0.28));
+  will-change: transform;
+  contain: layout paint style;
 }
 
 /* Default cursor everywhere */
@@ -261,7 +265,9 @@ canvas,
   }
 }
 
-/* Station Sections */
+/* Station Sections.
+   content-visibility: auto lets the browser skip layout/paint when offscreen.
+   contain-intrinsic-size keeps the scroll height stable while the section is skipped. */
 .station {
   width: 100%;
   height: 100vh;
@@ -273,6 +279,8 @@ canvas,
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 100vw 100vh;
 }
 
 .station-win98 {
@@ -1618,17 +1626,22 @@ canvas,
   background: var(--palette-color-3);
 }
 
-/* Tab panels */
+/* Tab panels.
+   Inactive panels stay in the tree (so React doesn't tear down their state) but the
+   browser is told to skip their layout/paint entirely. */
 .pb-panel {
   display: none;
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
+  content-visibility: auto;
+  contain-intrinsic-size: 1280px 900px;
 }
 
 .pb-panel-active {
   display: block;
+  content-visibility: visible;
 }
 
 /* Minimalistic scrollbar for tab panels */
@@ -1679,6 +1692,39 @@ canvas,
 
 .pb-panel[data-tab="projects"] {
   background-color: #f0f0f0;
+}
+
+/* Project card rendered as a single draggable canvas element.
+   Matches 98.css .window typography: Pixelated MS Sans Serif at 11px base. */
+.art-card {
+  width: 100%;
+  height: 100%;
+  font-family: "Pixelated MS Sans Serif", Arial;
+  font-size: 11px;
+  color: #222;
+  cursor: grab;
+}
+
+.art-card .project-card {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.art-card .project-card-title {
+  font-size: 1.35em;
+  line-height: 1.2;
+}
+
+.art-card .project-card-description {
+  font-size: 1.25em;
+  line-height: 1.3;
+}
+
+/* Buttons inside a draggable card: restore pointer cursor and let clicks
+   reach the anchor (drag is blocked via stopPropagation in JSX). */
+.art-card .social-btn {
+  cursor: pointer;
 }
 
 /* Projects tab: larger link text, classic blue links with icons */

@@ -1,15 +1,15 @@
 import type { ReactElement } from "react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { projects } from "../../../lib/content";
+import Media from "../../Media";
 
 /* ── Image map: project image key → public file ── */
 const IMAGE_MAP: Record<string, string> = {
-  sinatra: "/projects/sinatrademo.gif",
-  lockblock: "/projects/lockblock.png",
-  "ufc-search": "/projects/ufc_elo.png",
-  binder_action: "/projects/binder_action.gif",
-  stop_dont_go_on_grey: "/projects/stop_dont_go_on_grey.jpg",
-  "j-gif-space": "/projects/j-gif-space.gif",
+  opticat: "/projects/opticat.png",
+  beavertrail: "/projects/beavertailsdevpostbanner.png",
+  sinatra: "/projects/sinatrademo.mp4",
+  lockblock: "/projects/lockblock.webp",
+  "ufc-search": "/projects/ufc_elo.webp",
 };
 
 /* ── Sidebar tools (same as ArtTab) ── */
@@ -375,7 +375,7 @@ export default function ProjectsTab() {
           >
             <div className="project-card-image">
               {project.image && (
-                <img
+                <Media
                   src={
                     IMAGE_MAP[project.image] ?? `/projects/${project.image}.png`
                   }

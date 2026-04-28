@@ -40,7 +40,7 @@ export default function DesktopIcon({ id, icon, label, onDoubleClick }: DesktopI
       onBlur={handleBlur}
       tabIndex={0}
     >
-      <img src={icon} alt={label} />
+      <img src={icon} alt={label} loading="lazy" decoding="async" />
       <span>{label}</span>
     </div>
   );
