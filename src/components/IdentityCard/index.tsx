@@ -15,7 +15,7 @@ export default function IdentityCard() {
               rel="noopener noreferrer"
               title={link.label}
             >
-              <img src={getImageUrl(link.icon) || ''} alt={link.label} style={{ width: 14, height: 14 }} />
+              <img src={getImageUrl(link.icon) || ''} alt={link.label} style={{ width: 14, height: 14 }} loading="lazy" decoding="async" />
             </a>
           ))}
         </div>

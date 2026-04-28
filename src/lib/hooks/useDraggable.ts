@@ -5,6 +5,13 @@ interface DragOptions {
   constrainTop?: number; // minimum top value
 }
 
+/**
+ * During drag we mutate `transform: translate3d(...)` instead of left/top so the
+ * browser can move the element on its existing GPU layer without repainting it
+ * or anything composited above it (e.g. the noise overlay or sibling windows).
+ * On release we commit the final left/top inline before clearing transform so
+ * there's no flicker before React reconciles the new position.
+ */
 export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, options: DragOptions = {}) {
   const isDragging = useRef(false);
 
@@ -20,6 +27,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const startTop = el.offsetTop;
     const startX = e.clientX;
     const startY = e.clientY;
+    const constrainTop = options.constrainTop ?? 0;
+    const minDy = constrainTop - startTop;
 
     isDragging.current = true;
 
@@ -29,12 +38,23 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     document.body.appendChild(overlay);
 
     const onMouseMove = (me: MouseEvent) => {
-      const newLeft = startLeft + (me.clientX - startX);
-      const newTop = Math.max(options.constrainTop ?? 0, startTop + (me.clientY - startY));
+      const dx = me.clientX - startX;
+      const dy = Math.max(minDy, me.clientY - startY);
+      el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+    };
+
+    const commit = (clientX: number, clientY: number) => {
+      const dx = clientX - startX;
+      const dy = Math.max(minDy, clientY - startY);
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      // Apply final left/top inline first so the element stays put when we drop transform.
       el.style.left = `${newLeft}px`;
       el.style.top = `${newTop}px`;
       el.style.right = 'auto';
       el.style.bottom = 'auto';
+      el.style.transform = '';
+      return { newLeft, newTop };
     };
 
     const onMouseUp = (ue: MouseEvent) => {
@@ -43,8 +63,7 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
       overlay.remove();
       isDragging.current = false;
 
-      const newLeft = startLeft + (ue.clientX - startX);
-      const newTop = Math.max(options.constrainTop ?? 0, startTop + (ue.clientY - startY));
+      const { newLeft, newTop } = commit(ue.clientX, ue.clientY);
       options.onDragEnd?.(newLeft, newTop);
     };
 
@@ -69,6 +88,8 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const startTop = el.offsetTop;
     const startX = touch.clientX;
     const startY = touch.clientY;
+    const constrainTop = options.constrainTop ?? 0;
+    const minDy = constrainTop - startTop;
 
     e.preventDefault();
     isDragging.current = true;
@@ -76,8 +97,9 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
     const onTouchMove = (me: TouchEvent) => {
       me.preventDefault();
       const t = me.touches[0];
-      el.style.left = `${startLeft + (t.clientX - startX)}px`;
-      el.style.top = `${Math.max(options.constrainTop ?? 0, startTop + (t.clientY - startY))}px`;
+      const dx = t.clientX - startX;
+      const dy = Math.max(minDy, t.clientY - startY);
+      el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
     };
 
     const onTouchEnd = (ue: TouchEvent) => {
@@ -87,8 +109,15 @@ export function useDraggable(elementRef: React.RefObject<HTMLElement | null>, op
       isDragging.current = false;
 
       const t = ue.changedTouches[0];
-      const newLeft = startLeft + (t.clientX - startX);
-      const newTop = Math.max(options.constrainTop ?? 0, startTop + (t.clientY - startY));
+      const dx = t.clientX - startX;
+      const dy = Math.max(minDy, t.clientY - startY);
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      el.style.left = `${newLeft}px`;
+      el.style.top = `${newTop}px`;
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.style.transform = '';
       options.onDragEnd?.(newLeft, newTop);
     };
 

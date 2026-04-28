@@ -9,6 +9,19 @@ import { useTheme, colorPalettes } from '../../components/win98/ThemeProvider';
 import { useTypewriter } from '../../lib/hooks/useTypewriter';
 import { getImageUrl } from '../../lib/images';
 import * as content from '../../lib/content';
+import Media from '../../components/Media';
+
+// Project images live in /public/projects/. The PseudoBrowser tabs share this map;
+// keeping a single source here lets us avoid duplicating big media into src/assets.
+const PROJECT_IMAGE_SRC: Record<string, string> = {
+  sinatra: '/projects/sinatrademo.mp4',
+  lockblock: '/projects/lockblock.webp',
+  'ufc-search': '/projects/ufc_elo.webp',
+};
+function resolveProjectImage(slug: string | undefined): string | null {
+  if (!slug) return null;
+  return PROJECT_IMAGE_SRC[slug] ?? getImageUrl(slug);
+}
 
 // Typewriter title component
 function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, trigger = true, styledIndices }: {
@@ -29,22 +42,22 @@ function TypewriterTitle({ text, tag: Tag = 'h2', className = '', style = {}, tr
 function ProjectCard({ project }: { project: content.Project }) {
   const theme = useTheme();
   const btnStyle = theme.getButtonStyle();
-  const imgUrl = project.image ? getImageUrl(project.image) : null;
+  const imgUrl = resolveProjectImage(project.image);
 
   return (
     <div className="project-card">
-      {imgUrl && <img src={imgUrl} className="project-card-image" alt={project.title} />}
+      {imgUrl && <Media src={imgUrl} className="project-card-image" alt={project.title} />}
       <h3 className="project-card-title">{project.title}</h3>
       <p className="project-card-description">{project.description}</p>
       <div className="project-card-buttons">
         {project.website && (
           <a href={project.website} target="_blank" rel="noopener noreferrer" className="social-btn" style={btnStyle}>
-            <img src={getImageUrl('website-icon') || ''} alt="web" /> web
+            <img loading="lazy" decoding="async" src={getImageUrl('website-icon') || ''} alt="web" /> web
           </a>
         )}
         {project.github && (
           <a href={project.github} target="_blank" rel="noopener noreferrer" className="social-btn" style={btnStyle}>
-            <img src={getImageUrl('github-icon') || ''} alt="git" /> git
+            <img loading="lazy" decoding="async" src={getImageUrl('github-icon') || ''} alt="git" /> git
           </a>
         )}
       </div>
@@ -56,12 +69,12 @@ function ProjectCard({ project }: { project: content.Project }) {
 function ProjectSingle({ project, onAll }: { project: content.Project; onAll: () => void }) {
   const theme = useTheme();
   const btnStyle = theme.getButtonStyle();
-  const imgUrl = project.image ? getImageUrl(project.image) : null;
+  const imgUrl = resolveProjectImage(project.image);
 
   return (
     <div className="project-single">
       <h1 className="project-single-title">{project.title}</h1>
-      {imgUrl && <img src={imgUrl} className="project-single-image" alt={project.title} />}
+      {imgUrl && <Media src={imgUrl} className="project-single-image" alt={project.title} />}
       {(project.front || project.back) && (
         <div className="project-section">
           <h3 className="project-section-title">Stack</h3>
@@ -84,16 +97,16 @@ function ProjectSingle({ project, onAll }: { project: content.Project; onAll: ()
       <div className="project-single-buttons">
         {project.website && (
           <a href={project.website} target="_blank" rel="noopener noreferrer" className="social-btn" style={{ fontSize: 20, width: 140, ...btnStyle }}>
-            <img src={getImageUrl('website-icon') || ''} alt="Website" /> Website
+            <img loading="lazy" decoding="async" src={getImageUrl('website-icon') || ''} alt="Website" /> Website
           </a>
         )}
         {project.github && (
           <a href={project.github} target="_blank" rel="noopener noreferrer" className="social-btn" style={{ fontSize: 20, width: 140, ...btnStyle }}>
-            <img src={getImageUrl('github-icon') || ''} alt="GitHub" /> GitHub
+            <img loading="lazy" decoding="async" src={getImageUrl('github-icon') || ''} alt="GitHub" /> GitHub
           </a>
         )}
         <a href="#" className="social-btn" style={{ fontSize: 20, width: 140, ...btnStyle }} onClick={(e) => { e.preventDefault(); onAll(); }}>
-          <img src={getImageUrl('all-icon') || ''} alt="All" /> All
+          <img loading="lazy" decoding="async" src={getImageUrl('all-icon') || ''} alt="All" /> All
         </a>
       </div>
     </div>
@@ -194,13 +207,12 @@ export default function Win98Station() {
             <p className="bold-title">{content.aboutMe.title}</p>
             <p>{content.aboutMe.bio}</p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-              <img src={getImageUrl('cruisesunset') || ''} alt="Cruise Sunset" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
-              <img src={getImageUrl('pixelbjj') || ''} alt="bjj pixel art" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
+              <img loading="lazy" decoding="async" src={getImageUrl('cruisesunset') || ''} alt="Cruise Sunset" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
             </div>
             <div className="social-buttons-grid">
               {content.socialLinks.map(link => (
                 <a key={link.label} href={link.href} target={link.href.startsWith('mailto') ? undefined : '_blank'} className="social-btn" style={btnStyle}>
-                  <img src={getImageUrl(link.icon) || ''} alt={link.label} /> {link.label}
+                  <img loading="lazy" decoding="async" src={getImageUrl(link.icon) || ''} alt={link.label} /> {link.label}
                 </a>
               ))}
             </div>
@@ -246,7 +258,7 @@ export default function Win98Station() {
                 { src: 'Rodney', alt: 'Skating', maxWidth: 100 },
                 { src: 'stop', alt: 'graffiti', maxWidth: 100 },
               ].map(img => (
-                <img key={img.src} src={getImageUrl(img.src) || ''} alt={img.alt} style={{ maxWidth: img.maxWidth, width: 'auto', height: 'auto', objectFit: 'contain', display: 'block', margin: '8px 0 0 0', border: `2px solid ${borderColor}` }} />
+                <Media key={img.src} src={getImageUrl(img.src) || ''} alt={img.alt} style={{ maxWidth: img.maxWidth, width: 'auto', height: 'auto', objectFit: 'contain', display: 'block', margin: '8px 0 0 0', border: `2px solid ${borderColor}` }} />
               ))}
             </div>
           </Window>
@@ -287,7 +299,7 @@ export default function Win98Station() {
           <Window id="interactive" title="Interactive.exe" resizable className="window-interactive window-pop-open" onClose={() => handleCloseWindow('interactive')}>
             <div style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 10 }}>
               <TypewriterTitle text="you can interact with windows!" tag="p" trigger={windowsVisible.interactive} style={{ margin: 0, fontSize: '1.15em', flex: 1 }} />
-              <img src={getImageUrl('ascii-gif') || ''} alt="Bear" style={{ maxWidth: 100, height: 'auto', flexShrink: 0, border: `2px solid ${borderColor}` }} />
+              <Media src={getImageUrl('ascii-gif') || ''} alt="Bear" style={{ maxWidth: 100, height: 'auto', flexShrink: 0, border: `2px solid ${borderColor}` }} />
             </div>
           </Window>
         )}
@@ -302,7 +314,7 @@ export default function Win98Station() {
                 return (
                   <div key={img} style={{ display: 'inline-block', margin: 8, textAlign: 'center', verticalAlign: 'top', width: 100, cursor: 'pointer' }}
                     onDoubleClick={() => openImageViewer(index)}>
-                    <img src={imgUrl || ''} alt={img} style={{ width: 64, height: 64, objectFit: 'contain', border: `1px solid ${borderColor}`, background: '#fff', padding: 2, display: 'block', margin: '0 auto 4px auto' }} />
+                    <Media src={imgUrl || ''} alt={img} style={{ width: 64, height: 64, objectFit: 'contain', border: `1px solid ${borderColor}`, background: '#fff', padding: 2, display: 'block', margin: '0 auto 4px auto' }} />
                     <span style={{ fontSize: '0.85em', color: '#000', display: 'block', wordBreak: 'break-word' }}>{img}</span>
                   </div>
                 );

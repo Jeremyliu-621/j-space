@@ -22,13 +22,13 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
   me: {
     imageFolder: "/me",
     images: [
-      { file: "mesmiling.jpeg", width: 300, height: 300, x: 60, y: 75 },
+      { file: "mesmiling.webp", width: 300, height: 300, x: 60, y: 75 },
       { file: "mustache.jpg", width: 160, height: 160, x: 130, y: 210 },
       { file: "yohjishirt.png", width: 420, height: 300, x: 12, y: 305 },
-      { file: "4guys.png", width: 285, height: 245, x: 845, y: 190 },
+      { file: "4guys.webp", width: 285, height: 245, x: 845, y: 190 },
       { file: "kimeowra.jpg", width: 285, height: 390, x: 1140, y: 10 },
-      { file: "thefalsemirror.png", width: 315, height: 170, x: 815, y: 20 },
-      { file: "neverenough.png", width: 400, height: 245, x: 1100, y: 360 },
+      { file: "thefalsemirror.webp", width: 315, height: 170, x: 815, y: 20 },
+      { file: "neverenough.webp", width: 400, height: 245, x: 1100, y: 360 },
       { file: "uoftsticker.png", width: 500, height: 500, x: 700, y: 300 },
     ],
     defaultText: {
@@ -43,10 +43,10 @@ const TAB_PROPS: Record<string, ArtTabProps> = {
   sports: {
     imageFolder: "/sports",
     images: [
-      { file: "bjj.JPG", width: 320, height: 245, x: 450, y: 65 },
+      { file: "bjj.webp", width: 320, height: 245, x: 450, y: 65 },
       { file: "Hans-longboarding.jpg", width: 230, height: 152, x: 840, y: 88 },
       {
-        file: "alex-rockclimbing.png",
+        file: "alex-rockclimbing.webp",
         width: 230,
         height: 195,
         x: 1120,
@@ -163,10 +163,16 @@ export default function PseudoBrowser() {
       const panel = content.querySelector(
         ".pb-panel-active",
       ) as HTMLElement | null;
-      if (e.deltaY < 0 && (!panel || panel.scrollTop <= 0)) return;
+      if (!panel) return;
+
+      const atTop = panel.scrollTop <= 0;
+      const atBottom =
+        panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+      if (e.deltaY < 0 && atTop) return;
+      if (e.deltaY > 0 && atBottom) return;
 
       e.preventDefault();
-      if (panel) panel.scrollTop += e.deltaY;
+      panel.scrollTop += e.deltaY;
     };
 
     browser.addEventListener("wheel", handleWheel, { passive: false });
