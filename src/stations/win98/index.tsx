@@ -195,7 +195,6 @@ export default function Win98Station() {
             <p>{content.aboutMe.bio}</p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
               <img src={getImageUrl('cruisesunset') || ''} alt="Cruise Sunset" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
-              <img src={getImageUrl('pixelbjj') || ''} alt="bjj pixel art" style={{ width: '60%', height: 100, margin: '8px 2px', border: `2px solid ${borderColor}`, boxSizing: 'border-box', display: 'block', objectFit: 'cover', objectPosition: 'center' }} />
             </div>
             <div className="social-buttons-grid">
               {content.socialLinks.map(link => (

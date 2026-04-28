@@ -7,9 +7,6 @@ const IMAGE_MAP: Record<string, string> = {
   sinatra: "/projects/sinatrademo.gif",
   lockblock: "/projects/lockblock.png",
   "ufc-search": "/projects/ufc_elo.png",
-  binder_action: "/projects/binder_action.gif",
-  stop_dont_go_on_grey: "/projects/stop_dont_go_on_grey.jpg",
-  "j-gif-space": "/projects/j-gif-space.gif",
 };
 
 /* ── Sidebar tools (same as ArtTab) ── */

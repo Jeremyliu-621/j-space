@@ -7,15 +7,16 @@ import {
   useMemo,
 } from "react";
 import { projects } from "../../../lib/content";
+import { useTheme } from "../../win98/ThemeProvider";
+import { getImageUrl } from "../../../lib/images";
 
 /** Project slug → public asset (matches Win98 / ProjectsTab) */
 const PROJECT_IMAGE_SRC: Record<string, string> = {
+  opticat: "/projects/opticat.png",
+  beavertrail: "/projects/beavertailsdevpostbanner.png",
   sinatra: "/projects/sinatrademo.gif",
   lockblock: "/projects/lockblock.png",
   "ufc-search": "/projects/ufc_elo.png",
-  binder_action: "/projects/binder_action.gif",
-  stop_dont_go_on_grey: "/projects/stop_dont_go_on_grey.jpg",
-  "j-gif-space": "/projects/j-gif-space.gif",
 };
 
 /** Projects tab canvas grid — cards, type scale (see V_GAP for vertical rhythm) */
@@ -77,7 +78,7 @@ const ART_IMAGES = [
 /* ══════════════════════════════════════════════════════════════
    TYPES
    ══════════════════════════════════════════════════════════════ */
-type ElementType = "image" | "shape" | "text" | "link";
+type ElementType = "image" | "shape" | "text" | "link" | "card";
 type ShapeKind = "rect" | "circle" | "triangle" | "line" | "arrow" | "star";
 type HandleDir = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "rotate";
 
@@ -104,6 +105,8 @@ interface CanvasElement {
   groupId?: number;
   href?: string;
   linkIcon?: "website" | "github";
+  /** Index into the `projects` array — set when type === "card". */
+  projectIdx?: number;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -540,6 +543,10 @@ export default function ArtTab({
   links,
 }: ArtTabProps = {}) {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
+  const cardBtnStyle = theme.getButtonStyle();
+  const websiteIconUrl = getImageUrl("website-icon") ?? "";
+  const githubIconUrl = getImageUrl("github-icon") ?? "";
 
   const imgList = projectsGrid ? [] : (images ?? ART_IMAGES);
   const txt = defaultText ?? {
@@ -557,8 +564,6 @@ export default function ArtTab({
     if (projectsGrid) {
       const els: CanvasElement[] = [];
       let id = 1;
-      let nextGid = 1;
-      const INNER_W = PG.CARD_W - PG.PAD * 2;
 
       els.push({
         id: id++,
@@ -575,166 +580,26 @@ export default function ArtTab({
         fontColor: "#1a1a1a",
       });
 
+      const CARD_W = 300;
+      const CARD_H = 340;
+      const GRID_GAP = 24;
       for (let pi = 0; pi < projects.length; pi++) {
-        const p = projects[pi];
-        const gid = nextGid++;
-        const cx =
-          PG.GRID_PAD_X + (pi % PG.GRID_COLS) * (PG.CARD_W + PG.GRID_GAP);
+        const cx = PG.GRID_PAD_X + (pi % PG.GRID_COLS) * (CARD_W + GRID_GAP);
         const cy =
           PG_GRID_PAD_Y +
-          Math.floor(pi / PG.GRID_COLS) * (PG.CARD_H + PG.GRID_GAP);
-        const baseZ = id;
-
+          Math.floor(pi / PG.GRID_COLS) * (CARD_H + GRID_GAP);
         els.push({
           id: id++,
-          type: "shape",
-          shape: "rect",
+          type: "card",
           x: cx,
           y: cy,
-          w: PG.CARD_W,
-          h: PG.CARD_H,
+          w: CARD_W,
+          h: CARD_H,
           rotation: 0,
-          zIndex: baseZ,
-          groupId: gid,
-          fill: "#ffffff",
-          strokeColor: "#d4d4d4",
+          zIndex: id,
+          projectIdx: pi,
           noTilt: true,
         });
-
-        const yTitle = cy + PG.IMG_H + PG.IMG_PAD_BELOW;
-        const yDesc = yTitle + PG.TITLE_H + PG.V_GAP;
-
-        const imgSlug = p.image;
-        if (imgSlug) {
-          const src = PROJECT_IMAGE_SRC[imgSlug] ?? `/projects/${imgSlug}.png`;
-          els.push({
-            id: id++,
-            type: "image",
-            x: cx,
-            y: cy,
-            w: PG.CARD_W,
-            h: PG.IMG_H,
-            rotation: 0,
-            zIndex: baseZ,
-            file: src,
-            groupId: gid,
-            noTilt: true,
-          });
-        }
-
-        els.push({
-          id: id++,
-          type: "text",
-          x: cx + PG.PAD,
-          y: yTitle,
-          w: INNER_W,
-          h: PG.TITLE_H,
-          rotation: 0,
-          zIndex: baseZ,
-          content: p.title,
-          fontSize: PG.TITLE_FS,
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontColor: "#111",
-          groupId: gid,
-          noTilt: true,
-        });
-
-        els.push({
-          id: id++,
-          type: "text",
-          x: cx + PG.PAD,
-          y: yDesc,
-          w: INNER_W,
-          h: PG.DESC_H,
-          rotation: 0,
-          zIndex: baseZ,
-          content: p.description,
-          fontSize: PG.DESC_FS,
-          fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-          fontColor: "#4a4a4a",
-          groupId: gid,
-          noTilt: true,
-        });
-
-        let stackY = yDesc + PG.DESC_H + PG.V_GAP;
-        if (p.front) {
-          els.push({
-            id: id++,
-            type: "text",
-            x: cx + PG.PAD,
-            y: stackY,
-            w: INNER_W,
-            h: PG.META_LINE_H,
-            rotation: 0,
-            zIndex: baseZ,
-            content: `Front: ${p.front}`,
-            fontSize: PG.META_FS,
-            fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-            fontColor: "#555",
-            groupId: gid,
-            noTilt: true,
-          });
-          stackY += PG.META_LINE_H + PG.V_GAP;
-        }
-        if (p.back) {
-          els.push({
-            id: id++,
-            type: "text",
-            x: cx + PG.PAD,
-            y: stackY,
-            w: INNER_W,
-            h: PG.META_LINE_H,
-            rotation: 0,
-            zIndex: baseZ,
-            content: `Back: ${p.back}`,
-            fontSize: PG.META_FS,
-            fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
-            fontColor: "#555",
-            groupId: gid,
-            noTilt: true,
-          });
-          stackY += PG.META_LINE_H + PG.V_GAP;
-        }
-
-        const linkY = stackY + PG.V_GAP;
-        let linkX = cx + PG.PAD;
-        if (p.website) {
-          els.push({
-            id: id++,
-            type: "link",
-            x: linkX,
-            y: linkY,
-            w: PG.LINK_W,
-            h: PG.LINK_H,
-            rotation: 0,
-            zIndex: baseZ,
-            content: "Website",
-            fontSize: PG.LINK_FS,
-            href: p.website,
-            linkIcon: "website",
-            groupId: gid,
-            noTilt: true,
-          });
-          linkX += PG.LINK_W + PG.LINK_GAP_X;
-        }
-        if (p.github) {
-          els.push({
-            id: id++,
-            type: "link",
-            x: linkX,
-            y: linkY,
-            w: PG.LINK_W,
-            h: PG.LINK_H,
-            rotation: 0,
-            zIndex: baseZ,
-            content: "GitHub",
-            fontSize: PG.LINK_FS,
-            href: p.github,
-            linkIcon: "github",
-            groupId: gid,
-            noTilt: true,
-          });
-        }
       }
       return els;
     }
@@ -808,20 +673,11 @@ export default function ArtTab({
 
   const projectsGridMinCanvasHeight = useMemo(() => {
     if (!projectsGrid) return 0;
-    const frames = elements.filter(
-      (e) => e.type === "shape" && e.fill != null && e.groupId != null,
-    );
-    if (frames.length === 0) {
-      return (
-        PG_GRID_PAD_Y +
-        Math.ceil(projects.length / PG.GRID_COLS) * (PG.CARD_H + PG.GRID_GAP) -
-        PG.GRID_GAP +
-        72
-      );
-    }
-    const bottom = Math.max(...frames.map((f) => f.y + f.h));
+    const cards = elements.filter((e) => e.type === "card");
+    if (cards.length === 0) return 0;
+    const bottom = Math.max(...cards.map((c) => c.y + c.h));
     return bottom + 72;
-  }, [projectsGrid, elements, projects.length]);
+  }, [projectsGrid, elements]);
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
@@ -2454,6 +2310,70 @@ export default function ArtTab({
                     {el.content}
                   </div>
                 )}
+
+                {/* Project card */}
+                {el.type === "card" &&
+                  el.projectIdx != null &&
+                  projects[el.projectIdx] &&
+                  (() => {
+                    const p = projects[el.projectIdx];
+                    const slug = p.image;
+                    const imgSrc = slug
+                      ? PROJECT_IMAGE_SRC[slug] ?? `/projects/${slug}.png`
+                      : null;
+                    return (
+                      <div className="art-card">
+                        <div className="project-card">
+                          {imgSrc && (
+                            <img
+                              src={imgSrc}
+                              className="project-card-image"
+                              alt={p.title}
+                              draggable={false}
+                            />
+                          )}
+                          <h3 className="project-card-title">{p.title}</h3>
+                          <p className="project-card-description">
+                            {p.description}
+                          </p>
+                          <div className="project-card-buttons">
+                            {p.website && (
+                              <a
+                                href={p.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="social-btn"
+                                style={cardBtnStyle}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {websiteIconUrl && (
+                                  <img src={websiteIconUrl} alt="web" />
+                                )}{" "}
+                                web
+                              </a>
+                            )}
+                            {p.github && (
+                              <a
+                                href={p.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="social-btn"
+                                style={cardBtnStyle}
+                                onPointerDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {githubIconUrl && (
+                                  <img src={githubIconUrl} alt="git" />
+                                )}{" "}
+                                git
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                 {/* Selection UI — single selection: full handles */}
                 {(isSingleSelected || isTiltText) && (

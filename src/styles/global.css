@@ -1624,7 +1624,7 @@ canvas,
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
 }
 
 .pb-panel-active {
@@ -1679,6 +1679,39 @@ canvas,
 
 .pb-panel[data-tab="projects"] {
   background-color: #f0f0f0;
+}
+
+/* Project card rendered as a single draggable canvas element.
+   Matches 98.css .window typography: Pixelated MS Sans Serif at 11px base. */
+.art-card {
+  width: 100%;
+  height: 100%;
+  font-family: "Pixelated MS Sans Serif", Arial;
+  font-size: 11px;
+  color: #222;
+  cursor: grab;
+}
+
+.art-card .project-card {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.art-card .project-card-title {
+  font-size: 1.35em;
+  line-height: 1.2;
+}
+
+.art-card .project-card-description {
+  font-size: 1.25em;
+  line-height: 1.3;
+}
+
+/* Buttons inside a draggable card: restore pointer cursor and let clicks
+   reach the anchor (drag is blocked via stopPropagation in JSX). */
+.art-card .social-btn {
+  cursor: pointer;
 }
 
 /* Projects tab: larger link text, classic blue links with icons */

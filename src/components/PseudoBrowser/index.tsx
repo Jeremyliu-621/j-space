@@ -163,10 +163,16 @@ export default function PseudoBrowser() {
       const panel = content.querySelector(
         ".pb-panel-active",
       ) as HTMLElement | null;
-      if (e.deltaY < 0 && (!panel || panel.scrollTop <= 0)) return;
+      if (!panel) return;
+
+      const atTop = panel.scrollTop <= 0;
+      const atBottom =
+        panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+      if (e.deltaY < 0 && atTop) return;
+      if (e.deltaY > 0 && atBottom) return;
 
       e.preventDefault();
-      if (panel) panel.scrollTop += e.deltaY;
+      panel.scrollTop += e.deltaY;
     };
 
     browser.addEventListener("wheel", handleWheel, { passive: false });
