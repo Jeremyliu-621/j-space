@@ -1,11 +1,14 @@
 import { useTheme } from "../../win98/ThemeProvider";
 import { getImageUrl } from "../../../lib/images";
 import { projects } from "../../../lib/content";
+import Media from "../../Media";
 
 const PROJECT_IMAGE_SRC: Record<string, string> = {
-  sinatra: "/projects/sinatrademo.gif",
-  lockblock: "/projects/lockblock.png",
-  "ufc-search": "/projects/ufc_elo.png",
+  opticat: "/projects/opticat.png",
+  beavertrail: "/projects/beavertailsdevpostbanner.png",
+  sinatra: "/projects/sinatrademo.mp4",
+  lockblock: "/projects/lockblock.webp",
+  "ufc-search": "/projects/ufc_elo.webp",
 };
 
 function resolveProjectImage(slug?: string): string | null {
@@ -28,7 +31,7 @@ export default function BuildsTab() {
           return (
             <div key={project.title} className="project-card">
               {imgSrc && (
-                <img
+                <Media
                   src={imgSrc}
                   className="project-card-image"
                   alt={project.title}
@@ -45,7 +48,7 @@ export default function BuildsTab() {
                     className="social-btn"
                     style={btnStyle}
                   >
-                    {websiteIcon && <img src={websiteIcon} alt="web" />} web
+                    {websiteIcon && <img loading="lazy" decoding="async" src={websiteIcon} alt="web" />} web
                   </a>
                 )}
                 {project.github && (
@@ -56,7 +59,7 @@ export default function BuildsTab() {
                     className="social-btn"
                     style={btnStyle}
                   >
-                    {githubIcon && <img src={githubIcon} alt="git" />} git
+                    {githubIcon && <img loading="lazy" decoding="async" src={githubIcon} alt="git" />} git
                   </a>
                 )}
               </div>

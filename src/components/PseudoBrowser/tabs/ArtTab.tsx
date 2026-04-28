@@ -9,14 +9,15 @@ import {
 import { projects } from "../../../lib/content";
 import { useTheme } from "../../win98/ThemeProvider";
 import { getImageUrl } from "../../../lib/images";
+import Media from "../../Media";
 
 /** Project slug → public asset (matches Win98 / ProjectsTab) */
 const PROJECT_IMAGE_SRC: Record<string, string> = {
   opticat: "/projects/opticat.png",
   beavertrail: "/projects/beavertailsdevpostbanner.png",
-  sinatra: "/projects/sinatrademo.gif",
-  lockblock: "/projects/lockblock.png",
-  "ufc-search": "/projects/ufc_elo.png",
+  sinatra: "/projects/sinatrademo.mp4",
+  lockblock: "/projects/lockblock.webp",
+  "ufc-search": "/projects/ufc_elo.webp",
 };
 
 /** Projects tab canvas grid — cards, type scale (see V_GAP for vertical rhythm) */
@@ -57,22 +58,22 @@ const PG_GRID_PAD_Y = PG.HEAD_Y + PG.HEAD_H + PG.HEAD_GAP_BELOW;
    IMAGE CONFIG — edit positions / sizes here
    ══════════════════════════════════════════════════════════════ */
 const ART_IMAGES = [
-  { file: "almond-blossoms.jpg", width: 280, height: 210, x: 80, y: 30 },
-  { file: "sunflowers.JPG", width: 180, height: 240, x: 400, y: 15 },
+  { file: "almond-blossoms.webp", width: 280, height: 210, x: 80, y: 30 },
+  { file: "sunflowers.webp", width: 180, height: 240, x: 400, y: 15 },
   { file: "guernica.jpg", width: 340, height: 170, x: 30, y: 280 },
-  { file: "impression-sunrise.jpg", width: 220, height: 170, x: 620, y: 50 },
-  { file: "spiderverse.JPG", width: 260, height: 175, x: 870, y: 20 },
-  { file: "BR0D4R.jpg", width: 195, height: 250, x: 880, y: 230 },
+  { file: "impression-sunrise.webp", width: 220, height: 170, x: 620, y: 50 },
+  { file: "spiderverse.webp", width: 260, height: 175, x: 870, y: 20 },
+  { file: "BR0D4R.webp", width: 195, height: 250, x: 880, y: 230 },
   { file: "drool.jpg", width: 175, height: 220, x: 1100, y: 60 },
-  { file: "resk12tag.png", width: 100, height: 100, x: 410, y: 270 },
+  { file: "resk12tag.webp", width: 100, height: 100, x: 410, y: 270 },
   { file: "zephyr_tag.jpg", width: 200, height: 150, x: 680, y: 260 },
-  { file: "annalauraart.PNG", width: 165, height: 215, x: 1110, y: 310 },
-  { file: "beetlemoses.jpg", width: 215, height: 165, x: 50, y: 490 },
+  { file: "annalauraart.webp", width: 165, height: 215, x: 1110, y: 310 },
+  { file: "beetlemoses.webp", width: 215, height: 165, x: 50, y: 490 },
   { file: "sundown-sails.png", width: 255, height: 185, x: 310, y: 470 },
   { file: "Jesus.jpg", width: 155, height: 205, x: 600, y: 440 },
-  { file: "third-of-may.jpg", width: 275, height: 195, x: 790, y: 460 },
-  { file: "yohji.jpg", width: 165, height: 225, x: 1090, y: 540 },
-  { file: "rams.jpg", width: 200, height: 150, x: 420, y: 680 },
+  { file: "third-of-may.webp", width: 275, height: 195, x: 790, y: 460 },
+  { file: "yohji.webp", width: 165, height: 225, x: 1090, y: 540 },
+  { file: "rams.webp", width: 200, height: 150, x: 420, y: 680 },
 ];
 
 /* ══════════════════════════════════════════════════════════════
@@ -2175,6 +2176,8 @@ export default function ArtTab({
                 {/* Image */}
                 {el.type === "image" && (
                   <img
+                    loading="lazy"
+                    decoding="async"
                     src={
                       el.file?.startsWith("/") || el.file?.startsWith("http")
                         ? el.file
@@ -2325,7 +2328,7 @@ export default function ArtTab({
                       <div className="art-card">
                         <div className="project-card">
                           {imgSrc && (
-                            <img
+                            <Media
                               src={imgSrc}
                               className="project-card-image"
                               alt={p.title}
@@ -2348,7 +2351,7 @@ export default function ArtTab({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {websiteIconUrl && (
-                                  <img src={websiteIconUrl} alt="web" />
+                                  <img loading="lazy" decoding="async" src={websiteIconUrl} alt="web" />
                                 )}{" "}
                                 web
                               </a>
@@ -2364,7 +2367,7 @@ export default function ArtTab({
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {githubIconUrl && (
-                                  <img src={githubIconUrl} alt="git" />
+                                  <img loading="lazy" decoding="async" src={githubIconUrl} alt="git" />
                                 )}{" "}
                                 git
                               </a>

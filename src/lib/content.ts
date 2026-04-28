@@ -150,14 +150,14 @@ export const thanks: ThanksItem[] = [
 ];
 
 export const ASSET_IMAGES = [
-  "bear.gif",
+  "bear.mp4",
   "cruisesunset.JPG",
-  "do you even lift like a boss GIF.gif",
+  "do you even lift like a boss GIF.mp4",
   "directory_computer.png",
   "portfolio-website-cover.png",
   "rref_calculator.PNG",
   "slot-machine.PNG",
-  "ufc_elo.png",
+  "ufc_elo.webp",
 ];
 
 export const socialLinks = [
