@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import bgPattern from '../../assets/Backgroundpixels.png';
 import LandingArena from '../../components/arena-3d/LandingArena';
-import LeaderboardPreview from './LeaderboardPreview';
 
 /**
  * Four full straw `LandingArena` instances — copied as-is from the straw
@@ -71,8 +70,6 @@ export default function IntroStation() {
       <div style={{ ...arenaBase, bottom: -BLEED_Y, right: -BLEED_X }}>
         <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />
       </div>
-
-      <LeaderboardPreview />
 
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
