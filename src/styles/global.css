@@ -302,41 +302,26 @@ canvas,
   background-repeat: repeat;
   font-family: "EB Garamond", serif;
   color: #1a1a1a;
-  /* Switched from flex-center to block: panel is absolute-positioned in the
-     upper portion so the 3D iso scene gets the lower ~60% of the viewport. */
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: relative;
   /* Override .station's content-visibility:auto — it breaks R3F's
-     ResizeObserver on the canvas and we want the agent to render
-     immediately on first paint anyway. */
+     ResizeObserver on the canvas. */
   content-visibility: visible;
 }
 
 .intro-panel {
   background-color: #cfd6df;
-  padding: 24px 60px;
+  padding: 64px 96px;
   text-align: center;
-  max-width: 480px;
-  width: min(480px, 70vw);
-  /* Anchored at the top of the viewport — panel takes top ~22%, leaving
-     ~78% for the iso 3D scene below. */
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
+  max-width: 720px;
+  width: min(720px, 70vw);
+  position: relative;
   /* Above the 3D canvas (z 10000) and noise overlay (z 9999) so the text
-     reads cleanly even when the iso scene composes behind it. */
+     reads cleanly with the iso scene composing behind/around it. */
   z-index: 10002;
-}
-
-.intro-panel .intro-heading {
-  font-size: 1.6rem;
-  margin: 0 0 0.9rem 0;
-}
-
-.intro-panel .intro-line {
-  font-size: 0.95rem;
-  line-height: 1.7;
 }
 
 .intro-heading {
