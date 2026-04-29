@@ -16,26 +16,35 @@ interface IconProps {
   style?: React.CSSProperties;
 }
 
-/** Desk with chair tucked under it. */
+/** Desk with a tucked chair underneath. */
 export function DeskIcon({ size = 90, className, style }: IconProps) {
   return (
     <svg viewBox="0 0 100 80" width={size} height={size * 0.8} className={className} style={style}>
-      {/* Chair (drawn first, partially behind desk) */}
-      <rect x="38" y="48" width="20" height="4" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
-      <rect x="38" y="52" width="3" height="22" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
-      <rect x="55" y="52" width="3" height="22" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
-      <rect x="36" y="36" width="4" height="14" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
+      {/* Chair backrest (tall, stands above desk top) */}
+      <rect x="44" y="14" width="14" height="20" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
+      <rect x="46" y="16" width="10" height="16" fill={ACCENT.blue} stroke={stroke} strokeWidth="0.7" />
+      {/* Chair seat (peeks out from under desk) */}
+      <rect x="42" y="42" width="18" height="4" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
+      {/* Chair stem + base (rolling office chair) */}
+      <rect x="50" y="46" width="2" height="18" fill={FURNITURE_TINT.chair} stroke={stroke} strokeWidth={sw} />
+      <path
+        d="M 42 64 L 60 64 L 56 70 L 46 70 Z"
+        fill={FURNITURE_TINT.chair}
+        stroke={stroke}
+        strokeWidth={sw}
+      />
       {/* Desk top */}
-      <rect x="10" y="30" width="80" height="6" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
+      <rect x="10" y="34" width="80" height="6" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
       {/* Desk legs */}
-      <rect x="14" y="36" width="4" height="38" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
-      <rect x="82" y="36" width="4" height="38" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
-      {/* Monitor on desk */}
-      <rect x="22" y="14" width="22" height="14" fill={FURNITURE_TINT.computer} stroke={stroke} strokeWidth={sw} />
-      <rect x="30" y="28" width="6" height="2" fill={FURNITURE_TINT.computer} stroke={stroke} strokeWidth={sw} />
-      {/* Mug on desk */}
-      <rect x="60" y="22" width="8" height="8" fill={ACCENT.rose} stroke={stroke} strokeWidth={sw} />
-      <rect x="68" y="24" width="3" height="4" fill={ACCENT.rose} stroke={stroke} strokeWidth={sw} />
+      <rect x="14" y="40" width="4" height="34" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
+      <rect x="82" y="40" width="4" height="34" fill={FURNITURE_TINT.desk} stroke={stroke} strokeWidth={sw} />
+      {/* Monitor on desk (left) */}
+      <rect x="22" y="18" width="22" height="14" fill={FURNITURE_TINT.computer} stroke={stroke} strokeWidth={sw} />
+      <rect x="24" y="20" width="18" height="10" fill={ACCENT.blue} />
+      <rect x="30" y="32" width="6" height="2" fill={FURNITURE_TINT.computer} stroke={stroke} strokeWidth={sw} />
+      {/* Mug on desk (right) */}
+      <rect x="64" y="26" width="8" height="8" fill={ACCENT.rose} stroke={stroke} strokeWidth={sw} />
+      <rect x="72" y="28" width="3" height="4" fill={ACCENT.rose} stroke={stroke} strokeWidth={sw} />
     </svg>
   );
 }
@@ -201,8 +210,9 @@ export default function OfficeElements() {
         <BookshelfIcon size={110} />
       </div>
 
-      {/* RIGHT-BOTTOM: another small plant */}
-      <div style={{ position: 'absolute', bottom: 32, right: 90 }}>
+      {/* RIGHT-BOTTOM: another small plant — pushed in to clear the
+          archive link in the corner */}
+      <div style={{ position: 'absolute', bottom: 32, right: 180 }}>
         <PlantIcon size={56} />
       </div>
     </div>

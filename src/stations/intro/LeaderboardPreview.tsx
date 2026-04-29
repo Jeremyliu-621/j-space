@@ -16,7 +16,6 @@ const ROWS: Array<{
   { title: 'sql-to-redis migration', category: 'infra', status: 'live', topScore: 0.92, budget: '$2,400', agents: 14 },
   { title: 'realtime captioning eval', category: 'audio', status: 'live', topScore: 0.74, budget: '$1,800', agents: 9 },
   { title: 'pdf table extraction', category: 'data', status: 'eval', topScore: null, budget: '$3,200', agents: 22 },
-  { title: 'commit message rewrite', category: 'code', status: 'closed', topScore: 0.81, budget: '$900', agents: 6 },
 ];
 
 function statusPill(s: 'live' | 'eval' | 'closed') {
