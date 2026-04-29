@@ -19,7 +19,11 @@ Took the existing jia.build-style intro station (floral pattern + flat panel + b
 
 All inspired by straw's arena-tuner visual treatment (BWEffects), translated from white-bg pastels to our pale blue-grey palette.
 
-**Note: This is 2D SVG, not THREE.js.** I tried to use straw's actual approach (procedural voxel agents in @react-three/fiber + @react-three/drei) but R3F v9 was failing to draw geometry to the framebuffer in this project's environment despite extensive debugging — see `Lessons learned` below. SVG is the right tool here anyway: smaller bundle, no GPU dependency, identical visual aesthetic.
+**Update — REAL 3D is now working.** Initial SVG implementation has been replaced. The R3F rendering issue was a z-index conflict: the page has a `body::before` noise overlay at z-index 9999 with `mix-blend-mode: multiply` that was multiplying every WebGL pixel into near-black. Setting the canvas wrapper to z-index 10000 fixed it — now using:
+- Procedural voxel agent (R3F primitives, ported from straw's `AgentCharacter.tsx`)
+- Straw's actual GLB office furniture (`useGLTF` from drei) loaded from `public/office-assets/models/furniture/`
+- Black `EdgesGeometry` outlines on every mesh (BWEffects-inspired)
+- Tints applied per-furniture lerping toward our `TINT_TARGET` (`#dde2e8`)
 
 ---
 
@@ -73,10 +77,10 @@ From `/app/leaderboard/page.tsx` — table of competitions with: title, category
 
 ## Decisions
 
-### Why 2D SVG instead of 3D
-After ~45 minutes debugging, R3F v9 mounted the canvas fine, ran the React tree, but never drew any meshes to the framebuffer. Even plain THREE.js (no R3F) had the same symptom: `renderer.render()` was called every frame, but the canvas pixel buffer stayed transparent. Clear-color rendering worked (red filled the canvas), so the renderer wasn't dead — but no geometry survived to the screen. Wasn't worth more time when SVG delivers the same look.
+### Why R3F initially failed (and what fixed it)
+Took ~45 minutes to find: the page has `body::before` at z-index 9999 with `mix-blend-mode: multiply` (the pixel-grain texture). With the canvas at z-index 1, every WebGL pixel was being multiplied into near-black by the overlay above. The clear color showed because `alpha: false` makes the canvas itself opaque (multiply on opaque works), but transparent regions where geometry was drawn over a transparent canvas got crushed.
 
-The straw GLB models (desk, chair, computer, etc.) are still copied into `public/office-assets/` for if you want to revisit 3D later. Currently unused.
+Fix: set the canvas wrapper to `z-index: 10000` (above the noise overlay). The leaderboard sits at `z-index: 10001`. Both stack above `body::before`.
 
 ### Cursor-following implementation
 - Single window-level `mousemove` listener
@@ -113,9 +117,9 @@ The straw GLB models (desk, chair, computer, etc.) are still copied into `public
 
 ## Lessons learned
 
-- **R3F v9 + Vite + StrictMode + content-visibility** is a fragile combo. The canvas mounts but the GL framebuffer stays empty. If you want 3D back, try @react-three/fiber 8.x with React 18 — or write plain THREE.js and skip R3F entirely (which I tried and also failed for unknown reasons).
-- **`content-visibility: auto`** on a parent breaks R3F's ResizeObserver — the canvas stays at the default 300×150 even though the parent is sized correctly. Override to `visible` on any station that hosts a Canvas.
-- **2D SVG is plenty** for a voxel-style character at this scale. Frame-rate is great, file-size is tiny, no shader debugging.
+- **`mix-blend-mode: multiply` overlays murder WebGL canvases.** The body's noise grain at `z-index: 9999` was multiplying every transparent canvas pixel into invisible. Solution: put the canvas above the overlay (`z-index: 10000`). Symptom of this specific bug: clear colors render fine, but no geometry visible.
+- **`content-visibility: auto`** on a parent breaks R3F's ResizeObserver — the canvas stays at the default 300×150 even though the parent is sized correctly. Override to `visible` on any station that hosts a Canvas. (We do this in `.station-intro` in global.css.)
+- **R3F v9 needs React 19, three >=0.156.** Both are satisfied. v9 worked once the z-index bug was fixed.
 
 ---
 
