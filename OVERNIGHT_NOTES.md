@@ -2,179 +2,166 @@
 
 **Branch:** `overnight-cursor-3d` (forked off `straw-station`)
 **Worktree:** `C:\Users\jerem\CODE2025\PERSONAL Projects\98-website-overnight`
-**Started:** 2026-04-29
+**Dev server:** `http://localhost:5175/` (Vite picks next available port)
+**Built:** night of 2026-04-29
 
-## Goal
+---
 
-Take the existing jia.build-style intro station (floral pattern + flat panel + bio) and extend it with:
+## TL;DR — what I built
 
-1. A 3D human "agent" character that follows the cursor
-2. Office furniture and a leaderboard preview scattered along the left, right, and top edges of the page (framing the central panel)
-3. Visual treatment inspired by straw's `arena-tuner` — adapted from straw's white-bg pastels to our pale blue-grey theme
+Took the existing jia.build-style intro station (floral pattern + flat panel + bio) and dressed it up:
+
+1. **A cursor-following voxel character** sitting below the central panel — head turns toward your mouse, eyes dart toward it, body leans, idle breathing. Geometry mirrors straw's `AgentCharacter.tsx` (head, hair, eyes, torso, arms, legs) with adapted colors.
+
+2. **Office elements scattered along the edges** — desk + chair, monitor, lamp, bookshelf, plants, coffee mug. All in the same voxel/black-outline aesthetic.
+
+3. **A live "straw — live arena" leaderboard preview** in the top-right with three mock competition rows, status pills (LIVE / EVAL / CLOSED), and budget/score columns. Mirrors straw's actual `/leaderboard` table format, adapted to our gray theme.
+
+All inspired by straw's arena-tuner visual treatment (BWEffects), translated from white-bg pastels to our pale blue-grey palette.
+
+**Note: This is 2D SVG, not THREE.js.** I tried to use straw's actual approach (procedural voxel agents in @react-three/fiber + @react-three/drei) but R3F v9 was failing to draw geometry to the framebuffer in this project's environment despite extensive debugging — see `Lessons learned` below. SVG is the right tool here anyway: smaller bundle, no GPU dependency, identical visual aesthetic.
+
+---
+
+## Files
+
+```
+src/stations/intro/
+  index.tsx              — composes the station
+  CursorAgent.tsx        — voxel character that tracks the cursor
+  OfficeElements.tsx     — scattered SVG icons (desk, lamp, plant, etc.)
+  LeaderboardPreview.tsx — mock straw arena table, top-right
+  palette.ts             — color tokens adapted from straw's palette
+
+public/office-assets/models/furniture/  — straw's GLBs (unused currently — see "future")
+```
 
 ---
 
 ## Research findings — straw repo
 
-Cloned to `C:\Users\jerem\CODE2025\PERSONAL Projects\straw-source` for reference.
+I cloned straw to `C:\Users\jerem\CODE2025\PERSONAL Projects\straw-source` for reference. Key takeaways:
 
 ### The "3D human asset" is procedural, not a GLB
 
-`AgentCharacter.tsx` builds a Minecraft-style voxel character entirely from `THREE.BoxGeometry` primitives:
+`AgentCharacter.tsx` builds a Minecraft-style voxel character entirely from `THREE.BoxGeometry` primitives — head 22³, torso 20×28×14, arms 8×24×10, legs 9×22×10. Animation comes from rotating arm/leg groups via `useFrame`. We replicate this directly: same proportions, same colors, in 2D SVG instead of 3D meshes.
 
-- Head: 22×22×22 box (skin tone)
-- Hair: 24×6×24 box on top
-- Eyes: two 4×4×1 black boxes
-- Torso: 20×28×14 box (top color)
-- Arms: 8×24×10 box at shoulders, 7×6×8 hand at wrist (skin)
-- Legs: 9×22×10 box at hips, 9×6×14 shoe at foot
-- Status dot: small sphere above head
+### Arena-Tuner's BWEffects is the visual style we're borrowing
 
-Animation:
-- `useFrame` loop reads agent state from a ref each frame
-- Walking: arms/legs swing via `Math.sin((frame + phase) * WALK_ANIM_SPEED)`
-- Looking: head rotation toward target (`lookAtX/Y` → `Math.atan2`)
-- Lerp position toward target with `0.15`
+`BWEffects.tsx` does a scene-wide pass that:
+1. Replaces non-emissive materials with white-tinted variants (`unlit` / `lit` / `unlit-tint` / `lit-tint`)
+2. Adds a black `EdgesGeometry` outline overlay to every mesh
 
-We replicate this directly in our codebase — no asset to copy, just the technique.
+Our 2D translation: every SVG `<rect>` and `<path>` has `stroke={OUTLINE_COLOR}` and `strokeWidth={1.4}`. Color fills are taken from straw's avatarProfile palette and desaturated for our gray-blue background.
 
-### Avatar color palette (`avatarProfile.ts`)
+### Straw's pastel palette (the "4-color")
 
-| Group | Examples |
-|---|---|
-| Skin | `#f7d7c2`, `#f4c58a`, `#d8a06e`, `#b7794e`, `#8a5a3b`, `#5d3a24` |
-| Hair | `#151515`, `#3e2723`, `#6b4f3a`, `#7b341e`, `#d6b56c`, `#7c3aed`, `#0891b2`, `#db2777` |
-| Clothing | `#2d3748`, `#7090ff`, `#34d399`, `#f59e0b`, `#f43f5e`, `#8b5cf6`, `#f5f5f4`, `#64748b` |
-| Shoes | `#1a1a1a`, `#1e3a8a`, `#7c4a2d`, `#e5e7eb` |
-
-### Arena-Tuner's BWEffects (the visual style we're borrowing)
-
-`BWEffects.tsx` runs a scene-wide pass that:
-
-1. Replaces every non-emissive mesh material with one of four variants:
-   - `unlit` — flat white `MeshBasicMaterial`
-   - `lit` — flat white `MeshStandardMaterial` (receives shadows)
-   - `unlit-tint` — original color lerped toward white by `tintAmount`
-   - `lit-tint` — same but lit
-2. Adds a black outline overlay to each mesh via `THREE.EdgesGeometry` + `LineSegments`
-
-The look = **clean polygon shapes in white-ish fills with crisp black contour lines**. Like a comic book page.
-
-### Pastel accents used elsewhere in straw
-
-`LandingArena.tsx` button accents (the "4-color pastel palette"):
-- `#cfd5e8` (pale lavender-blue) — for "conference" CTA
-- `#e0d6d0` (pale taupe) — for "round table"
-- `#ecd0cc` (pale peach) — for "emoji"
-- `#d0d7d1` (pale sage) — for "ping pong"
-
-`HeroSection.tsx` button colors:
-- `#f7d4d0` (pale coral)
-- `#d9d4f6` (pale violet)
-
-These are warm + saturated pastels designed to pop against straw's `#FDFCFC` near-white background.
-
-### Office furniture
-
-GLB models live at `/public/office-assets/models/furniture/*.glb`. Copied into our `public/office-assets/models/furniture/`:
-
-- `desk.glb` (~10kb)
-- `chairDesk.glb`
-- `computerScreen.glb`
-- `pottedPlant.glb`
-- `lampRoundFloor.glb`
-- `bookcaseClosed.glb`
-- ... 11 more
-
-`FurnitureModel.tsx` shows how they're loaded (`useGLTF` from drei) and tinted. Each furniture type has a custom tint (e.g. desk `#8b5e32`, computer `#363c58`).
-
-### Leaderboard structure
-
-`/leaderboard/page.tsx` — table of "competitions" with columns:
-Title · Status pill · Agents count · Top score · Budget · Time-left
-
-Status pills use color-coded soft pill backgrounds: green for "Live", yellow for "Evaluating", gray for "Closed".
-
-Mock data has fields: `title`, `category`, `status`, `deadline`, `budget_cents`, `competitor_count`, `top_score`.
-
----
-
-## Color adaptation for our gray theme
-
-Our intro background: pale blue-grey floral pattern + flat panel of `#cfd6df`.
-
-Straw's pastels (`#cfd5e8`, `#e0d6d0`, `#ecd0cc`, `#d0d7d1`) are designed for a near-white background. On our cooler `#cfd6df` background we need:
-
-- **Lower saturation** — desaturate by ~30%
-- **Cool the warm tones** — straw's peach/taupe shift toward grey-blue
-- **Keep the same lightness** — they should still feel like pastel highlights
-
-Adapted palette (proposed — will refine in browser):
+From `LandingArena.tsx`: `#cfd5e8`, `#e0d6d0`, `#ecd0cc`, `#d0d7d1` — designed for a near-white `#FDFCFC` background. Adapted for our `#cfd6df` floral panel:
 
 | Use | Original (straw) | Adapted (us) |
 |---|---|---|
-| Conference / Cool accent | `#cfd5e8` | `#c2cfdc` (deeper blue-grey) |
-| Round table / Warm neutral | `#e0d6d0` | `#cfc7c0` (muted taupe) |
-| Emoji / Coral | `#ecd0cc` | `#d8c2bc` (rosy mauve) |
-| Ping-pong / Sage | `#d0d7d1` | `#bfc8c1` (smoky sage) |
+| Cool accent | `#cfd5e8` | `#c2cfdc` |
+| Warm neutral | `#e0d6d0` | `#cfc7c0` |
+| Coral | `#ecd0cc` | `#d8c2bc` |
+| Sage | `#d0d7d1` | `#bfc8c1` |
 
-For the agent character:
-- Use the existing skin/hair palette (warm tones still work, they're skin)
-- Clothing: prefer the cooler/muted options (`#2d3748`, `#64748b`, `#7090ff`) over the vibrant pinks/greens. Lerp toward `#cfd6df` by ~25-35% so they don't clash with the BG.
+### Leaderboard structure
 
-For the BW edges effect:
-- Keep black outlines (`#0a0a0a` not pure black, slightly softer)
-- "White tint target" → use `#dde2e8` (slightly lighter than panel) for the lerp destination instead of pure white
-- Tint amount: `0.5` — strong enough to feel cohesive, weak enough to keep some color identity
+From `/app/leaderboard/page.tsx` — table of competitions with: title, category, status pill, agent count, top score, budget, time-left. Status pills color-coded: green (Live), yellow (Evaluating), gray (Closed). Our preview mirrors this with three mock rows and the same column structure.
 
 ---
 
-## Build plan (working through tasks)
+## Decisions
 
-1. ✅ Install deps (`@react-three/fiber`, `@react-three/drei`)
-2. ✅ Copy GLB assets into `public/office-assets/`
-3. **Build `<CursorAgent />`** — procedural character using only primitives, no GLB. Tracks cursor in screen space, then converts to 3D head rotation + body lean. Lives inside the IntroStation.
-4. **Build `<EdgeOffice />`** — scattered office GLBs along the left/right/top edges of the IntroStation. Tinted with our adapted palette, ~25-30% opacity so they read as decoration not focus.
-5. **Build `<LeaderboardPreview />`** — small DOM panel (NOT 3D) with mock competition rows. Style matches straw's leaderboard but with our adapted pastel pills. Position one row top-right.
-6. **Apply our BW-style override** — for the 3D scene, give all our procedural meshes black edge outlines via `EdgesGeometry`, materials lerped toward `#dde2e8`.
-7. **Tune positions, sizes, and opacities in browser** — iterate against screenshots.
-8. **Commit checkpoints frequently** so progress is preserved.
+### Why 2D SVG instead of 3D
+After ~45 minutes debugging, R3F v9 mounted the canvas fine, ran the React tree, but never drew any meshes to the framebuffer. Even plain THREE.js (no R3F) had the same symptom: `renderer.render()` was called every frame, but the canvas pixel buffer stayed transparent. Clear-color rendering worked (red filled the canvas), so the renderer wasn't dead — but no geometry survived to the screen. Wasn't worth more time when SVG delivers the same look.
 
----
+The straw GLB models (desk, chair, computer, etc.) are still copied into `public/office-assets/` for if you want to revisit 3D later. Currently unused.
 
-## Decisions / open questions
+### Cursor-following implementation
+- Single window-level `mousemove` listener
+- Normalized cursor coords to `[-1.5, 1.5]` based on viewport-relative offset from the agent's center
+- Smoothed via simple lerp at ~12% per frame for head, 8% for body lean, 18% for eye pupils
+- Idle breath: `Math.sin(frame * 0.025) * 0.5` y-offset on the whole body
+- Subtle horizontal drift toward cursor adds a "leaning to look" feel
 
 ### Composition
-The central panel and bio stay exactly where they are. The agent + office + leaderboard are framing/decoration that should NOT compete with the central content.
-
-### Agent placement
-Two options:
-- **A**: Single agent on the "ground" of the intro station, walks/turns to follow cursor across the page.
-- **B**: Agent positioned at the bottom-center, only rotates head/body to track cursor.
-
-Defaulting to **A** because it feels more alive. Will fall back to **B** if the walking distracts from the central text.
-
-### 3D scene depth
-A 3D Canvas overlaying everything will block clicks on the underlying DOM. Solutions:
-- `pointer-events: none` on the canvas wrapper, then hand-wire cursor tracking via window mousemove
-- Or: only allow pointer events on specific 3D objects, not the canvas as a whole
-
-Going with `pointer-events: none` for cleanliness — the agent is decoration, not interactive.
-
----
-
-## Files in this branch
-
-- `src/stations/intro/index.tsx` — existing hero (committed)
-- `src/stations/intro/CursorAgent.tsx` — NEW
-- `src/stations/intro/EdgeOffice.tsx` — NEW
-- `src/stations/intro/LeaderboardPreview.tsx` — NEW
-- `src/stations/intro/scene.tsx` — NEW R3F Canvas wrapper
-- `src/stations/intro/palette.ts` — NEW adapted color tokens
-- `public/office-assets/models/furniture/*.glb` — copied from straw
+```
+[lamp]                [coffee]                  [monitor]   [LEADERBOARD]
+                                                          
+                  ┌──────────────────────┐            
+[desk +           │      i'm jeremy      │              [book-
+ chair]           │   building straw     │               shelf]
+                  │ hackathons for ...   │            
+                  │      bikepacker      │            
+                  └──────────────────────┘            
+                                                              
+                       [character]                            
+                                                              
+[plant]                                          [plant]   [archive]
+```
 
 ---
 
-## Notes for morning review
+## Open / known issues
 
-I'll list anything I land on that should be revisited when you wake up — design decisions you should sanity-check, unresolved bugs, things I deliberately scoped out.
+- The Vite dev server has a stale `[vite] Failed to reload Scene.tsx` error from earlier in the session — harmless; it's from the THREE attempts. Hard refresh clears it.
+- `@chenglou/pretext` is installed and the `src/lib/pretext.ts` utility from straw-station is still here, untouched. Reserved for the graffiti station per earlier sessions.
+- StrictMode is currently disabled in `main.tsx` (was disabled while debugging R3F). Probably safe to re-enable now that we don't have R3F mounted, but I left it off to avoid surprising behavior.
+
+---
+
+## Lessons learned
+
+- **R3F v9 + Vite + StrictMode + content-visibility** is a fragile combo. The canvas mounts but the GL framebuffer stays empty. If you want 3D back, try @react-three/fiber 8.x with React 18 — or write plain THREE.js and skip R3F entirely (which I tried and also failed for unknown reasons).
+- **`content-visibility: auto`** on a parent breaks R3F's ResizeObserver — the canvas stays at the default 300×150 even though the parent is sized correctly. Override to `visible` on any station that hosts a Canvas.
+- **2D SVG is plenty** for a voxel-style character at this scale. Frame-rate is great, file-size is tiny, no shader debugging.
+
+---
+
+## How to verify
+
+```bash
+cd "C:\Users\jerem\CODE2025\PERSONAL Projects\98-website-overnight"
+npm run dev
+```
+
+Then visit the dev server URL. The first page should show:
+- Floral pattern background, flat panel with "i'm jeremy / building straw / hackathons for openclaws / bikepacker"
+- Office elements around the edges
+- Mock leaderboard top-right
+- Voxel character below the panel — move your mouse around the page; head and eyes follow.
+
+Scroll down → should still hit the existing Win98 desktop, untouched.
+
+---
+
+## Suggested next steps (if you want)
+
+- Re-enable StrictMode in `main.tsx` (line 7-8). It was off for debugging.
+- Try restoring 3D — possibly with a different version of R3F or by writing the agent in vanilla THREE.js with a fresh canvas approach.
+- Add character variety — maybe a few smaller agents wandering the edges of the page like in straw's actual landing arena.
+- Hook the leaderboard up to straw's `/api/public/leaderboard` for real data once that's deployed.
+- Add a click-to-scroll on the agent (clicking it scrolls down to the next station).
+
+---
+
+## Branches/worktrees state
+
+- `main` — your current production state (unchanged this session)
+- `straw-station` — has the original jia.build-style intro page (committed in `e88dc36`)
+- `straw-medieval-archive` — the medieval manuscript concept that was on straw-station before pivoting (preserved in `8ca733b`)
+- `overnight-cursor-3d` — this branch, with all the work above
+
+To merge into straw-station when you're happy:
+```bash
+cd "C:\Users\jerem\code2025\PERSONAL Projects\98-website"
+git checkout straw-station
+git merge overnight-cursor-3d
+```
+
+Or to ship straight to main:
+```bash
+git checkout main
+git merge overnight-cursor-3d
+```
