@@ -204,85 +204,90 @@ function GLBFurniture({
 
 function SceneContent() {
   const { viewport } = useThree();
+  const w = viewport.width;
+  const h = viewport.height;
 
-  // Agent in center-foreground
-  // Office furniture scattered around the periphery
-  // Scale: viewport.height ≈ 200 world units (orthographic zoom), agent is
-  // 120 units tall so set scale to ~0.5 → 60-unit visible height
-  const agentScale = 0.55;
+  // Agent: scale so the body is ~26% of viewport height. Position so the
+  // feet land near the bottom edge with a small inset for the floor.
+  const agentScale = (h * 0.26) / 120;
+  const agentY = -h / 2 + 8; // feet near bottom
 
   return (
     <>
       <ambientLight intensity={0.85} />
-      <directionalLight position={[8, 12, 8]} intensity={1.0} />
+      <directionalLight position={[8, 14, 8]} intensity={1.0} />
       <directionalLight position={[-6, 4, -4]} intensity={0.3} />
 
-      {/* AGENT — center-bottom */}
-      <group position={[0, -viewport.height / 2 + 30, 0]} scale={agentScale}>
+      {/* AGENT — bottom-center, follows cursor */}
+      <group position={[0, agentY, 0]} scale={agentScale}>
         <VoxelAgent seed="jeremy" />
       </group>
 
-      {/* OFFICE FURNITURE — scattered along edges. Positions in world units.
-          GLBs come from straw's `/public/office-assets/models/furniture/`. */}
+      {/* OFFICE FURNITURE — scattered along edges. Y values in world units;
+          x/z anchored to viewport edges. */}
 
-      {/* Left side: desk + chair */}
-      <Suspense fallback={null}>
-        <GLBFurniture
-          url="/office-assets/models/furniture/desk.glb"
-          position={[-viewport.width / 2 + 60, -viewport.height / 2 + 25, 0]}
-          rotation={[0, Math.PI / 6, 0]}
-          scale={42}
-          tint={FURNITURE_TINT.desk}
-        />
-        <GLBFurniture
-          url="/office-assets/models/furniture/chairDesk.glb"
-          position={[-viewport.width / 2 + 80, -viewport.height / 2 + 22, 18]}
-          rotation={[0, -Math.PI / 4, 0]}
-          scale={32}
-          tint={FURNITURE_TINT.chair}
-        />
-        <GLBFurniture
-          url="/office-assets/models/furniture/computerScreen.glb"
-          position={[-viewport.width / 2 + 60, -viewport.height / 2 + 38, 0]}
-          rotation={[0, Math.PI / 6, 0]}
-          scale={24}
-          tint={FURNITURE_TINT.computer}
-        />
-      </Suspense>
-
-      {/* Top-left: floor lamp */}
+      {/* Top-left: floor lamp standing on the "back wall" */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/lampRoundFloor.glb"
-          position={[-viewport.width / 2 + 50, viewport.height / 2 - 50, 0]}
-          scale={32}
+          position={[-w / 2 + 30, h / 2 - 65, -10]}
+          scale={45}
           tint={FURNITURE_TINT.lamp}
         />
       </Suspense>
 
-      {/* Right side: bookshelf + plant */}
+      {/* LEFT mid: desk + chair + computer (a tiny workstation) */}
+      <Suspense fallback={null}>
+        <GLBFurniture
+          url="/office-assets/models/furniture/desk.glb"
+          position={[-w / 2 + 50, agentY + 5, -2]}
+          rotation={[0, Math.PI / 5, 0]}
+          scale={28}
+          tint={FURNITURE_TINT.desk}
+        />
+        <GLBFurniture
+          url="/office-assets/models/furniture/chairDesk.glb"
+          position={[-w / 2 + 65, agentY + 4, 12]}
+          rotation={[0, -Math.PI / 4, 0]}
+          scale={22}
+          tint={FURNITURE_TINT.chair}
+        />
+        <GLBFurniture
+          url="/office-assets/models/furniture/computerScreen.glb"
+          position={[-w / 2 + 50, agentY + 16, -2]}
+          rotation={[0, Math.PI / 5, 0]}
+          scale={18}
+          tint={FURNITURE_TINT.computer}
+        />
+      </Suspense>
+
+      {/* RIGHT mid: bookshelf */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/bookcaseClosed.glb"
-          position={[viewport.width / 2 - 60, -viewport.height / 2 + 35, 0]}
+          position={[w / 2 - 50, agentY + 12, -4]}
           rotation={[0, -Math.PI / 6, 0]}
-          scale={42}
+          scale={32}
           tint={FURNITURE_TINT.bookshelf}
         />
+      </Suspense>
+
+      {/* RIGHT bottom: large potted plant */}
+      <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/pottedPlant.glb"
-          position={[viewport.width / 2 - 100, -viewport.height / 2 + 18, 0]}
-          scale={28}
+          position={[w / 2 - 95, agentY + 4, 6]}
+          scale={26}
           tint={null}
         />
       </Suspense>
 
-      {/* Bottom-left: small plant */}
+      {/* Bottom-left small plant on the floor near the desk */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/plantSmall1.glb"
-          position={[-viewport.width / 2 + 40, -viewport.height / 2 + 12, 30]}
-          scale={26}
+          position={[-w / 2 + 95, agentY + 2, 12]}
+          scale={22}
           tint={null}
         />
       </Suspense>
