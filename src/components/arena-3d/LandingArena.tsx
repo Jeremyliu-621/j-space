@@ -3,7 +3,15 @@
 import { useLayoutEffect, useEffect, useCallback } from "react";
 import TunerScene, { useTunerAgent } from "./tuner/TunerScene";
 
-export default function LandingArena({ height }: { height: number }) {
+export default function LandingArena({
+  height,
+  hideControls = false,
+}: {
+  height: number;
+  /** When true, suppress the built-in conference/round-table/emoji/ping-pong
+   *  button strip so the caller can render its own controls elsewhere. */
+  hideControls?: boolean;
+}) {
   const {
     cohort,
     stationIdxByAgent,
@@ -130,42 +138,44 @@ export default function LandingArena({ height }: { height: number }) {
         wallBury={wallBury}
         zoom={25}
       />
-      <div
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 10,
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          zIndex: 5,
-          flexWrap: "wrap",
-          justifyContent: "flex-end",
-        }}
-      >
-        {buttons.map((b) => (
-          <button
-            key={b.label}
-            onClick={b.onClick}
-            title={b.title}
-            className="px-2 py-1 text-[11px] font-sans backdrop-blur-sm transition-colors"
-            style={{
-              borderRadius: 999,
-              border: `1px solid ${b.accent}`,
-              background: "rgba(255, 255, 255, 0.9)",
-              color: "#111",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = b.accent;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
-            }}
-          >
-            {b.label}
-          </button>
-        ))}
-      </div>
+      {!hideControls && (
+        <div
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            zIndex: 5,
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+          }}
+        >
+          {buttons.map((b) => (
+            <button
+              key={b.label}
+              onClick={b.onClick}
+              title={b.title}
+              className="px-2 py-1 text-[11px] font-sans backdrop-blur-sm transition-colors"
+              style={{
+                borderRadius: 999,
+                border: `1px solid ${b.accent}`,
+                background: "rgba(255, 255, 255, 0.9)",
+                color: "#111",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = b.accent;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
+              }}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

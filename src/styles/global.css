@@ -297,6 +297,27 @@ canvas,
   z-index: 5;
 }
 
+.intro-arena-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.intro-arena-button {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+  transition: background 120ms;
+}
+
 .intro-heading {
   font-family: "EB Garamond", serif;
   font-weight: 400;

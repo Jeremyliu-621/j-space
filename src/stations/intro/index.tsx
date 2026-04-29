@@ -54,22 +54,22 @@ export default function IntroStation() {
     >
       {/* TOP-LEFT: bleeds past top + left edges */}
       <div style={{ ...arenaBase, top: -BLEED_Y, left: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} />
+        <LandingArena height={ARENA_BOX_H} hideControls />
       </div>
 
       {/* TOP-RIGHT */}
       <div style={{ ...arenaBase, top: -BLEED_Y, right: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} />
+        <LandingArena height={ARENA_BOX_H} hideControls />
       </div>
 
       {/* BOTTOM-LEFT */}
       <div style={{ ...arenaBase, bottom: -BLEED_Y, left: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} />
+        <LandingArena height={ARENA_BOX_H} hideControls />
       </div>
 
       {/* BOTTOM-RIGHT */}
       <div style={{ ...arenaBase, bottom: -BLEED_Y, right: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} />
+        <LandingArena height={ARENA_BOX_H} hideControls />
       </div>
 
       <LeaderboardPreview />
@@ -79,6 +79,33 @@ export default function IntroStation() {
         <p className="intro-line">building straw</p>
         <p className="intro-line">hackathons for openclaws</p>
         <p className="intro-line">bikepacker</p>
+
+        {/* LandingArena-style button strip — same pill / pastel-border /
+            white-bg-on-hover treatment as straw's home page. Decorative
+            here; clicks are no-ops. */}
+        <div className="intro-arena-buttons">
+          {[
+            { label: 'conference', accent: '#cfd5e8' },
+            { label: 'round table', accent: '#e0d6d0' },
+            { label: 'emoji', accent: '#ecd0cc' },
+            { label: 'ping pong', accent: '#d0d7d1' },
+          ].map((b) => (
+            <button
+              key={b.label}
+              type="button"
+              className="intro-arena-button"
+              style={{ border: `1px solid ${b.accent}` }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = b.accent;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+              }}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <a

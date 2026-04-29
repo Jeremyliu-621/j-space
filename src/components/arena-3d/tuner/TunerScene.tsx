@@ -2442,15 +2442,13 @@ export default function TunerScene({
       orthographic
       shadows
       camera={{ near: 0.1, far: 100 }}
-      gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-      style={{ background: "#FDFCFC" }}
+      gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+      style={{ background: "transparent" }}
       frameloop="always"
     >
-      {/* Without a scene background colour, three.js clears to black and
-          the floor plane doesn't cover every pixel of the canvas at some
-          camera angles — producing a dark border around the scene. This
-          matches the CSS background so the seam disappears. */}
-      <color attach="background" args={["#FDFCFC"]} />
+      {/* Background left transparent so callers can show whatever's behind
+          the canvas (e.g. the 98-website's floral pattern bleeds through
+          the negative space around the office's iso footprint). */}
       <Suspense fallback={null}>
         <CameraRig zoom={cameraZoom} view={view} />
         <ambientLight intensity={0.8} color="#ffffff" />
