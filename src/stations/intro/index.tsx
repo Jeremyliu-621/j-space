@@ -1,4 +1,5 @@
 import bgPattern from '../../assets/Backgroundpixels.png';
+import Scene from './Scene';
 
 export default function IntroStation() {
   const scrollNext = () => {
@@ -12,6 +13,8 @@ export default function IntroStation() {
       className="station station-intro"
       style={{ backgroundImage: `url(${bgPattern})` }}
     >
+      <Scene />
+
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
         <p className="intro-line">building straw</p>

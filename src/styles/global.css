@@ -307,6 +307,10 @@ canvas,
   justify-content: center;
   align-items: center;
   position: relative;
+  /* Override .station's content-visibility:auto — it breaks R3F's
+     ResizeObserver on the canvas and we want the agent to render
+     immediately on first paint anyway. */
+  content-visibility: visible;
 }
 
 .intro-panel {
@@ -315,6 +319,8 @@ canvas,
   text-align: center;
   max-width: 720px;
   width: min(720px, 70vw);
+  position: relative;
+  z-index: 2;
 }
 
 .intro-heading {
@@ -342,6 +348,7 @@ canvas,
   opacity: 0.7;
   text-decoration: none;
   cursor: pointer;
+  z-index: 3;
 }
 
 .intro-archive:hover {
