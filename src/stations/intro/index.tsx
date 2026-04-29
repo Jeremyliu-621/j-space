@@ -9,8 +9,8 @@ import LeaderboardPreview from './LeaderboardPreview';
  * bleed past each edge so they get cut off. Each one runs its own mock
  * agents (~15 agents per arena, walking around, doing ping pong, etc.).
  */
-const ARENA_BOX_W = 700;
-const ARENA_BOX_H = 540;
+const ARENA_BOX_W = 820;
+const ARENA_BOX_H = 600;
 // Bleed past viewport edges — large negative offset so each arena
 // shows only its corner, the rest disappears past the page edge.
 const BLEED_X = 280;
@@ -79,33 +79,33 @@ export default function IntroStation() {
         <p className="intro-line">building straw</p>
         <p className="intro-line">hackathons for openclaws</p>
         <p className="intro-line">bikepacker</p>
+      </div>
 
-        {/* LandingArena-style button strip — same pill / pastel-border /
-            white-bg-on-hover treatment as straw's home page. Decorative
-            here; clicks are no-ops. */}
-        <div className="intro-arena-buttons">
-          {[
-            { label: 'conference', accent: '#cfd5e8' },
-            { label: 'round table', accent: '#e0d6d0' },
-            { label: 'emoji', accent: '#ecd0cc' },
-            { label: 'ping pong', accent: '#d0d7d1' },
-          ].map((b) => (
-            <button
-              key={b.label}
-              type="button"
-              className="intro-arena-button"
-              style={{ border: `1px solid ${b.accent}` }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = b.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-              }}
-            >
-              {b.label}
-            </button>
-          ))}
-        </div>
+      {/* LandingArena-style button strip, BELOW the panel rather than inside
+          it — sits on the floral pattern with no shared background.
+          Decorative for now; clicks are no-ops. */}
+      <div className="intro-arena-buttons">
+        {[
+          { label: 'conference', accent: '#cfd5e8' },
+          { label: 'round table', accent: '#e0d6d0' },
+          { label: 'emoji', accent: '#ecd0cc' },
+          { label: 'ping pong', accent: '#d0d7d1' },
+        ].map((b) => (
+          <button
+            key={b.label}
+            type="button"
+            className="intro-arena-button"
+            style={{ border: `1px solid ${b.accent}` }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = b.accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+            }}
+          >
+            {b.label}
+          </button>
+        ))}
       </div>
 
       <a
