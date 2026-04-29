@@ -6,11 +6,16 @@ import TunerScene, { useTunerAgent } from "./tuner/TunerScene";
 export default function LandingArena({
   height,
   hideControls = false,
+  zoom = 25,
 }: {
   height: number;
   /** When true, suppress the built-in conference/round-table/emoji/ping-pong
    *  button strip so the caller can render its own controls elsewhere. */
   hideControls?: boolean;
+  /** Camera zoom for the orthographic iso view. Lower = office renders
+   *  smaller within the canvas (more margin at the edges). Defaults to
+   *  25 (straw's value). */
+  zoom?: number;
 }) {
   const {
     cohort,
@@ -136,7 +141,7 @@ export default function LandingArena({
         navOverrides={navOverrides}
         view="iso"
         wallBury={wallBury}
-        zoom={25}
+        zoom={zoom}
       />
       {!hideControls && (
         <div

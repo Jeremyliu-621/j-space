@@ -9,8 +9,8 @@ import LeaderboardPreview from './LeaderboardPreview';
  * bleed past each edge so they get cut off. Each one runs its own mock
  * agents (~15 agents per arena, walking around, doing ping pong, etc.).
  */
-const ARENA_BOX_W = 820;
-const ARENA_BOX_H = 600;
+const ARENA_BOX_W = 700;
+const ARENA_BOX_H = 540;
 // Bleed past viewport edges — large negative offset so each arena
 // shows only its corner, the rest disappears past the page edge.
 const BLEED_X = 280;
@@ -54,22 +54,22 @@ export default function IntroStation() {
     >
       {/* TOP-LEFT: bleeds past top + left edges */}
       <div style={{ ...arenaBase, top: -BLEED_Y, left: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} hideControls />
+        <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />
       </div>
 
       {/* TOP-RIGHT */}
       <div style={{ ...arenaBase, top: -BLEED_Y, right: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} hideControls />
+        <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />
       </div>
 
       {/* BOTTOM-LEFT */}
       <div style={{ ...arenaBase, bottom: -BLEED_Y, left: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} hideControls />
+        <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />
       </div>
 
       {/* BOTTOM-RIGHT */}
       <div style={{ ...arenaBase, bottom: -BLEED_Y, right: -BLEED_X }}>
-        <LandingArena height={ARENA_BOX_H} hideControls />
+        <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />
       </div>
 
       <LeaderboardPreview />
