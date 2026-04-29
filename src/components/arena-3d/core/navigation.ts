@@ -2,7 +2,6 @@ import { CANVAS_H, CANVAS_W } from "./constants";
 import {
   applyClusterTransform,
   getItemBaseSize,
-  ITEM_FOOTPRINT,
   ITEM_METADATA,
   NAV_ANCHOR_OVERRIDES,
   type NavAnchorOverride,

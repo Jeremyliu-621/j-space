@@ -1,6 +1,6 @@
 import type { FurnitureItem } from "./types";
 import { ITEM_FOOTPRINT, FURNITURE_ROTATION } from "./geometry";
-import { makeDeskStation, makeDeskPod, DESK_W, DESK_H, type DeskStation } from "./stations";
+import { makeDeskStation, makeDeskPod, type DeskStation } from "./stations";
 
 let uidCounter = 0;
 const uid = (prefix: string) => `${prefix}_${uidCounter++}`;

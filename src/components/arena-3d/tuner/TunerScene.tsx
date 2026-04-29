@@ -227,31 +227,9 @@ export interface Station {
   pingPongSide?: "A" | "B";
 }
 
-// Kept for reference — no longer used. Clusters now rotate via three.js
-// <group> wrappers (see ClusterGroupRender) which avoid per-item pivot drift.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function rotateItems(items: FurnitureItem[], cx: number, cy: number, deg: number): FurnitureItem[] {
-  const rad = (deg * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  return items.map((item) => {
-    const [defW, defH] = ITEM_FOOTPRINT[item.type] ?? [40, 40];
-    const w = item.w ?? defW;
-    const h = item.h ?? defH;
-    const itemCx = item.x + w / 2;
-    const itemCy = item.y + h / 2;
-    const dx = itemCx - cx;
-    const dy = itemCy - cy;
-    const newCx = cx + dx * cos - dy * sin;
-    const newCy = cy + dx * sin + dy * cos;
-    return {
-      ...item,
-      x: Math.round(newCx - w / 2),
-      y: Math.round(newCy - h / 2),
-      facing: ((item.facing ?? 0) + deg + 360) % 360,
-    };
-  });
-}
+// Removed legacy rotateItems — clusters rotate via three.js <group> wrappers
+// (see ClusterGroupRender) which avoid per-item pivot drift. The function is
+// preserved in straw's repo if needed for reference.
 
 function rotatePoint(
   px: number,

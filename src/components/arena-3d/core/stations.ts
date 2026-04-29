@@ -155,9 +155,7 @@ export function makeDeskPod(opts: DeskPodOptions): DeskStation[] {
   const pivotX = opts.pivotX ?? x + xStep / 2;
   const pivotY = opts.pivotY ?? y + yStep / 2;
 
-  // Pod rotation applies to each desk's position AND each desk's own cluster rotation.
-  const podRotRad = (rotDeg * Math.PI) / 180;
-
+  // Pod rotation: cluster transforms below recompute this from rotDeg directly.
   const seeds: {
     id: string;
     /** Raw top-left before pod rotation. */

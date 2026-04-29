@@ -104,8 +104,6 @@ export const AGENT_AVATAR_SHOE_COLOR_OPTIONS: ColorOption[] = [
 
 const AGENT_AVATAR_VERSION = 1 as const;
 
-const coerceString = (value: unknown) => (typeof value === "string" ? value.trim() : "");
-
 const hashSeed = (seed: string) => {
   let hash = 2166136261;
   for (let index = 0; index < seed.length; index += 1) {

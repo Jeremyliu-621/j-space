@@ -148,7 +148,6 @@ const RE_ROAM_CHANCE = 0.005;            // per-tick chance for idle standing ag
 const DANCE_HOLD_MS = 5_000;
 const TALK_HOLD_MS = 2_000;
 const EMOJI_HOLD_MS = 2_500;
-const FAILURE_COUCH_MS = 30_000;
 
 // Ported from /arena-tuner — proximity talk, wave-on-pass, head glance.
 // Kept identical so live leaderboard + task-detail views match the tuner.
