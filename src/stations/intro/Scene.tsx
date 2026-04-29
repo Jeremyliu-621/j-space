@@ -202,92 +202,127 @@ function GLBFurniture({
 // SCENE COMPOSITION
 // ---------------------------------------------------------------------------
 
-function SceneContent() {
-  const { viewport } = useThree();
-  const w = viewport.width;
-  const h = viewport.height;
+/**
+ * Camera rig — straw's exact isometric preset, scaled up to match our world
+ * units. Straw's preset (`position [14,16,19], zoom 22, target [0,0,0]`) is
+ * tuned for objects sized ~0.2 world units; we keep the same direction +
+ * proportions but multiply the position out so our larger meshes fit.
+ */
+/**
+ * Camera rig — straw's exact isometric direction (14:16:19), positioned far
+ * enough away to fit our object scale. Looks at a point ABOVE the floor so
+ * the 3D scene composes below the central panel rather than colliding with it.
+ */
+function IsoCameraRig() {
+  const { camera } = useThree();
+  useEffect(() => {
+    // Iso direction vector (matches straw's [14, 16, 19] proportions).
+    // We shift BOTH camera and target up the same amount so the camera-to-
+    // target vector stays iso-aligned while the world's screen-center moves
+    // up — which puts our floor-level objects in the bottom half of the view.
+    // Iso direction (matches straw's [14:16:19]).
+    const iso: [number, number, number] = [140, 160, 190];
+    // yShift sets where the world's screen-center sits in world Y. The
+    // visible world Y range is [yShift - halfVisibleY, yShift + halfVisibleY].
+    // We pick yShift so the floor (y=0) lands at the BOTTOM edge of the
+    // canvas — the office sits on a floor at screen-bottom, agent above.
+    const yShift = 50;
+    camera.position.set(iso[0], iso[1] + yShift, iso[2]);
+    camera.lookAt(0, yShift, 0);
+    camera.up.set(0, 1, 0);
+    type AnyCam = typeof camera & { zoom?: number; updateProjectionMatrix: () => void };
+    const ac = camera as AnyCam;
+    if (typeof ac.zoom === 'number') ac.zoom = 2.6;
+    ac.updateProjectionMatrix();
+  }, [camera]);
+  return null;
+}
 
-  // Agent: scale so the body is ~26% of viewport height. Position so the
-  // feet land near the bottom edge with a small inset for the floor.
-  const agentScale = (h * 0.26) / 120;
-  const agentY = -h / 2 + 8; // feet near bottom
+function SceneContent() {
+  // World coords are now CAMERA-CENTERED at origin (iso looks at 0,0,0).
+  // Place objects on a notional floor at y=0, with the agent at the center
+  // and furniture spread around it on the same plane.
 
   return (
     <>
-      <ambientLight intensity={0.85} />
-      <directionalLight position={[8, 14, 8]} intensity={1.0} />
-      <directionalLight position={[-6, 4, -4]} intensity={0.3} />
+      <IsoCameraRig />
 
-      {/* AGENT — bottom-center, follows cursor */}
-      <group position={[0, agentY, 0]} scale={agentScale}>
+      <ambientLight intensity={0.7} />
+      {/* Key light from upper-front-right (matches iso camera angle) */}
+      <directionalLight position={[10, 18, 14]} intensity={1.0} />
+      {/* Fill from opposite side */}
+      <directionalLight position={[-8, 4, -6]} intensity={0.35} />
+
+      {/* AGENT — center of the scene, slightly forward of origin */}
+      <group position={[0, 0, 20]} scale={0.5}>
         <VoxelAgent seed="jeremy" />
       </group>
 
-      {/* OFFICE FURNITURE — scattered along edges. Y values in world units;
-          x/z anchored to viewport edges. */}
+      {/* OFFICE FURNITURE — tight cluster around the agent on the iso "floor".
+          Coords in world units; iso projects back-left → upper-left on screen. */}
 
-      {/* Top-left: floor lamp standing on the "back wall" */}
+      {/* Floor lamp — back-left, near the desk */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/lampRoundFloor.glb"
-          position={[-w / 2 + 30, h / 2 - 65, -10]}
-          scale={45}
+          position={[-70, 0, -60]}
+          scale={42}
           tint={FURNITURE_TINT.lamp}
         />
       </Suspense>
 
-      {/* LEFT mid: desk + chair + computer (a tiny workstation) */}
+      {/* Workstation cluster — desk + chair + computer, left-foreground */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/desk.glb"
-          position={[-w / 2 + 50, agentY + 5, -2]}
-          rotation={[0, Math.PI / 5, 0]}
-          scale={28}
+          position={[-90, 0, 0]}
+          rotation={[0, Math.PI / 4, 0]}
+          scale={32}
           tint={FURNITURE_TINT.desk}
         />
         <GLBFurniture
           url="/office-assets/models/furniture/chairDesk.glb"
-          position={[-w / 2 + 65, agentY + 4, 12]}
+          position={[-65, 0, 25]}
           rotation={[0, -Math.PI / 4, 0]}
-          scale={22}
+          scale={24}
           tint={FURNITURE_TINT.chair}
         />
         <GLBFurniture
           url="/office-assets/models/furniture/computerScreen.glb"
-          position={[-w / 2 + 50, agentY + 16, -2]}
-          rotation={[0, Math.PI / 5, 0]}
+          position={[-92, 18, 0]}
+          rotation={[0, Math.PI / 4, 0]}
           scale={18}
           tint={FURNITURE_TINT.computer}
         />
       </Suspense>
 
-      {/* RIGHT mid: bookshelf */}
+      {/* Bookshelf — back-right */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/bookcaseClosed.glb"
-          position={[w / 2 - 50, agentY + 12, -4]}
+          position={[70, 0, -50]}
           rotation={[0, -Math.PI / 6, 0]}
-          scale={32}
+          scale={34}
           tint={FURNITURE_TINT.bookshelf}
         />
       </Suspense>
 
-      {/* RIGHT bottom: large potted plant */}
+      {/* Potted plant — right-foreground */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/pottedPlant.glb"
-          position={[w / 2 - 95, agentY + 4, 6]}
+          position={[80, 0, 30]}
           scale={26}
           tint={null}
         />
       </Suspense>
 
-      {/* Bottom-left small plant on the floor near the desk */}
+      {/* Small plant — front-left, near the chair */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/plantSmall1.glb"
-          position={[-w / 2 + 95, agentY + 2, 12]}
-          scale={22}
+          position={[-40, 0, 60]}
+          scale={20}
           tint={null}
         />
       </Suspense>
@@ -328,7 +363,8 @@ export default function Scene() {
     >
       {size && (
         <Canvas
-          camera={{ position: [0, 0, 320], fov: 35, near: 1, far: 2000 }}
+          orthographic
+          camera={{ position: [140, 210, 190], zoom: 2.6, near: 1, far: 2000 }}
           dpr={[1, 2]}
           frameloop="always"
           gl={{ alpha: true, antialias: true, preserveDrawingBuffer: false }}
