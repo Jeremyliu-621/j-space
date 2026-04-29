@@ -2445,10 +2445,17 @@ export default function TunerScene({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
       frameloop="always"
+      onCreated={({ gl }) => {
+        // R3F leaves clearAlpha at 1 even when context alpha is true, so
+        // the canvas clears to opaque black between frames. Force it to 0
+        // so the negative space around the iso office is genuinely
+        // transparent and whatever's behind the canvas (the 98-website's
+        // floral pattern) bleeds through.
+        gl.setClearAlpha(0);
+      }}
     >
       {/* Background left transparent so callers can show whatever's behind
-          the canvas (e.g. the 98-website's floral pattern bleeds through
-          the negative space around the office's iso footprint). */}
+          the canvas. */}
       <Suspense fallback={null}>
         <CameraRig zoom={cameraZoom} view={view} />
         <ambientLight intensity={0.8} color="#ffffff" />
