@@ -261,68 +261,52 @@ function SceneContent() {
       {/* OFFICE FURNITURE — tight cluster around the agent on the iso "floor".
           Coords in world units; iso projects back-left → upper-left on screen. */}
 
-      {/* Floor lamp — back-left, near the desk */}
+      {/* LEFT workstation cluster: lamp behind, desk + computer + chair.
+          Positions tuned so all four read as one workstation when projected
+          to iso, without overlapping the central agent. */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/lampRoundFloor.glb"
-          position={[-70, 0, -60]}
-          scale={42}
+          position={[-130, 0, -10]}
+          scale={36}
           tint={FURNITURE_TINT.lamp}
         />
-      </Suspense>
-
-      {/* Workstation cluster — desk + chair + computer, left-foreground */}
-      <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/desk.glb"
-          position={[-90, 0, 0]}
+          position={[-100, 0, 30]}
           rotation={[0, Math.PI / 4, 0]}
           scale={32}
           tint={FURNITURE_TINT.desk}
         />
         <GLBFurniture
-          url="/office-assets/models/furniture/chairDesk.glb"
-          position={[-65, 0, 25]}
-          rotation={[0, -Math.PI / 4, 0]}
-          scale={24}
-          tint={FURNITURE_TINT.chair}
-        />
-        <GLBFurniture
           url="/office-assets/models/furniture/computerScreen.glb"
-          position={[-92, 18, 0]}
+          position={[-102, 18, 30]}
           rotation={[0, Math.PI / 4, 0]}
           scale={18}
           tint={FURNITURE_TINT.computer}
         />
+        <GLBFurniture
+          url="/office-assets/models/furniture/chairDesk.glb"
+          position={[-72, 0, 55]}
+          rotation={[0, -Math.PI / 4, 0]}
+          scale={24}
+          tint={FURNITURE_TINT.chair}
+        />
       </Suspense>
 
-      {/* Bookshelf — back-right */}
+      {/* RIGHT cluster: bookshelf back, potted plant front */}
       <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/bookcaseClosed.glb"
-          position={[70, 0, -50]}
+          position={[100, 0, -40]}
           rotation={[0, -Math.PI / 6, 0]}
           scale={34}
           tint={FURNITURE_TINT.bookshelf}
         />
-      </Suspense>
-
-      {/* Potted plant — right-foreground */}
-      <Suspense fallback={null}>
         <GLBFurniture
           url="/office-assets/models/furniture/pottedPlant.glb"
-          position={[80, 0, 30]}
-          scale={26}
-          tint={null}
-        />
-      </Suspense>
-
-      {/* Small plant — front-left, near the chair */}
-      <Suspense fallback={null}>
-        <GLBFurniture
-          url="/office-assets/models/furniture/plantSmall1.glb"
-          position={[-40, 0, 60]}
-          scale={20}
+          position={[90, 0, 40]}
+          scale={28}
           tint={null}
         />
       </Suspense>
