@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import LandingArena from '../../components/arena-3d/LandingArena';
-import { useTheme } from '../../components/win98/ThemeProvider';
 
 /**
  * Four full straw `LandingArena` instances — copied as-is from the straw
@@ -16,16 +15,6 @@ const BLEED_X = 280;
 const BLEED_Y = 220;
 
 export default function IntroStation() {
-  const { paletteKey, getDesktopBackground, getDesktopBeforeStyle } = useTheme();
-  // Match the Win98 desktop's background treatment — for themed palettes the
-  // pattern is colorized via a `filter` on a ::before-style pseudo, for
-  // default/dark it's just the raw image. We render the bg as its own
-  // absolutely-positioned div behind the rest of the station's content.
-  const isThemedPalette = paletteKey !== 'default' && paletteKey !== 'dark';
-  const bgPatternStyle: React.CSSProperties = isThemedPalette
-    ? getDesktopBeforeStyle()
-    : getDesktopBackground();
-
   const scrollNext = () => {
     document
       .querySelector('.station-win98')
@@ -58,19 +47,6 @@ export default function IntroStation() {
 
   return (
     <section className="station station-intro">
-      {/* Floral pattern bg as its own layer behind everything, so the same
-          theme filter the Win98 desktop applies hits it the same way. */}
-      <div
-        className="intro-bg-pattern"
-        style={{
-          ...bgPatternStyle,
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
       {/* TOP-LEFT: bleeds past top + left edges */}
       <div style={{ ...arenaBase, top: -BLEED_Y, left: -BLEED_X }}>
         <LandingArena height={ARENA_BOX_H} hideControls zoom={21} />

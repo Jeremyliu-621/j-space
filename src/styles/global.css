@@ -26,7 +26,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow: auto;
-  background-color: #c0c0c0;
+  background-color: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -259,11 +259,28 @@ canvas,
 }
 
 .station-win98 {
-  background-color: #c0c0c0;
+  background-color: transparent;
   padding: 0;
   margin: 0;
   scroll-snap-stop: always;
   overflow: visible;
+}
+
+/* Page-bg-continuity overrides: kill the per-station opaque backgrounds so
+   the single fixed page-level pattern (App.tsx <PageBackground />) shows
+   through every station. CSS-only — we don't touch Win98 component code. */
+.win98-desktop {
+  background-color: transparent !important;
+}
+.win98-desktop > div:first-of-type {
+  /* The Desktop component renders its theme-filter pattern as the first
+     absolutely-positioned div child. Hide it so the page-bg's same pattern
+     is what shows behind the desktop instead — eliminates the seam where
+     the desktop's tile origin restarts at every station boundary. */
+  display: none !important;
+}
+.pb-tab-strip {
+  background-color: transparent !important;
 }
 
 /* ============================================
@@ -273,8 +290,7 @@ canvas,
    the centered text.
    ============================================ */
 .station-intro {
-  background-color: #c0c0c0;
-  background-repeat: repeat;
+  background-color: transparent;
   font-family: "EB Garamond", serif;
   color: #1a1a1a;
   display: flex;
@@ -285,6 +301,9 @@ canvas,
   /* Override .station's content-visibility:auto — it breaks R3F's
      ResizeObserver on the canvas. */
   content-visibility: visible;
+  /* Allow arenas + content to bleed past the station boundary into the
+     adjacent station so the four corners aren't hard-clipped at scroll snaps. */
+  overflow: visible;
 }
 
 .intro-panel {
