@@ -7,6 +7,7 @@ export default function LandingArena({
   height,
   hideControls = false,
   zoom = 25,
+  paused = false,
 }: {
   height: number;
   /** When true, suppress the built-in conference/round-table/emoji/ping-pong
@@ -16,6 +17,10 @@ export default function LandingArena({
    *  smaller within the canvas (more margin at the edges). Defaults to
    *  25 (straw's value). */
   zoom?: number;
+  /** When true, the R3F render loop runs on demand instead of every frame —
+   *  used to pause off-viewport arenas so they don't burn CPU/GPU when the
+   *  user can't see them. */
+  paused?: boolean;
 }) {
   const {
     cohort,
@@ -142,6 +147,7 @@ export default function LandingArena({
         view="iso"
         wallBury={wallBury}
         zoom={zoom}
+        paused={paused}
       />
       {!hideControls && (
         <div

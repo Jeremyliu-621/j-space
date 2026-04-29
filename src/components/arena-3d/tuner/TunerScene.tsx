@@ -1403,6 +1403,10 @@ interface TunerSceneProps {
    *  steers the scene camera toward `camAgentIdx`. Defaults to "off". */
   camMode?: CamMode;
   camAgentIdx?: number;
+  /** When true, the R3F render loop is set to "demand" instead of "always".
+   *  Used by callers (e.g. landing-page corner arenas) to pause off-viewport
+   *  scenes so they don't burn CPU/GPU when the user can't see them. */
+  paused?: boolean;
 }
 
 function ClusterGroupRender({ cluster }: { cluster: ClusterGroup }) {
@@ -2418,6 +2422,7 @@ export default function TunerScene({
   zoom,
   camMode = "off",
   camAgentIdx = 0,
+  paused = false,
 }: TunerSceneProps) {
   const { items, clusters, stations } = useMemo(() => {
     if (cohort === "gym") return buildGymStations(gymTuning);
@@ -2444,7 +2449,10 @@ export default function TunerScene({
       camera={{ near: 0.1, far: 100 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       style={{ background: "transparent" }}
-      frameloop="always"
+      // Cap dpr so retina/HiDPI doesn't quadruple every fragment shader cost
+      // on these decorative corner scenes.
+      dpr={[1, 1.5]}
+      frameloop={paused ? "demand" : "always"}
       onCreated={({ gl }) => {
         // R3F leaves clearAlpha at 1 even when context alpha is true, so
         // the canvas clears to opaque black between frames. Force it to 0
