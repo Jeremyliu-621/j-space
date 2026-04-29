@@ -1,5 +1,7 @@
 import bgPattern from '../../assets/Backgroundpixels.png';
 import CursorAgent from './CursorAgent';
+import OfficeElements from './OfficeElements';
+import LeaderboardPreview from './LeaderboardPreview';
 
 export default function IntroStation() {
   const scrollNext = () => {
@@ -13,6 +15,9 @@ export default function IntroStation() {
       className="station station-intro"
       style={{ backgroundImage: `url(${bgPattern})` }}
     >
+      <OfficeElements />
+      <LeaderboardPreview />
+
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
         <p className="intro-line">building straw</p>
