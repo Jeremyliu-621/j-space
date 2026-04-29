@@ -291,6 +291,63 @@ canvas,
   overflow: visible;
 }
 
+/* ============================================
+   INTRO STATION — jia.build-style hero
+   Tiled floral pattern around the edges, flat
+   panel matching the pattern's base color behind
+   the centered text.
+   ============================================ */
+.station-intro {
+  background-color: #cfd6df;
+  background-repeat: repeat;
+  font-family: "EB Garamond", serif;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.intro-panel {
+  background-color: #cfd6df;
+  padding: 64px 96px;
+  text-align: center;
+  max-width: 720px;
+  width: min(720px, 70vw);
+}
+
+.intro-heading {
+  font-family: "EB Garamond", serif;
+  font-weight: 400;
+  font-size: 2rem;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.2;
+}
+
+.intro-line {
+  font-family: "EB Garamond", serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.intro-archive {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  font-family: "EB Garamond", serif;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  opacity: 0.7;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.intro-archive:hover {
+  opacity: 1;
+}
+
 /* Identity Card - Persistent across all stations */
 .identity-card {
   position: fixed;
