@@ -1,8 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { WindowManagerProvider } from './components/win98/WindowManagerProvider'
 import { useTheme, ThemeProvider } from './components/win98/ThemeProvider'
 import IntroStation from './stations/intro'
 import Win98Station from './stations/win98'
-import PseudoBrowser from './components/PseudoBrowser'
+
+// PseudoBrowser is the bottom-most station — its tab content is dozens of
+// images and canvas state that aren't needed for first paint. Code-split
+// so the initial scroll into Win98 isn't gated on downloading the
+// browser's React tree + its tab assets.
+const PseudoBrowser = lazy(() => import('./components/PseudoBrowser'))
 
 /**
  * One continuous floral background that spans every station — fixed to the
@@ -44,7 +50,9 @@ function App() {
           <Win98Station />
         </WindowManagerProvider>
 
-        <PseudoBrowser />
+        <Suspense fallback={null}>
+          <PseudoBrowser />
+        </Suspense>
       </div>
     </ThemeProvider>
   )
