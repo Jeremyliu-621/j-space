@@ -1,5 +1,6 @@
 import bgPattern from '../../assets/Backgroundpixels.png';
 import Scene from './Scene';
+import LeaderboardPreview from './LeaderboardPreview';
 
 export default function IntroStation() {
   const scrollNext = () => {
@@ -14,6 +15,7 @@ export default function IntroStation() {
       style={{ backgroundImage: `url(${bgPattern})` }}
     >
       <Scene />
+      <LeaderboardPreview />
 
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
