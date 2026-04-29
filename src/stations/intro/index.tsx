@@ -9,10 +9,10 @@ import LeaderboardPreview from './LeaderboardPreview';
  * bleed past each edge so they get cut off. Each one runs its own mock
  * agents (~15 agents per arena, walking around, doing ping pong, etc.).
  */
-const ARENA_BOX_W = 950;
-const ARENA_BOX_H = 720;
-// Bleed past viewport edges — kept similar to before so the arena still
-// reads as cut off at the edge, but the visible portion is bigger.
+const ARENA_BOX_W = 700;
+const ARENA_BOX_H = 540;
+// Bleed past viewport edges — large negative offset so each arena
+// shows only its corner, the rest disappears past the page edge.
 const BLEED_X = 280;
 const BLEED_Y = 220;
 
