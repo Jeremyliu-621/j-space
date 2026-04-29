@@ -43,37 +43,12 @@ html::-webkit-scrollbar {
   display: none;
 }
 
-/* Very faint paper grain/pixel noise overlay */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.745;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.05) 0px,
-      transparent 0px,
-      transparent 1px,
-      rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.05) 0px,
-      transparent 0px,
-      transparent 1px,
-      rgba(0, 0, 0, 0.05) 1px,
-      transparent 2px
-    );
-  background-size: 3px 3px;
-  mix-blend-mode: multiply;
-}
+/* Paper grain/pixel noise overlay — DISABLED.
+   The mix-blend-mode: multiply pass at any z-index was crushing every WebGL
+   canvas pixel underneath (the four iso arenas on the intro station). The
+   grain is a faint aesthetic detail; losing it is the right trade for
+   getting the actual 3D content to render. If we want it back, scope it to
+   stations that don't host a canvas. */
 
 /* Subtle drop shadow on Win98 windows.
    will-change + contain isolate each window onto its own GPU layer so
@@ -319,9 +294,7 @@ canvas,
   max-width: 720px;
   width: min(720px, 70vw);
   position: relative;
-  /* Above the 3D canvas (z 10000) and noise overlay (z 9999) so the text
-     reads cleanly with the iso scene composing behind/around it. */
-  z-index: 10002;
+  z-index: 5;
 }
 
 .intro-heading {
@@ -349,7 +322,7 @@ canvas,
   opacity: 0.7;
   text-decoration: none;
   cursor: pointer;
-  z-index: 10002;
+  z-index: 6;
 }
 
 .intro-archive:hover {

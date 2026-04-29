@@ -36,8 +36,7 @@ export default function LeaderboardPreview() {
         border: `1.4px solid ${OUTLINE_COLOR}`,
         fontFamily: '"EB Garamond", serif',
         color: '#1a1a1a',
-        // Above the noise overlay (z 9999) and canvas (z 10000)
-        zIndex: 10001,
+        zIndex: 4,
         pointerEvents: 'none',
       }}
     >

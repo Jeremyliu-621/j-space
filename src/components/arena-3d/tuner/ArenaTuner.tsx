@@ -1,0 +1,105 @@
+
+
+import TunerScene, { useTunerAgent } from "./TunerScene";
+import TunerPanel from "./TunerPanel";
+
+export default function ArenaTuner() {
+  const {
+    agentRef,
+    cohort,
+    setCohort,
+    stationIdxByAgent,
+    sendToStation,
+    reset,
+    triggerDevAction,
+    triggerStandup,
+    triggerCluster,
+    triggerJoin,
+    triggerLeave,
+    tuning,
+    setTuning,
+    gymTuning,
+    setGymTuning,
+    miscTuning,
+    setMiscTuning,
+    showPaths,
+    setShowPaths,
+    showNav,
+    setShowNav,
+    view,
+    setView,
+    wallBury,
+    setWallBury,
+    navOverrides,
+    setNavOverrides,
+    ambientByAgent,
+    setAmbientForAgent,
+    setAmbientForAll,
+    stations,
+    walkToPoint,
+    camMode,
+    setCamMode,
+    camAgentIdx,
+    setCamAgentIdx,
+  } = useTunerAgent();
+
+  return (
+    <div className="flex gap-4">
+      <div className="flex-1 h-[700px] rounded-lg overflow-hidden border border-gray-200">
+        <TunerScene
+          cohort={cohort}
+          stationIdxByAgent={stationIdxByAgent}
+          tuning={tuning}
+          gymTuning={gymTuning}
+          miscTuning={miscTuning}
+          agentRef={agentRef}
+          showPaths={showPaths}
+          showNav={showNav}
+          navOverrides={navOverrides}
+          view={view}
+          wallBury={wallBury}
+          onFloorClick={cohort === "arena" ? walkToPoint : undefined}
+          camMode={camMode}
+          camAgentIdx={camAgentIdx}
+        />
+      </div>
+      <TunerPanel
+        cohort={cohort}
+        setCohort={setCohort}
+        stationIdxByAgent={stationIdxByAgent}
+        stations={stations}
+        tuning={tuning}
+        setTuning={setTuning}
+        gymTuning={gymTuning}
+        setGymTuning={setGymTuning}
+        miscTuning={miscTuning}
+        setMiscTuning={setMiscTuning}
+        showPaths={showPaths}
+        setShowPaths={setShowPaths}
+        showNav={showNav}
+        setShowNav={setShowNav}
+        view={view}
+        setView={setView}
+        wallBury={wallBury}
+        setWallBury={setWallBury}
+        navOverrides={navOverrides}
+        setNavOverrides={setNavOverrides}
+        ambientByAgent={ambientByAgent}
+        setAmbientForAgent={setAmbientForAgent}
+        setAmbientForAll={setAmbientForAll}
+        onGoto={sendToStation}
+        onReset={reset}
+        onDevAction={triggerDevAction}
+        onStandup={triggerStandup}
+        onCluster={triggerCluster}
+        onJoin={triggerJoin}
+        onLeave={triggerLeave}
+        agentRef={agentRef}
+        camMode={camMode}
+        setCamMode={setCamMode}
+        camAgentIdx={camAgentIdx}
+        setCamAgentIdx={setCamAgentIdx}
+      />
+    </div>
+  );
+}

@@ -1,16 +1,20 @@
+import { useEffect } from 'react';
 import bgPattern from '../../assets/Backgroundpixels.png';
-import Arena from './Arena';
+import LandingArena from '../../components/arena-3d/LandingArena';
 import LeaderboardPreview from './LeaderboardPreview';
 
 /**
- * Four mini iso arenas, one per corner — each lets agents and furniture
- * bleed past the viewport edges, like glimpsing four neighboring offices
- * around the central panel.
+ * Four full straw `LandingArena` instances — copied as-is from the straw
+ * repo — anchored at the four corners of the viewport with intentional
+ * bleed past each edge so they get cut off. Each one runs its own mock
+ * agents (~15 agents per arena, walking around, doing ping pong, etc.).
  */
-const ARENA_BOX_W = 600;
-const ARENA_BOX_H = 460;
-// How far each arena bleeds past the corresponding viewport edge.
-const BLEED = 130;
+const ARENA_BOX_W = 700;
+const ARENA_BOX_H = 540;
+// Bleed past viewport edges — large negative offset so each arena
+// shows only its corner, the rest disappears past the page edge.
+const BLEED_X = 280;
+const BLEED_Y = 220;
 
 export default function IntroStation() {
   const scrollNext = () => {
@@ -19,13 +23,28 @@ export default function IntroStation() {
       ?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // R3F's Canvas auto-resize observer doesn't fire on initial mount in this
+  // setup (likely due to the scroll-snap stations + content-visibility on
+  // sibling stations). Dispatch a resize event a couple of frames after
+  // mount so each Canvas measures its parent and starts rendering.
+  useEffect(() => {
+    const id1 = requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    });
+    const id2 = setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
+    return () => {
+      cancelAnimationFrame(id1);
+      clearTimeout(id2);
+    };
+  }, []);
+
   const arenaBase: React.CSSProperties = {
     position: 'absolute',
     width: ARENA_BOX_W,
     height: ARENA_BOX_H,
     pointerEvents: 'none',
-    // Above the noise overlay (z 9999); panel sits above this at z 10002.
-    zIndex: 10000,
+    overflow: 'hidden',
+    zIndex: 2,
   };
 
   return (
@@ -33,24 +52,24 @@ export default function IntroStation() {
       className="station station-intro"
       style={{ backgroundImage: `url(${bgPattern})` }}
     >
-      {/* TOP-LEFT arena — bleeds past top + left edges */}
-      <div style={{ ...arenaBase, top: -BLEED, left: -BLEED }}>
-        <Arena variant="desk" seed="alpha" />
+      {/* TOP-LEFT: bleeds past top + left edges */}
+      <div style={{ ...arenaBase, top: -BLEED_Y, left: -BLEED_X }}>
+        <LandingArena height={ARENA_BOX_H} />
       </div>
 
-      {/* TOP-RIGHT arena */}
-      <div style={{ ...arenaBase, top: -BLEED, right: -BLEED }}>
-        <Arena variant="study" seed="beta" />
+      {/* TOP-RIGHT */}
+      <div style={{ ...arenaBase, top: -BLEED_Y, right: -BLEED_X }}>
+        <LandingArena height={ARENA_BOX_H} />
       </div>
 
-      {/* BOTTOM-LEFT arena */}
-      <div style={{ ...arenaBase, bottom: -BLEED, left: -BLEED }}>
-        <Arena variant="lounge" seed="gamma" />
+      {/* BOTTOM-LEFT */}
+      <div style={{ ...arenaBase, bottom: -BLEED_Y, left: -BLEED_X }}>
+        <LandingArena height={ARENA_BOX_H} />
       </div>
 
-      {/* BOTTOM-RIGHT arena */}
-      <div style={{ ...arenaBase, bottom: -BLEED, right: -BLEED }}>
-        <Arena variant="kitchen" seed="delta" />
+      {/* BOTTOM-RIGHT */}
+      <div style={{ ...arenaBase, bottom: -BLEED_Y, right: -BLEED_X }}>
+        <LandingArena height={ARENA_BOX_H} />
       </div>
 
       <LeaderboardPreview />
