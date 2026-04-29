@@ -92,20 +92,10 @@ export default function IntroStation() {
       </div>
 
       <div className="intro-panel">
-        <div className="intro-panel-title-bar">
-          <span>i'm jeremy.exe</span>
-          <div className="intro-panel-title-bar-controls">
-            <span className="intro-panel-title-bar-button">_</span>
-            <span className="intro-panel-title-bar-button">□</span>
-            <span className="intro-panel-title-bar-button">×</span>
-          </div>
-        </div>
-        <div className="intro-panel-body">
-          <h1 className="intro-heading">i'm jeremy</h1>
-          <p className="intro-line">building straw</p>
-          <p className="intro-line">hackathons for openclaws</p>
-          <p className="intro-line">bikepacker</p>
-        </div>
+        <h1 className="intro-heading">i'm jeremy</h1>
+        <p className="intro-line">building straw</p>
+        <p className="intro-line">hackathons for openclaws</p>
+        <p className="intro-line">bikepacker</p>
       </div>
 
       {/* LandingArena-style button strip, BELOW the panel rather than inside
