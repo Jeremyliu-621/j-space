@@ -120,27 +120,16 @@ export default function IntroStation() {
         <p className="intro-line">grappler</p>
       </div>
 
-      <div className="intro-arena-buttons">
-        {[
-          { label: 'conference', accent: '#cfd5e8' },
-          { label: 'round table', accent: '#e0d6d0' },
-          { label: 'emoji', accent: '#ecd0cc' },
-          { label: 'ping pong', accent: '#d0d7d1' },
-        ].map((b) => (
-          <button
-            key={b.label}
-            type="button"
-            className="intro-arena-button"
-            style={{ border: `1px solid ${b.accent}` }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = b.accent;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-            }}
+      <div className="intro-side-links">
+        {['conference', 'round table', 'emoji', 'ping pong'].map((label) => (
+          <a
+            key={label}
+            href="#"
+            className="intro-side-link"
+            onClick={(e) => e.preventDefault()}
           >
-            {b.label}
-          </button>
+            {label}
+          </a>
         ))}
       </div>
 

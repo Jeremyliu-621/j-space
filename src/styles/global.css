@@ -353,29 +353,31 @@ canvas,
   text-underline-offset: 2px;
 }
 
-.intro-arena-buttons {
+/* Right-side vertical column of arena links — same gray-text style as
+   .intro-archive (no underline, EB Garamond, 0.875rem, opacity 0.7). */
+.intro-side-links {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 1.6rem;
-  flex-wrap: wrap;
-  position: relative;
-  /* Above the arena canvases (z 2) so the buttons stay clickable / readable
-     even where an arena bleeds into the strip's row. */
-  z-index: 5;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-end;
+  z-index: 6;
 }
 
-.intro-arena-button {
-  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-  font-size: 11px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #111;
+.intro-side-link {
+  font-family: "EB Garamond", serif;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  opacity: 0.7;
+  text-decoration: none;
   cursor: pointer;
-  backdrop-filter: blur(2px);
-  transition: background 120ms;
+}
+
+.intro-side-link:hover {
+  opacity: 1;
 }
 
 .intro-heading {
