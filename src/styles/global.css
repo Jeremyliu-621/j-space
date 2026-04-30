@@ -267,10 +267,11 @@ canvas,
   margin: 0;
   scroll-snap-stop: always;
   overflow: visible;
-  /* Higher z than PseudoBrowser so Win98 window drop-shadows that overflow
-     the station's bottom paint OVER the browser tabs underneath, instead of
-     being covered by the next sibling section. */
-  z-index: 2;
+  /* No z-index here — PseudoBrowser uses margin-top:-55px to overlap the
+     bottom of this station, and a higher z-index on win98 was hiding the
+     PseudoBrowser tabs in that overlap zone (clicks landed on Win98's
+     taskbar instead of the tab). Trade-off: window drop-shadows that
+     extend past win98's bottom no longer paint over PseudoBrowser. */
 }
 
 /* Empty spacer between intro and Win98 stations. No scroll-snap-align so
