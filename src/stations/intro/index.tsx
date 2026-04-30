@@ -29,6 +29,7 @@ const UNMOUNT_DELAY_MS = 5000;
 function ArenaSlot({ position, active }: ArenaSlotProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(true);
+  const [hovered, setHovered] = useState(false);
   // `mounted` is the React-side gate — fully unmount the LandingArena
   // (Canvas, agents, GLBs) when offscreen for >UNMOUNT_DELAY_MS so the
   // browser frees the WebGL context entirely.
@@ -58,11 +59,15 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
   return (
     <div
       ref={wrapperRef}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         position: 'absolute',
         width: ARENA_BOX_W,
         height: ARENA_BOX_H,
-        pointerEvents: 'none',
+        // pointer-events: auto so we get hover events; the canvas itself is
+        // visually decorative and won't trap meaningful clicks.
+        pointerEvents: 'auto',
         overflow: 'hidden',
         zIndex: 2,
         ...position,
@@ -75,6 +80,7 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
             hideControls
             zoom={21}
             paused={!inView}
+            showPaths={hovered}
           />
         </Suspense>
       )}

@@ -8,6 +8,7 @@ export default function LandingArena({
   hideControls = false,
   zoom = 25,
   paused = false,
+  showPaths: showPathsProp,
 }: {
   height: number;
   /** When true, suppress the built-in conference/round-table/emoji/ping-pong
@@ -21,6 +22,11 @@ export default function LandingArena({
    *  used to pause off-viewport arenas so they don't burn CPU/GPU when the
    *  user can't see them. */
   paused?: boolean;
+  /** Override the agent-path debug overlay. When undefined, falls back to
+   *  whatever useTunerAgent has set internally (off by default). The
+   *  landing page uses this to flip paths on while the user hovers a
+   *  specific arena. */
+  showPaths?: boolean;
 }) {
   const {
     cohort,
@@ -160,7 +166,7 @@ export default function LandingArena({
         gymTuning={gymTuning}
         miscTuning={miscTuning}
         agentRef={agentRef}
-        showPaths={showPaths}
+        showPaths={showPathsProp ?? showPaths}
         showNav={showNav}
         navOverrides={navOverrides}
         view="iso"
