@@ -347,6 +347,18 @@ canvas,
   z-index: 5;
 }
 
+/* Inline link in the bio — keeps the panel's text color, only adds the
+   underline so it reads as a link without breaking the visual flow. */
+.intro-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.intro-link:hover {
+  color: inherit;
+  text-decoration: underline;
+}
+
 .intro-arena-buttons {
   display: flex;
   gap: 8px;
