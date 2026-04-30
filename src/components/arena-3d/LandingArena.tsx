@@ -102,6 +102,25 @@ export default function LandingArena({
     sendToStation(eligible[1], ppStationIdxs[1]);
   }, [agentRef, stations, sendToStation]);
 
+  // External wiring — let any caller in the page (e.g. the intro side-link
+  // strip) trigger this arena's actions by dispatching a window event.
+  // All four arenas listen to the same four events, so one click fires in
+  // all of them simultaneously.
+  useEffect(() => {
+    const onConference = () => triggerStandup("conference");
+    const onRoundTable = () => triggerStandup("round_table");
+    window.addEventListener("arena:conference", onConference);
+    window.addEventListener("arena:round_table", onRoundTable);
+    window.addEventListener("arena:emoji", onEmoji);
+    window.addEventListener("arena:ping_pong", onPingPong);
+    return () => {
+      window.removeEventListener("arena:conference", onConference);
+      window.removeEventListener("arena:round_table", onRoundTable);
+      window.removeEventListener("arena:emoji", onEmoji);
+      window.removeEventListener("arena:ping_pong", onPingPong);
+    };
+  }, [triggerStandup, onEmoji, onPingPong]);
+
   // Button outline accents — mirrors the ProcessFlow / Differentiators
   // 4-color pastel palette. Border-radius 6 matches the "Task makers
   // define winning" / "Builders compete on the real problem" cards.

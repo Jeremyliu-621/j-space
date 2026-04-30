@@ -374,10 +374,18 @@ canvas,
   opacity: 0.7;
   text-decoration: none;
   cursor: pointer;
+  outline: none;
 }
 
 .intro-side-link:hover {
   opacity: 1;
+}
+
+.intro-side-link:focus,
+.intro-side-link:focus-visible,
+.intro-side-link:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .intro-heading {

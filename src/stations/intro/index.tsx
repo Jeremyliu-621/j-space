@@ -138,12 +138,24 @@ export default function IntroStation() {
       </div>
 
       <div className="intro-side-links">
-        {['conference', 'round table', 'emoji', 'ping pong'].map((label) => (
+        {[
+          { label: 'conference', event: 'arena:conference' },
+          { label: 'round table', event: 'arena:round_table' },
+          { label: 'emoji', event: 'arena:emoji' },
+          { label: 'ping pong', event: 'arena:ping_pong' },
+        ].map(({ label, event }) => (
           <a
             key={label}
             href="#"
             className="intro-side-link"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              // Fan out to all four arenas — each LandingArena listens for
+              // these events and runs its own handler.
+              window.dispatchEvent(new CustomEvent(event));
+              // Drop the focus ring left by the click.
+              (e.currentTarget as HTMLAnchorElement).blur();
+            }}
           >
             {label}
           </a>
