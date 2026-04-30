@@ -398,7 +398,8 @@ canvas,
 .intro-archive {
   position: absolute;
   bottom: 1.5rem;
-  right: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   font-family: "EB Garamond", serif;
   font-size: 0.875rem;
   color: #1a1a1a;
