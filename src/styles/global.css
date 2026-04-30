@@ -241,8 +241,11 @@ canvas,
 }
 
 /* Station Sections.
-   content-visibility: auto lets the browser skip layout/paint when offscreen.
-   contain-intrinsic-size keeps the scroll height stable while the section is skipped. */
+   content-visibility was previously `auto` (skip offscreen layout/paint) —
+   removed so window drop-shadows + arena 3D bleed render across station
+   boundaries instead of being clipped at the offscreen-paint hint. The
+   per-station perf cost is small now that arena-3d is lazy + offscreen
+   arenas pause via IntersectionObserver. */
 .station {
   width: 100%;
   height: 100vh;
@@ -253,9 +256,9 @@ canvas,
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  content-visibility: auto;
-  contain-intrinsic-size: 100vw 100vh;
+  /* `visible` so children (window shadows, arena bleed) escape the
+     section box and render in the next station's screen area. */
+  overflow: visible;
 }
 
 .station-win98 {
@@ -264,6 +267,10 @@ canvas,
   margin: 0;
   scroll-snap-stop: always;
   overflow: visible;
+  /* Higher z than PseudoBrowser so Win98 window drop-shadows that overflow
+     the station's bottom paint OVER the browser tabs underneath, instead of
+     being covered by the next sibling section. */
+  z-index: 2;
 }
 
 /* Page-bg-continuity overrides: kill the per-station opaque backgrounds so
@@ -298,11 +305,9 @@ canvas,
   justify-content: center;
   align-items: center;
   position: relative;
-  /* Override .station's content-visibility:auto — it breaks R3F's
-     ResizeObserver on the canvas. */
-  content-visibility: visible;
-  /* Allow arenas + content to bleed past the station boundary into the
-     adjacent station so the four corners aren't hard-clipped at scroll snaps. */
+  /* Highest stack — corner arena 3D bleeds past intro's bottom into the
+     Win98 area beneath without getting covered. */
+  z-index: 3;
   overflow: visible;
 }
 
@@ -1358,6 +1363,10 @@ canvas,
 
 .pseudo-browser {
   position: relative;
+  /* Lowest of the three stations — Win98 station (z 2) and Intro (z 3)
+     paint over PseudoBrowser at boundary overlaps, so window drop-shadows
+     and arena 3D bleed render visibly across into the browser's screen
+     area instead of being covered. */
   z-index: 1;
   height: 100vh;
   display: flex;
@@ -1365,7 +1374,7 @@ canvas,
   margin-top: -55px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  background: var(--palette-color-1);
+  background: transparent;
   box-sizing: border-box;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
