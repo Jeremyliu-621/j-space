@@ -114,7 +114,7 @@ export default function IntroStation() {
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
         <p className="intro-line">
-          building <a href="https://straw.vercel.app/">straw</a>,
+          building <a className="intro-link" href="https://straw.vercel.app/">straw</a>,
         </p>
         <p className="intro-line">hackathons for openclaws.</p>
         <p className="intro-line">grappler</p>

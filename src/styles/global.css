@@ -347,6 +347,12 @@ canvas,
   z-index: 5;
 }
 
+.intro-link {
+  color: #000;
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 2px;
+}
+
 .intro-arena-buttons {
   display: flex;
   gap: 8px;
