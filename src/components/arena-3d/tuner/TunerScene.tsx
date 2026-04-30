@@ -1230,10 +1230,12 @@ const PING_PONG_CYCLE_MS = 1200; // full out-and-back loop
 // Seats / gym / misc cohorts tune poses for one or two subjects at a time;
 // the arena cohort simulates the full office (15 = roughly the main-arena
 // top-of-leaderboard size).
-// 15 onstage + 3 offstage reserve so "+ join" / "− leave" dev buttons
-// always have someone to swap in / out of the arena.
-export const ARENA_AGENT_COUNT = 18;
-export const ARENA_ONSTAGE_COUNT = 15;
+// Was 18 total / 15 onstage in straw. Lowered for the four-corner landing
+// arenas — at 4 instances each running its own simulation, 18 × 4 = 72
+// agents was the actual lag culprit (not MOCK_AGENT_COUNT). 6 onstage + 2
+// reserve keeps the office populated without the per-frame cost.
+export const ARENA_AGENT_COUNT = 8;
+export const ARENA_ONSTAGE_COUNT = 6;
 
 // Door coords live in defaultLayout so the live /leaderboard game loop
 // can share them. Re-exported here for backwards compat with any callers
