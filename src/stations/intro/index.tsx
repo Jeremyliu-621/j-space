@@ -16,9 +16,6 @@ const BLEED_Y = 220;
 
 interface ArenaSlotProps {
   position: React.CSSProperties;
-  /** Whether this slot's arena should be live. Off-viewport slots get
-   *  paused so the GPU/CPU isn't churning frames the user can't see. */
-  active: boolean;
 }
 
 /** ms to wait offscreen before fully unmounting an arena. Long enough that
@@ -26,7 +23,7 @@ interface ArenaSlotProps {
  *  genuine "moved on" frees memory + GPU + simulation cost. */
 const UNMOUNT_DELAY_MS = 5000;
 
-function ArenaSlot({ position, active }: ArenaSlotProps) {
+function ArenaSlot({ position }: ArenaSlotProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(true);
   const [hovered, setHovered] = useState(false);
@@ -73,7 +70,7 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
         ...position,
       }}
     >
-      {active && mounted && (
+      {mounted && (
         <Suspense fallback={null}>
           <LandingArena
             height={ARENA_BOX_H}
@@ -89,28 +86,15 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
 }
 
 export default function IntroStation() {
-  const [arenasMounted, setArenasMounted] = useState(false);
-
-  // Defer arena mounting until after the first paint so the panel + bio
-  // text reach the screen before the heavy R3F init kicks in.
-  useEffect(() => {
-    type IdleCB = (cb: () => void) => number;
-    const ric = (window as Window & { requestIdleCallback?: IdleCB })
-      .requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 16));
-    const id = ric(() => setArenasMounted(true));
-    return () => {
-      const cic = (window as Window & { cancelIdleCallback?: (h: number) => void })
-        .cancelIdleCallback;
-      if (cic) cic(id);
-      else window.clearTimeout(id);
-    };
-  }, []);
+  // Arenas mount on first render — no requestIdleCallback gate. The chunk
+  // and GLBs are preloaded in main.tsx so they're already in cache by the
+  // time React reaches this point, and the Suspense boundary inside each
+  // ArenaSlot keeps the bio panel painting first either way.
 
   // R3F's Canvas auto-resize observer doesn't fire on initial mount in this
-  // setup. Dispatch a resize event a few frames after the arenas mount so
-  // each Canvas measures its parent.
+  // setup. Dispatch a resize event a few frames after mount so each Canvas
+  // measures its parent.
   useEffect(() => {
-    if (!arenasMounted) return;
     const id1 = requestAnimationFrame(() => {
       requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     });
@@ -119,7 +103,7 @@ export default function IntroStation() {
       cancelAnimationFrame(id1);
       window.clearTimeout(id2);
     };
-  }, [arenasMounted]);
+  }, []);
 
   const scrollNext = () => {
     document
@@ -129,10 +113,10 @@ export default function IntroStation() {
 
   return (
     <section className="station station-intro">
-      <ArenaSlot active={arenasMounted} position={{ top: -BLEED_Y, left: -BLEED_X }} />
-      <ArenaSlot active={arenasMounted} position={{ top: -BLEED_Y, right: -BLEED_X }} />
-      <ArenaSlot active={arenasMounted} position={{ bottom: -BLEED_Y, left: -BLEED_X }} />
-      <ArenaSlot active={arenasMounted} position={{ bottom: -BLEED_Y, right: -BLEED_X }} />
+      <ArenaSlot position={{ top: -BLEED_Y, left: -BLEED_X }} />
+      <ArenaSlot position={{ top: -BLEED_Y, right: -BLEED_X }} />
+      <ArenaSlot position={{ bottom: -BLEED_Y, left: -BLEED_X }} />
+      <ArenaSlot position={{ bottom: -BLEED_Y, right: -BLEED_X }} />
 
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>

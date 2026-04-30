@@ -46,23 +46,31 @@ export default function LandingArena({
     stations,
   } = useTunerAgent({ initialCohort: "arena", initialAmbientAll: true });
 
-  // Hide every agent before the first paint so the scene opens on an
-  // empty arena (instead of showing 15 agents piled up at the spawn grid).
+  // Hide agents for a single layout pass so they don't render piled up
+  // on the spawn grid before triggerJoin teleports them — but unlike the
+  // original 14-second staggered entrance (400 + i * 900 ms each), we
+  // immediately trigger every agent on the next animation frame so the
+  // office is populated within ~one frame of mount.
   useLayoutEffect(() => {
     for (const a of agentRef.current) {
       if (a) a.hidden = true;
     }
   }, [agentRef]);
 
-  // Stagger agents in through the east door. triggerJoin picks the first
-  // hidden agent, teleports them just-inside the door, and walks them to
-  // the spawn area; once idle the ambient picker takes over normally.
   useEffect(() => {
     const timers: number[] = [];
-    for (let i = 0; i < agentRef.current.length; i++) {
-      timers.push(window.setTimeout(() => triggerJoin(), 400 + i * 900));
-    }
+    // Single rAF, then fire all triggerJoin calls in one tight loop so all
+    // agents teleport to the door + start walking on the same frame. They
+    // briefly cluster at the door, then disperse as their ambient picks
+    // assign them roam targets — natural-looking and ~1s vs the original
+    // ~14s staggered entrance.
+    const rafId = requestAnimationFrame(() => {
+      for (let i = 0; i < agentRef.current.length; i++) {
+        triggerJoin();
+      }
+    });
     return () => {
+      cancelAnimationFrame(rafId);
       for (const t of timers) window.clearTimeout(t);
     };
   }, [agentRef, triggerJoin]);
