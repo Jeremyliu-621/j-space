@@ -1,7 +1,7 @@
 
 
 import { useEffect, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 /**
@@ -323,18 +323,27 @@ export default function BWEffects({
     };
   }, [scene]);
 
-  // Catch late-mounted meshes (lazy GLB sub-meshes, agent spawn) every frame.
-  useFrame(() => {
+  // Catch late-mounted meshes (lazy GLB sub-meshes, agent spawn). Was a
+  // useFrame scene.traverse running every frame — for a static-ish scene
+  // that's mostly wasted work. Now ticks at 2 Hz on a setInterval, plus
+  // immediately on each prop change. Cuts a per-frame O(meshes) scan that
+  // was a major contributor to lag with four parallel arenas.
+  useEffect(() => {
     if (variant === null || !activeRef.current) return;
-    scene.traverse((obj) => {
-      const mesh = obj as THREE.Mesh;
-      if (!mesh.isMesh) return;
-      const ud = mesh.userData as MeshUserData;
-      if (ud.__bwOriginalMaterial !== undefined) return; // already patched
-      if (ud.__isBWEdgeOverlay) return;
-      applyBWToMesh(mesh, variant, pureWhite, activeTint, edgeThreshold);
-    });
-  });
+    const tick = () => {
+      scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const ud = mesh.userData as MeshUserData;
+        if (ud.__bwOriginalMaterial !== undefined) return;
+        if (ud.__isBWEdgeOverlay) return;
+        applyBWToMesh(mesh, variant, pureWhite, activeTint, edgeThreshold);
+      });
+    };
+    tick();
+    const id = window.setInterval(tick, 500);
+    return () => window.clearInterval(id);
+  }, [scene, variant, pureWhite, activeTint, edgeThreshold]);
 
   return null;
 }

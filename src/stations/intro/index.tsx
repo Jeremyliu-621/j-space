@@ -21,12 +21,19 @@ interface ArenaSlotProps {
   active: boolean;
 }
 
+/** ms to wait offscreen before fully unmounting an arena. Long enough that
+ *  quick scroll-and-back doesn't lose the live state, short enough that
+ *  genuine "moved on" frees memory + GPU + simulation cost. */
+const UNMOUNT_DELAY_MS = 5000;
+
 function ArenaSlot({ position, active }: ArenaSlotProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(true);
+  // `mounted` is the React-side gate — fully unmount the LandingArena
+  // (Canvas, agents, GLBs) when offscreen for >UNMOUNT_DELAY_MS so the
+  // browser frees the WebGL context entirely.
+  const [mounted, setMounted] = useState(true);
 
-  // IntersectionObserver pauses each arena's render loop when its wrapper
-  // scrolls out of the viewport (e.g. user is on the Win98 station).
   useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
@@ -37,6 +44,16 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  // Unmount on a delay when offscreen; remount immediately when in view.
+  useEffect(() => {
+    if (inView) {
+      setMounted(true);
+      return;
+    }
+    const id = window.setTimeout(() => setMounted(false), UNMOUNT_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [inView]);
 
   return (
     <div
@@ -51,7 +68,7 @@ function ArenaSlot({ position, active }: ArenaSlotProps) {
         ...position,
       }}
     >
-      {active && (
+      {active && mounted && (
         <Suspense fallback={null}>
           <LandingArena
             height={ARENA_BOX_H}

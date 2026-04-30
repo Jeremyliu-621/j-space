@@ -23,7 +23,11 @@ import type { ArenaEvent, ArenaEventType } from "./useArenaEvents";
  * consistent agents.
  */
 
-const MOCK_AGENT_COUNT = 15;
+// Lowered from 15 → 6 for the four-corner landing arenas. Each LandingArena
+// independently runs this hook, so the page hosts 4 simulations in parallel
+// — at 15 agents each that's 60 agent tick loops + 60 × 9 meshes per frame.
+// Six per arena keeps the office feeling populated without the lag.
+const MOCK_AGENT_COUNT = 6;
 const TASK_TITLE = "Distributed Rate Limiter: 10M RPS, Sliding-Window, Multi-Region";
 
 // Curated palette — same seed as AGENT_COLORS in useStrawAgents so visuals
