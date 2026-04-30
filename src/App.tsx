@@ -46,6 +46,12 @@ function App() {
       <div id="scroll-container">
         <IntroStation />
 
+        {/* Empty spacer between intro and Win98 — gives the corner arenas
+            and the panel breathing room before the desktop shows up, and
+            keeps any bleed/overflow from one station crashing into the
+            next. The page-bg flows through it. */}
+        <div className="station-gap" aria-hidden />
+
         <WindowManagerProvider>
           <Win98Station />
         </WindowManagerProvider>

@@ -273,6 +273,16 @@ canvas,
   z-index: 2;
 }
 
+/* Empty spacer between intro and Win98 stations. No scroll-snap-align so
+   the user can scroll through it freely without snapping to it; just adds
+   vertical breathing room so corner arena bleed + the desktop don't crash
+   into each other. The fixed page-bg shows through this region naturally. */
+.station-gap {
+  width: 100%;
+  height: 40vh;
+  pointer-events: none;
+}
+
 /* Page-bg-continuity overrides: kill the per-station opaque backgrounds so
    the single fixed page-level pattern (App.tsx <PageBackground />) shows
    through every station. CSS-only — we don't touch Win98 component code.
