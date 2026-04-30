@@ -275,19 +275,32 @@ canvas,
 
 /* Page-bg-continuity overrides: kill the per-station opaque backgrounds so
    the single fixed page-level pattern (App.tsx <PageBackground />) shows
-   through every station. CSS-only — we don't touch Win98 component code. */
+   through every station. CSS-only — we don't touch Win98 component code.
+
+   The Desktop component sets background-color + background-image inline on
+   .win98-desktop, AND renders two extra absolute-positioned children — a
+   filter-pattern div and a theme-multiply overlay. All four leak the
+   per-station pattern that creates the seam at the station boundary. We
+   stub all four so only the page-bg shows. */
 .win98-desktop {
   background-color: transparent !important;
+  background-image: none !important;
 }
-.win98-desktop > div:first-of-type {
-  /* The Desktop component renders its theme-filter pattern as the first
-     absolutely-positioned div child. Hide it so the page-bg's same pattern
-     is what shows behind the desktop instead — eliminates the seam where
-     the desktop's tile origin restarts at every station boundary. */
+/* Both Desktop's pattern + theme-overlay children carry pointer-events:none
+   inline; the actual content wrapper does not. This selector hides both
+   without risking the content div regardless of which palette is active. */
+.win98-desktop > div[style*="pointer-events: none"] {
   display: none !important;
 }
 .pb-tab-strip {
   background-color: transparent !important;
+  background-image: none !important;
+}
+/* PseudoBrowser uses the same Desktop-style pattern + overlay wrapper
+   inside its tab strip — same trick as above to hide them so the page-bg
+   shows through. */
+.pb-tab-strip > div[style*="pointer-events: none"] {
+  display: none !important;
 }
 
 /* ============================================
