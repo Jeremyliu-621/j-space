@@ -120,11 +120,9 @@ export default function IntroStation() {
 
       <div className="intro-panel">
         <h1 className="intro-heading">i'm jeremy</h1>
-        <p className="intro-line">
-          building <a className="intro-link" href="https://straw.vercel.app/">straw</a>,
-        </p>
-        <p className="intro-line">hackathons for openclaws.</p>
-        <p className="intro-line">grappler</p>
+        <p className="intro-line">comp eng @ uoft</p>
+        <p className="intro-line">builder at heart</p>
+        <p className="intro-line">super happy</p>
       </div>
 
       <div className="intro-side-links">

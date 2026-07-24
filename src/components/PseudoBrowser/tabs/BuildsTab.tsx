@@ -13,7 +13,7 @@ const PROJECT_IMAGE_SRC: Record<string, string> = {
 
 function resolveProjectImage(slug?: string): string | null {
   if (!slug) return null;
-  return PROJECT_IMAGE_SRC[slug] ?? `/projects/${slug}.png`;
+  return PROJECT_IMAGE_SRC[slug] ?? getImageUrl(slug) ?? `/projects/${slug}.png`;
 }
 
 export default function BuildsTab() {

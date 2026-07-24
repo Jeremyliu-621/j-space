@@ -2322,7 +2322,9 @@ export default function ArtTab({
                     const p = projects[el.projectIdx];
                     const slug = p.image;
                     const imgSrc = slug
-                      ? PROJECT_IMAGE_SRC[slug] ?? `/projects/${slug}.png`
+                      ? PROJECT_IMAGE_SRC[slug] ??
+                        getImageUrl(slug) ??
+                        `/projects/${slug}.png`
                       : null;
                     return (
                       <div className="art-card">

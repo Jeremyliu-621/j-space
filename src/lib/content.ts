@@ -40,6 +40,30 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    title: "Ensemble",
+    description: "Turn your audience's phones into an orchestra.",
+    image: "Ensemble",
+    github: "https://github.com/Jeremyliu-621/ensemble",
+  },
+  {
+    title: "Paper Cuts",
+    description: "Super Smash Bros that lets you doodle.",
+    image: "Paper-Cuts",
+    website: "https://doodletown.io/",
+  },
+  {
+    title: "Aucctopus",
+    description: "Agent swarm predicts product virality.",
+    image: "aucctopus",
+    github: "https://github.com/Jeremyliu-621/ensemble",
+  },
+  {
+    title: "Leetmeow",
+    description: "LeetCode-gated website blocker.",
+    image: "leetmeow",
+    website: "https://leetmeow.vercel.app/",
+  },
+  {
     title: "Opticat",
     description: "Turn any repo into an AI-narrated onboarding tour.",
     front: "Next.js 15, TypeScript, Tailwind CSS",

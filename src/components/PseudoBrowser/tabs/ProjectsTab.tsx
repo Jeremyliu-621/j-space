@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { projects } from "../../../lib/content";
+import { getImageUrl } from "../../../lib/images";
 import Media from "../../Media";
 
 /* ── Image map: project image key → public file ── */
@@ -377,7 +378,9 @@ export default function ProjectsTab() {
               {project.image && (
                 <Media
                   src={
-                    IMAGE_MAP[project.image] ?? `/projects/${project.image}.png`
+                    IMAGE_MAP[project.image] ??
+                    getImageUrl(project.image) ??
+                    `/projects/${project.image}.png`
                   }
                   alt={project.title}
                   draggable={false}
